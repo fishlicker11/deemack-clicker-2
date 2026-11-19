@@ -566,10 +566,10 @@ var im=document.createElement('img');im.alt='';im.src=PHOTOS[BF.t.ph||BF.t.id]||
 b.onpointerdown=function(e){e.preventDefault();if(!fAlive(id)||BF.ph!=='idle'||!fOk())return;var r=A.getBoundingClientRect();hurtBoss(1,e.clientX-r.left-8,e.clientY-r.top-30)};
 fStatus('Click '+BF.t.name+'!');fl(nextAttack,Math.round((4.5-BF.d*2)*1000))}
 var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;if(t.name==='Mr Holmgren')SIMON9=i}); /* Simon squares: 4 before Mr Reiman, 6 for Mr Reiman and Mr Scott, 9 from Mr Holmgren on */
-var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle'};
-function nextAttack(){var pool=['circles','mash','dodge','react','simon','power','rhythm'],k=BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)];BF.attacks++;BF.ph='atk';var id=BF.id;
+var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace'};
+function nextAttack(){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace'],k=BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)];BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
-if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
+if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over')fIdle()}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
 if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;save()}
@@ -703,6 +703,48 @@ function frame(){if(!fAlive(id)){clean();return}var now=songNow();
 for(var i=0;i<notes.length;i++){var n=notes[i];if(n.t-now>-0.14)break;if(n.st)continue;n.st=3;miss++;combo=0;judge('Miss','#ef4444');
 var dm=Math.min(mhit,cap-hurt);if(dm>0){hurt+=dm;hurtMe(dm);if(!fAlive(id)){clean();return}}}
 draw(now);if(now>=end){finish();return}requestAnimationFrame(frame)}
+requestAnimationFrame(frame)};
+/* ===== Path trace: drag the circle along a winding path to the flag before time runs out.
+   Staying near the middle of the path scores accuracy; accuracy sets the damage. ===== */
+ATK.trace=function(){var id=BF.id,A=arena(),d=BF.d;fStatus('Drag the blue circle along the path to the 🏁');
+var cv=document.createElement('canvas');cv.className='dg';A.appendChild(cv);
+var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
+var css=getComputedStyle(document.documentElement),mut=(css.getPropertyValue('--muted')||'').trim()||'#888',ln=(css.getPropertyValue('--line')||'').trim()||'#ddd';
+var tol=Math.round(22-d*10),mx=34,top=40,bot=H-30,np=4+Math.round(d*4),cp=[];
+/* control points go left to right with random heights; more points = curvier path for harder bosses */
+for(var i=0;i<np;i++){var x=mx+(W-2*mx)*i/(np-1),y=top+Math.random()*(bot-top);if(i>0&&Math.abs(y-cp[i-1].y)<40)y=cp[i-1].y+(y>cp[i-1].y?40:-40);cp.push({x:x,y:Math.max(top,Math.min(bot,y))})}
+var raw=[];for(i=0;i<np-1;i++){var p0=cp[Math.max(0,i-1)],p1=cp[i],p2=cp[i+1],p3=cp[Math.min(np-1,i+2)];
+for(var k=0;k<24;k++){var t=k/24,t2=t*t,t3=t2*t;raw.push({x:.5*(2*p1.x+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),y:.5*(2*p1.y+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)})}}
+raw.push(cp[np-1]);
+/* resample to even 4px steps so progress and accuracy are fair everywhere on the path */
+var P=[raw[0]],carry=0;for(i=1;i<raw.length;i++){var a=raw[i-1],b=raw[i],dx=b.x-a.x,dy=b.y-a.y,dl=Math.sqrt(dx*dx+dy*dy);if(!dl)continue;var at=4-carry;while(at<=dl){P.push({x:a.x+dx*at/dl,y:a.y+dy*at/dl});at+=4}carry=dl-(at-4)}
+P.push(raw[raw.length-1]);var N=P.length,plen=(N-1)*4;
+var limit=+(plen/(110+d*90)+1.5).toFixed(1),t0=performance.now(),dot={x:P[0].x,y:P[0].y},R=16,drag=false,prog=0,sum=0,lenSum=0,off=false,over=false,lastOff=-9;
+function near(q){var best=1e9,bi=prog;for(var j=Math.max(0,prog-15);j<=Math.min(N-1,prog+30);j++){var ex=P[j].x-q.x,ey=P[j].y-q.y,dd=ex*ex+ey*ey;if(dd<best){best=dd;bi=j}}return{d:Math.sqrt(best),i:bi}}
+function sample(q,step){var n=near(q),sc=n.d<=tol*.35?1:Math.max(0,1-(n.d-tol*.35)/(tol*.65));sum+=sc*step;lenSum+=step;off=n.d>tol;if(off)lastOff=performance.now();else if(n.i>prog)prog=n.i}
+function moveTo(x,y){var dx=x-dot.x,dy=y-dot.y,dl=Math.sqrt(dx*dx+dy*dy),steps=Math.max(1,Math.ceil(dl/3));
+for(var k=1;k<=steps;k++)sample({x:dot.x+dx*k/steps,y:dot.y+dy*k/steps},dl/steps);dot.x=x;dot.y=y;
+if(prog>=N-3&&Math.hypot(dot.x-P[N-1].x,dot.y-P[N-1].y)<=tol)done(true)}
+function pos(e){var r=cv.getBoundingClientRect();return{x:Math.max(0,Math.min(W,e.clientX-r.left)),y:Math.max(0,Math.min(H,e.clientY-r.top))}}
+cv.onpointerdown=function(e){e.preventDefault();if(over||!fAlive(id))return;var q=pos(e);if(Math.hypot(q.x-dot.x,q.y-dot.y)<=R+22){drag=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}}};
+cv.onpointermove=function(e){if(!drag||over||!fAlive(id))return;var q=pos(e);moveTo(q.x,q.y)};
+cv.onpointerup=cv.onpointercancel=function(){drag=false};
+function accNow(){return lenSum?sum/lenSum:0}
+function done(win){if(over)return;over=true;drag=false;var acc=accNow();
+if(!win){fStatus('Out of time!');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,900);return}
+var dmg=Math.max(1,Math.round(BF.base*0.45*acc*acc));hurtBoss(dmg);if(!fAlive(id))return;
+fStatus((acc>=0.95?'Perfect trace! ':'')+'Accuracy '+Math.round(acc*100)+'% · You hit for '+dmg+'!');fl(atkDone,1200)}
+function path(from,to){g.beginPath();g.moveTo(P[from].x,P[from].y);for(var j=from+1;j<=to;j++)g.lineTo(P[j].x,P[j].y)}
+function draw(now){var left=Math.max(0,limit-(now-t0)/1000);g.clearRect(0,0,W,H);g.lineCap='round';g.lineJoin='round';
+path(0,N-1);g.lineWidth=tol*2;g.strokeStyle=(now-lastOff<150)?'rgba(239,68,68,.35)':ln;g.stroke();
+if(prog>0){path(0,prog);g.lineWidth=tol*2;g.strokeStyle='rgba(34,163,90,.45)';g.stroke()}
+path(0,N-1);g.lineWidth=2;g.setLineDash([6,6]);g.strokeStyle=mut;g.stroke();g.setLineDash([]);
+var e=P[N-1];g.beginPath();g.arc(e.x,e.y,tol+4,0,6.2832);g.lineWidth=3;g.strokeStyle='#f59e0b';g.stroke();g.font='22px system-ui,sans-serif';g.textAlign='center';g.fillText('🏁',e.x+2,e.y-tol-8);
+g.beginPath();g.arc(dot.x,dot.y,R,0,6.2832);g.fillStyle=off&&drag?'#ef4444':'#3b82f6';g.fill();g.lineWidth=3;g.strokeStyle='#fff';g.stroke();
+if(!drag&&prog===0){g.fillStyle=mut;g.font='600 12px system-ui,sans-serif';g.fillText('Drag me',dot.x,dot.y+R+16)}
+g.font='700 14px system-ui,sans-serif';g.textAlign='left';g.fillStyle=left<2?'#ef4444':mut;g.fillText(left.toFixed(1)+'s',10,20);
+g.textAlign='right';g.fillStyle=mut;g.fillText('Accuracy '+Math.round(accNow()*100)+'%',W-10,20);g.textAlign='left'}
+function frame(now){if(!fAlive(id)||over){if(fAlive(id))draw(now);return}draw(now);if((now-t0)/1000>=limit){done(false);return}requestAnimationFrame(frame)}
 requestAnimationFrame(frame)};
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
