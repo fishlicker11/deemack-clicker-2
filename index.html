@@ -935,12 +935,15 @@ var FB=(FB_URL||'').replace(/\/+$/,'');
 (function(){var id=null;try{id=LS.getItem('deemackClicker2.uid')}catch(e){}
 if(!id){id='p'+Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{LS.setItem('deemackClicker2.uid',id)}catch(e){}}
 uid=id})();
+/* Names hidden from the leaderboard for everyone (capitals and extra spaces don't matter). Add more names here to hide them. */
+var LB_HIDE=['mom'];
+function lbHidden(n){return LB_HIDE.indexOf(String(n||'').trim().replace(/\s+/g,' ').toLowerCase())>=0}
 var lbAll=false;
 function loadLB(){if(!FB){note('The leaderboard isn\u2019t connected to a server yet.');return}
 if(document.hidden)return;
-fetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=20')).then(function(r){return r.json().catch(function(){return null}).then(function(o){
+fetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=30')).then(function(r){return r.json().catch(function(){return null}).then(function(o){
 if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll=true;loadLB();throw 'skip'}if(r.status===401||r.status===403||/permission/i.test(m))throw 'The leaderboard server blocked the game. Check the database rules.';if(r.status===404)throw 'Leaderboard server not found. Check the FB_URL address.';throw 'Leaderboard server error: '+(m||r.status)})}).then(function(o){o=o||{};
-var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,20);
+var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,20);
 renderLB(docs)}).catch(function(e){if(e==='skip')return;note(typeof e==='string'?e:'Could not reach the leaderboard server.')})}
 loadLB();setInterval(loadLB,5000);
 if(NAME)pushStats(true);
