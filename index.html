@@ -291,16 +291,18 @@ TICO={inc:'💰',tip:'🌟',clk:'👆',tc:'🏷️',uc:'⬆️',pp:'⭐',start:'
 TNAME={inc:'Pay Raise',tip:'Golden Twig',clk:'Strong Finger',tc:'Hiring Discount',uc:'Training Budget',pp:'Wisdom',start:'Head Start',luck:'Lucky Charm'};
 var TN=TREE.map(function(r){return{p:r[0],x:r[1],y:r[2],t:TT[r[3]],c:r[4],w:r[5],kids:[]}}),TD=0;
 TN.forEach(function(n,i){n.d=n.p<0?0:TN[n.p].d+1;if(n.d>TD)TD=n.d;if(n.p>=0)TN[n.p].kids.push(i)});
+/* Hiring Discounts add together and max out at 50% cheaper teachers: each one is scaled so all of them sum to exactly 50% */
+var TC_MAX=0.5,TCA=0.006,TCB=(function(){var c=0,sf=0;TN.forEach(function(n){if(n.t==='tc'){c++;sf+=n.d/TD}});return sf?(TC_MAX-c*TCA)/sf:0})();
 function roman(n){var r='';[[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']].forEach(function(q){while(n>=q[0]){r+=q[1];n-=q[0]}});return r}
 (function(){var cnt={};TN.forEach(function(n,i){cnt[n.t]=(cnt[n.t]||0)+1;n.name=i===0?'Roots':TNAME[n.t]+' '+roman(cnt[n.t])})})();
-function tval(n){var f=n.d/TD;switch(n.t){case 'inc':return 1.1+2*f*f;case 'tip':return 1.2+3*f*f;case 'clk':return 1.1+0.25*f*f;case 'tc':case 'uc':return 0.95-0.2*f;case 'pp':return 0.03+0.3*f;case 'start':return Math.pow(10,4+8*f);default:return f}}
+function tval(n){var f=n.d/TD;switch(n.t){case 'inc':return 1.1+2*f*f;case 'tip':return 1.2+3*f*f;case 'clk':return 1.1+0.25*f*f;case 'tc':return TCA+TCB*f;case 'uc':return 0.95-0.2*f;case 'pp':return 0.03+0.3*f;case 'start':return Math.pow(10,4+8*f);default:return f}}
 function ttext(n){var v=tval(n),pc=function(x){return Math.round(x*100)+'%'},mul=function(x){return x<2?'+'+pc(x-1):'×'+x.toFixed(2)};
-switch(n.t){case 'inc':case 'tip':return mul(v)+' teacher income';case 'clk':return mul(v)+' click power';case 'tc':return 'Teachers '+pc(1-v)+' cheaper';case 'uc':return 'Upgrades '+pc(1-v)+' cheaper';
+switch(n.t){case 'inc':case 'tip':return mul(v)+' teacher income';case 'clk':return mul(v)+' click power';case 'tc':return 'Teachers '+(v*100).toFixed(1)+'% cheaper';case 'uc':return 'Upgrades '+pc(1-v)+' cheaper';
 case 'pp':return '+'+pc(v)+' prestige points';case 'start':return 'Start each run with '+fmt(v)+' Games Blocked';default:return '+'+pc(0.1+0.4*v)+' rune chance, +'+(0.5+2*v).toFixed(1)+'% crit chance'}}
 var TFXC={d:null,n:-1,v:null};
-function tfx(d){var L=(d&&d.tree)||[];if(TFXC.d===d&&TFXC.n===L.length)return TFXC.v;var o={inc:1,clk:1,tc:1,uc:1,pp:0,start:0,rune:0,crit:0};
-L.forEach(function(i){var n=TN[i];if(!n)return;var v=tval(n);if(n.t==='inc'||n.t==='tip')o.inc*=v;else if(n.t==='clk')o.clk*=v;else if(n.t==='tc')o.tc*=v;else if(n.t==='uc')o.uc*=v;else if(n.t==='pp')o.pp+=v;else if(n.t==='start')o.start=Math.max(o.start,v);else{o.rune+=0.1+0.4*v;o.crit+=(0.5+2*v)/100}});
-o.tc=Math.max(o.tc,0.001);o.uc=Math.max(o.uc,0.001);TFXC={d:d,n:L.length,v:o};return o}
+function tfx(d){var L=(d&&d.tree)||[];if(TFXC.d===d&&TFXC.n===L.length)return TFXC.v;var o={inc:1,clk:1,tc:1,tcd:0,uc:1,pp:0,start:0,rune:0,crit:0};
+L.forEach(function(i){var n=TN[i];if(!n)return;var v=tval(n);if(n.t==='inc'||n.t==='tip')o.inc*=v;else if(n.t==='clk')o.clk*=v;else if(n.t==='tc')o.tcd+=v;else if(n.t==='uc')o.uc*=v;else if(n.t==='pp')o.pp+=v;else if(n.t==='start')o.start=Math.max(o.start,v);else{o.rune+=0.1+0.4*v;o.crit+=(0.5+2*v)/100}});
+o.tc=1-Math.min(TC_MAX,o.tcd);o.uc=Math.max(o.uc,0.001);TFXC={d:d,n:L.length,v:o};return o}
 /* prestige points: 1 for reaching 1M earned in a run, +1 for every 1000x after that (1B, 1T, 1Qa...) */
 function ppBase(E){E=Math.min(+E||0,1e300);return E>=1e6?Math.floor((Math.log10(E)+1e-9-6)/3)+1:0}
 function ppPending(){return Math.floor(ppBase(S.run)*(1+tfx(S).pp))}
