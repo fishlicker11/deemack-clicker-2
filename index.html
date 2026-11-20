@@ -51,6 +51,16 @@ button:disabled{opacity:.35;cursor:default}
 .lb .row.me{border-color:var(--accent)}
 .obadge{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#f59e0b;color:#1a1300;white-space:nowrap}
 .runebtn[hidden]{display:none}
+.runebtn.logbtn{position:relative;font-size:18px;padding:8px 11px}
+.runebtn.logbtn small{font-size:12px;font-weight:700;color:var(--text)}
+.ldot{position:absolute;top:-7px;right:-7px;background:var(--accent);color:var(--btntext);font-size:9px;font-weight:800;line-height:1;padding:3px 5px;border-radius:999px;letter-spacing:.03em}
+.ldot[hidden]{display:none}
+.logent{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--bg);text-align:left}
+.logent.latest{border-color:var(--accent)}
+.logent .ld{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-bottom:4px}
+.logent .ltag{color:var(--accent);font-weight:700}
+.logent b{display:block;font-size:15px;margin-bottom:2px}
+.logent .lx{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}
 .lb .rk{width:22px;color:var(--muted)}.lb .nmm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.lb .st{color:var(--muted);font-size:12px;text-align:right}
 .lb .note{color:var(--muted);font-size:13px}
 .ov{position:fixed;inset:0;background:var(--bg);display:flex;align-items:flex-start;justify-content:center;z-index:20;padding:20px;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
@@ -237,7 +247,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="warn" id="nosave" hidden>⚠️ This page can't save your progress, so it will be lost when you close it. Open the game in its own browser tab (not inside another website or app) to keep your progress.</div>
 <div class="slots" id="slots"></div>
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
-<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
+<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
 <button class="rs" id="rs">Erase this slot</button>
@@ -263,6 +273,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div id="bf" hidden><div class="bfw"><div class="bfh"><img id="bfi" alt=""><div class="bft"><b id="bfn"></b><span class="dif" id="bfd"></span></div><button class="xbtn2" id="bfx" aria-label="Run away">✕</button></div><div class="hpl"><span>Boss</span><span id="bfht"></span></div><div class="hp"><div id="bfhb" class="hpf boss"></div></div><div class="hpl"><span>You</span><span id="bfpt"></span></div><div class="hp"><div id="bfpb" class="hpf me"></div></div><div id="bfs" class="bfs"></div><div id="bfa" class="bfa"></div></div></div>
 <div class="ov" id="ev" hidden><div class="box"><h1>Erase this slot?</h1><p id="evs"></p><input id="evi" maxlength="10" placeholder="Type ERASE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="evgo" disabled>Erase slot</button><button id="evx" class="sec">Cancel</button></div></div>
 <div class="ov" id="bw" hidden><div class="box"><div class="bwt">🏆</div><img id="bwi" class="bwimg" alt=""><h1 id="bwn"></h1><p id="bwp"></p><div class="bwst" id="bws"></div><button id="bwr">Replay boss</button><button id="bwb" class="sec">Back to boss menu</button></div></div>
+<div class="ov" id="logv" hidden><div class="box rbox"><div class="phd"><h1>📜 Update log</h1><button class="xbtn" id="logx" aria-label="Close">✕</button></div><div id="logl"></div></div></div>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
 </div>
@@ -272,6 +283,9 @@ var FB_URL='https://deemack-clicker-2-default-rtdb.firebaseio.com';
 /* ===== LEADERBOARD SIGN-IN: paste the Firebase Web API key between the quotes. With it, every player is signed in
    anonymously (no account needed) and the database rules only let each player change their own entry. ===== */
 var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
+/* ===== UPDATE LOG: posts shown in the 📜 Log button, NEWEST FIRST. Only the owner adds these.
+   Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
+var UPDATES=[];
 (function(){
 var T=[
 {id:"davis",name:"Kid Davis",cps:2,buy:25,up:200},
@@ -990,6 +1004,19 @@ var f=document.createElement('div');f.className='gfx';f.textContent='×'+m+' MON
 toast('✨ Golden '+t.name+'! ×'+m+' money for '+secs+' seconds','#f59e0b');CK=[];disp=null;update()}
 function goldTick(){var n=Date.now();if(goldOn||n<nextGold)return;if(document.hidden||anyOpen()){nextGold=n+3000;return}spawnGold();nextGold=n+GOLD_EVERY}
 setInterval(goldTick,1000);
+/* ===== Update log: shows UPDATES (newest first, scroll for older ones). The button shows NEW until the latest is read. ===== */
+function logSeen(){try{return LS.getItem('deemackClicker2.logSeen')||''}catch(e){return ''}}
+function logUnread(){return UPDATES.length>0&&logSeen()!==String(UPDATES[0].id)}
+function renderLog(){var L=$('logl');L.textContent='';
+if(!UPDATES.length){var e=document.createElement('div');e.className='rempty';e.textContent='No updates yet. Check back later!';L.appendChild(e);return}
+UPDATES.forEach(function(u,i){var d=document.createElement('div');d.className='logent'+(i===0?' latest':'');
+var top=document.createElement('div');top.className='ld';var dt=document.createElement('span');dt.textContent=u.date||'';top.appendChild(dt);
+if(i===0){var tg=document.createElement('span');tg.className='ltag';tg.textContent='Latest';top.appendChild(tg)}d.appendChild(top);
+if(u.title){var b=document.createElement('b');b.textContent=u.title;d.appendChild(b)}
+var x=document.createElement('div');x.className='lx';x.textContent=u.text||'';d.appendChild(x);L.appendChild(d)})}
+$('logb').onclick=function(){renderLog();$('logv').hidden=false;$('logl').parentNode.scrollTop=0;if(UPDATES.length){try{LS.setItem('deemackClicker2.logSeen',String(UPDATES[0].id))}catch(e){}}$('logdot').hidden=true};
+function closeLog(){$('logv').hidden=true}$('logx').onclick=closeLog;$('logv').onclick=function(e){if(e.target===$('logv'))closeLog()};
+$('logdot').hidden=!logUnread();if(logUnread())setTimeout(function(){toast('📜 New update! Tap Log to read it.','#3b82f6')},1500);
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
