@@ -55,6 +55,10 @@ button:disabled{opacity:.35;cursor:default}
 .runebtn.logbtn small{font-size:12px;font-weight:700;color:var(--text)}
 .ldot{position:absolute;top:-7px;right:-7px;background:var(--accent);color:var(--btntext);font-size:9px;font-weight:800;line-height:1;padding:3px 5px;border-radius:999px;letter-spacing:.03em}
 .ldot[hidden]{display:none}
+.crsec{text-align:center;margin:16px 0}
+.crsec .crr{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--accent);margin-bottom:4px}
+.crsec .crn{font-size:20px;font-weight:700;line-height:1.35}
+.crend{text-align:center;color:var(--muted);font-size:13px;margin:22px 0 6px}
 .logent{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;background:var(--bg);text-align:left}
 .logent.latest{border-color:var(--accent)}
 .logent .ld{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);margin-bottom:4px}
@@ -251,7 +255,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="warn" id="nosave" hidden>⚠️ This page can't save your progress, so it will be lost when you close it. Open the game in its own browser tab (not inside another website or app) to keep your progress.</div>
 <div class="slots" id="slots"></div>
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
-<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
+<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
 <button class="rs" id="rs">Erase this slot</button>
@@ -278,6 +282,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="ev" hidden><div class="box"><h1>Erase this slot?</h1><p id="evs"></p><input id="evi" maxlength="10" placeholder="Type ERASE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="evgo" disabled>Erase slot</button><button id="evx" class="sec">Cancel</button></div></div>
 <div class="ov" id="bw" hidden><div class="box"><div class="bwt">🏆</div><img id="bwi" class="bwimg" alt=""><h1 id="bwn"></h1><p id="bwp"></p><div class="bwrw" id="bwrw"></div><div class="bwst" id="bws"></div><button id="bwr">Replay boss</button><button id="bwb" class="sec">Back to boss menu</button></div></div>
 <div class="ov" id="logv" hidden><div class="box rbox"><div class="phd"><h1>📜 Update log</h1><button class="xbtn" id="logx" aria-label="Close">✕</button></div><div id="logl"></div></div></div>
+<div class="ov" id="crv" hidden><div class="box rbox"><div class="phd"><h1>🎬 Credits</h1><button class="xbtn" id="crx" aria-label="Close">✕</button></div><div id="crl"></div></div></div>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
 </div>
@@ -289,6 +294,12 @@ var FB_URL='https://deemack-clicker-2-default-rtdb.firebaseio.com';
 var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
 /* ===== UPDATE LOG: posts shown in the 📜 Log button, NEWEST FIRST. Only the owner adds these.
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
+/* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
+var CREDITS=[
+{role:'OWNER AND CREATOR',names:['Trenton']},
+{role:'ORIGINAL IDEA',names:['xander']},
+{role:'MARKETING-ish',names:['Oliver']},
+{role:'PLAYTESTERS',names:['Oliver']}];
 var UPDATES=[];
 (function(){
 var T=[
@@ -1039,6 +1050,13 @@ var x=document.createElement('div');x.className='lx';x.textContent=u.text||'';d.
 $('logb').onclick=function(){renderLog();$('logv').hidden=false;$('logl').parentNode.scrollTop=0;if(UPDATES.length){try{LS.setItem('deemackClicker2.logSeen',String(UPDATES[0].id))}catch(e){}}$('logdot').hidden=true};
 function closeLog(){$('logv').hidden=true}$('logx').onclick=closeLog;$('logv').onclick=function(e){if(e.target===$('logv'))closeLog()};
 $('logdot').hidden=!logUnread();if(logUnread())setTimeout(function(){toast('📜 New update! Tap Log to read it.','#3b82f6')},1500);
+/* ===== Credits ===== */
+function renderCredits(){var L=$('crl');L.textContent='';CREDITS.forEach(function(c){var d=document.createElement('div');d.className='crsec';
+var r=document.createElement('div');r.className='crr';r.textContent=c.role;d.appendChild(r);
+(c.names||[]).forEach(function(n){var x=document.createElement('div');x.className='crn';x.textContent=n;d.appendChild(x)});L.appendChild(d)});
+var e=document.createElement('div');e.className='crend';e.textContent='Thanks for playing DeeMack Clicker 2!';L.appendChild(e)}
+$('crb').onclick=function(){renderCredits();$('crv').hidden=false;$('crl').parentNode.scrollTop=0};
+function closeCR(){$('crv').hidden=true}$('crx').onclick=closeCR;$('crv').onclick=function(e){if(e.target===$('crv'))closeCR()};
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
