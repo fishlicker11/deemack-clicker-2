@@ -49,6 +49,8 @@ button:disabled{opacity:.35;cursor:default}
 .lb{margin-top:18px}.lb h2{font-size:15px;margin:0 0 6px}
 .lb .row{display:flex;gap:8px;align-items:baseline;padding:6px 10px;border:1px solid var(--line);background:var(--card);border-radius:10px;margin-bottom:5px;font-size:14px}
 .lb .row.me{border-color:var(--accent)}
+.obadge{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#f59e0b;color:#1a1300;white-space:nowrap}
+.runebtn[hidden]{display:none}
 .lb .rk{width:22px;color:var(--muted)}.lb .nmm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.lb .st{color:var(--muted);font-size:12px;text-align:right}
 .lb .note{color:var(--muted);font-size:13px}
 .ov{position:fixed;inset:0;background:var(--bg);display:flex;align-items:flex-start;justify-content:center;z-index:20;padding:20px;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
@@ -228,14 +230,16 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="warn" id="nosave" hidden>⚠️ This page can't save your progress, so it will be lost when you close it. Open the game in its own browser tab (not inside another website or app) to keep your progress.</div>
 <div class="slots" id="slots"></div>
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
-<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
+<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
 <button class="rs" id="rs">Erase this slot</button>
-<div class="ov" id="ov" hidden><div class="box"><h1>DeeMack Clicker 2</h1><p>Pick a display name for the leaderboard.</p><input id="nin" maxlength="16" placeholder="Display name" autocomplete="off"><button id="nok">Play</button><button id="nimp" class="sec">I have a save code</button><p id="nerr"></p></div></div>
+<div class="ov" id="ov" hidden><div class="box"><h1>DeeMack Clicker 2</h1><p id="nmsg">Pick a display name for the leaderboard.</p><input id="nin" maxlength="16" placeholder="Display name" autocomplete="off"><input id="ncode" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off" hidden><button id="nok">Play</button><button id="nimp" class="sec">I have a save code</button><button id="ncancel" class="sec" hidden>Cancel</button><p id="nerr"></p></div></div>
+<div class="ov" id="devv" hidden><div class="box rbox"><div class="phd"><h1>🛠️ Dev tools</h1><button class="xbtn" id="devvx" aria-label="Close">✕</button></div><p>Owner only. Commands only change your own game.</p><div id="devl"></div></div></div>
+<div class="ov" id="dcv" hidden><div class="box"><h1>🛠️ Dev tools</h1><p>Enter the owner code.</p><input id="dcin" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off"><button id="dcok">Unlock</button><button id="dcx" class="sec">Cancel</button><p id="dcerr"></p></div></div>
 <div class="ov" id="pv" hidden><div class="box"><h1 id="pvn"></h1><p id="pvr"></p><div id="pvs"></div><button id="pvx">Close</button></div></div>
 <div class="ov" id="rv" hidden><div class="box rbox"><h1>Runes</h1><p id="rvs"></p><div id="rvl"></div><button id="rvx">Close</button></div></div>
-<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><p>Rank score = income per second, boosted by your runes and cards.</p><div id="lb"><div class="note">Loading...</div></div><button id="lvx">Close</button></div></div>
+<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><p>Rank score = income per second, boosted by your runes and cards.</p><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
 <div class="ov" id="rl" hidden><div class="box"><h1>Daily Roller</h1><p>Roll once every 22 hours for an income boost.</p><div id="rls"></div><p id="rlt"></p><button id="rlr">Roll</button><button id="rlx">Close</button></div></div>
 <div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvx">Close</button></div></div>
 <div class="ov" id="cv" hidden><div class="box rbox"><h1>Cards</h1><p id="cvs"></p><div class="binder" id="cvb"></div><button id="cvx">Close</button></div></div>
@@ -360,7 +364,7 @@ function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.sh
 var base=total(),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
 function update(noAnim){var anim=ready&&!noAnim;
-$("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");if(nt<RL.until){bs.hidden=false;bs.textContent="🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left"}else bs.hidden=true;$("dn").textContent=S.rolls;var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
+$("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");if(nt<RL.until){bs.hidden=false;bs.textContent="🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left"}else bs.hidden=true;$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||S.own[T[i-1].id]>0;
 if(!vis){r.card.hidden=true;return}
@@ -441,7 +445,7 @@ sbtn(armed?'Sure?':'Delete',function(){if(delArm===r.id){S.st.deleted++;S.runes=
 $('rb').onclick=function(){delArm=null;renderRunes();$('rv').hidden=false};
 function closeRunes(){$('rv').hidden=true}
 $('rvx').onclick=closeRunes;$('rv').onclick=function(e){if(e.target===$('rv'))closeRunes()};
-$('lbb').onclick=function(){$('lv').hidden=false;loadLB()};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
+$('lbb').onclick=function(){$('lv').hidden=false;loadLB()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
 var RLK='deemackClicker2.roller',RLD=22*3600*1000,DWT=[38,28,15,9,5,2.5,1.5,0.7,0.2,0.1],RL=S.rl,spinning=false;
 function rlSave(){save()}
 function boostMul(){return Date.now()<RL.until?1+RL.pct/100:1}
@@ -569,9 +573,9 @@ function applyTheme(i){var el=document.documentElement;if(!el||!el.style)return;
 if(i>=0&&THEMES[i]){var t=THEMES[i];keys.forEach(function(k){el.style.setProperty('--'+k,t[k])});el.style.colorScheme=t.dark?'dark':'light'}
 else{keys.forEach(function(k){el.style.removeProperty('--'+k)});el.style.colorScheme=''}}
 function renderThemes(){var L=$('tvl'),n=achCount(S);L.textContent='';
-if(S.theme>=0&&n<10*(S.theme+1)){S.theme=-1;applyTheme(-1)}
-$('tvs').textContent=n+' achievements · a new theme every 10';
-function trow(i,name,t,need){var ok=n>=need,r=document.createElement('div');r.className='arow trow'+(S.theme===i?' on':'')+(ok?'':' off');
+if(S.theme>=0&&n<10*(S.theme+1)&&!allThemes()){S.theme=-1;applyTheme(-1)}
+$('tvs').textContent=n+' achievements · a new theme every 10'+(allThemes()?' · all unlocked (dev)':'');
+function trow(i,name,t,need){var ok=n>=need||allThemes(),r=document.createElement('div');r.className='arow trow'+(S.theme===i?' on':'')+(ok?'':' off');
 var sw=document.createElement('div');sw.className='sw';sw.style.background='linear-gradient(135deg,'+(t?t.bg:'var(--bg)')+' 50%,'+(t?t.accent:'var(--accent)')+' 50%)';
 var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=name;var s=document.createElement('span');
 s.textContent=ok?(S.theme===i?'In use':'Tap to use'):'Unlocks at '+need+' achievements ('+(need-n)+' to go)';x.appendChild(b);x.appendChild(s);
@@ -916,6 +920,33 @@ psArm=false;clearTimeout(psArmT);var first=tLocked();S.pp+=pn;S.ppt+=pn;S.prs++;
 save();update(true);updateSlots();checkAch();pushStats(true);toast('Prestiged! +'+pn+' point'+(pn===1?'':'s')+(first?' · skill tree unlocked!':''),'#a855f7');
 psStats();tRefresh();tInfo();if(first)requestAnimationFrame(function(){tGo(tFitView(false))})}
 $('psgo').onclick=doPrestige;
+/* ===== Owner (Trenton) =====
+   The name Trenton (or a lookalike) needs the owner code. The owner gets a 👑 badge on the leaderboard and the
+   🛠️ Dev tools button. The code is only stored scrambled; only one player can ever hold the name, and the badge
+   only shows for that player. Dev commands only change the owner's own game. */
+var OWNER_NAME='trenton',OWNER_HASH='db293ca4',lbOwner=null;
+function codeHash(c){var h=0x811c9dc5,t='dmc2-owner:'+String(c).trim();for(var i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0}return h.toString(16)}
+function ownerLike(n){return String(n||'').toLowerCase().replace(/0/g,'o').replace(/[@4]/g,'a').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[5$]/g,'s').replace(/7/g,'t').replace(/[^a-z]/g,'')===OWNER_NAME}
+function isOwnerName(n){return String(n||'').trim().replace(/\s+/g,' ').toLowerCase()===OWNER_NAME}
+function devOk(){try{return LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
+function showDev(){return isOwnerName(NAME)&&(devOk()||nameOk||!FB)}
+function devFlag(k){try{return LS.getItem('deemackClicker2.dev.'+k)==='1'}catch(e){return false}}
+function setDevFlag(k,on){try{if(on)LS.setItem('deemackClicker2.dev.'+k,'1');else LS.removeItem('deemackClicker2.dev.'+k)}catch(e){}}
+function allThemes(){return isOwnerName(NAME)&&devOk()&&devFlag('themes')}
+/* dev commands: add more here */
+var DEVCMDS=[{id:'themes',name:'Unlock all themes',desc:'Every theme can be used on all your save slots, no achievements needed.',
+ run:function(on){if(on)toast('All themes unlocked','#a855f7');else{var n=achCount(S);if(S.theme>=0&&n<10*(S.theme+1)){S.theme=-1;applyTheme(-1);save()}toast('Themes back to normal','#a855f7')}if(!$('tv').hidden)renderThemes()}}];
+function renderDev(){var L=$('devl');L.textContent='';DEVCMDS.forEach(function(c){var on=devFlag(c.id),r=document.createElement('div');r.className='arow'+(on?' trow on':'');
+var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=c.name+(on?' · ON':'');var sp=document.createElement('span');sp.textContent=c.desc;x.appendChild(b);x.appendChild(sp);
+var bt=document.createElement('button');bt.className='bfight';bt.textContent=on?'Turn off':'Turn on';bt.onclick=function(){setDevFlag(c.id,!on);c.run(!on);renderDev()};
+r.appendChild(x);r.appendChild(bt);L.appendChild(r)})}
+function openDev(){if(!showDev())return;if(devOk()){renderDev();$('devv').hidden=false}else{$('dcin').value='';$('dcerr').textContent='';$('dcv').hidden=false;$('dcin').focus()}}
+$('devb').onclick=openDev;
+$('dcok').onclick=function(){if(codeHash($('dcin').value)===OWNER_HASH){try{LS.setItem('deemackClicker2.devok','1')}catch(e){}$('dcv').hidden=true;$('dcin').value='';renderDev();$('devv').hidden=false}else $('dcerr').textContent='Wrong code.'};
+$('dcin').onkeydown=function(e){if(e.key==='Enter')$('dcok').click()};
+$('dcx').onclick=function(){$('dcv').hidden=true;$('dcin').value=''};
+$('devvx').onclick=function(){$('devv').hidden=true};$('devv').onclick=function(e){if(e.target===$('devv'))$('devv').hidden=true};
+
 $('prb').onclick=function(){if(!TEl)tBuild();PSO=true;psArm=false;$('ps').hidden=false;psStats();tRefresh();tInfo();requestAnimationFrame(function(){tGo(tFitView(false))})};
 $('psx').onclick=function(){PSO=false;psArm=false;$('ps').hidden=true};
 $('tfit').onclick=function(){tGo(tFitView(true),450)};
@@ -924,7 +955,7 @@ var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
 function showProfile(doc,rank){var d=doc.data()||{};pvId=doc.id;$('pvn').textContent=String(d.name||'Player').slice(0,16);
-$('pvr').textContent='Rank #'+rank+(doc.id===uid?' · you':'');
+$('pvr').textContent='Rank #'+rank+(lbOwner&&doc.id===lbOwner?' · 👑 Owner':'')+(doc.id===uid?' · you':'');
 var box=$('pvs');box.textContent='';PSTATS.forEach(function(p){var r=document.createElement('div');r.className='pst';var a=document.createElement('span');a.textContent=p[0];var b=document.createElement('span');b.textContent=p[1](d);r.appendChild(a);r.appendChild(b);box.appendChild(r)});
 $('pv').hidden=false}
 function closeProfile(){pvId=null;$('pv').hidden=true}
@@ -935,7 +966,7 @@ docs.forEach(function(doc,i){var d=doc.data()||{},r=document.createElement('div'
 var a=document.createElement('span');a.className='rk';a.textContent=i+1;
 var b=document.createElement('span');b.className='nmm';b.textContent=String(d.name||'Player').slice(0,16);b.title='View profile';b.onclick=function(){showProfile(doc,i+1)};
 var c=document.createElement('span');c.className='st';c.textContent=fmt(+d.score||0);
-r.appendChild(a);r.appendChild(b);r.appendChild(c);el.appendChild(r)});
+r.appendChild(a);r.appendChild(b);if(lbOwner&&doc.id===lbOwner){var ob=document.createElement('span');ob.className='obadge';ob.textContent='👑 Owner';r.appendChild(ob)}r.appendChild(c);el.appendChild(r)});
 if(pvId){var cur=docs.filter(function(x){return x.id===pvId})[0];if(cur)showProfile(cur,docs.indexOf(cur)+1)}}
 /* Unique names: each name is claimed at /names/<key> on the server, holding the owner's player id.
    The key ignores capitals and extra spaces, so "Bob" and " bob " count as the same name. */
@@ -979,13 +1010,18 @@ function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemac
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
 function pushStats(force){if(!FB||!uid||!NAME||busy)return;if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<10000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').catch(function(){}).then(function(){busy=false})}
-function askName(msg){var ov=$('ov'),inp=$('nin'),btn=$('nok');ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;inp.focus();
+function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
+$('nmsg').textContent=change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change;$('nimp').hidden=!!change;btn.textContent=change?'Save name':'Play';
+inp.value=change?NAME:'';cd.value='';cd.hidden=!ownerLike(inp.value)||!!(change&&isOwnerName(NAME));inp.oninput=function(){cd.hidden=!ownerLike(inp.value)||(isOwnerName(NAME)&&nameOk&&isOwnerName(inp.value))};
+$('ncancel').onclick=function(){ov.hidden=true;cd.value=''};inp.focus();
 function setName(v,ok){NAME=v;nameOk=ok;try{LS.setItem('deemackClicker2.name',v)}catch(e){}ov.hidden=true;$('nerr').textContent='';if(ok)pushStats(true);else verifyName()}
 function go(){if(btn.disabled)return;var v=inp.value.trim().replace(/\s+/g,' ');if(v.length<2){$('nerr').textContent='Use at least 2 characters.';return}
 if(badName(v)){$('nerr').textContent='Please pick a different name.';return}
+if(ownerLike(v)&&!(isOwnerName(NAME)&&nameOk&&isOwnerName(v))){if(cd.hidden){cd.hidden=false;cd.focus();$('nerr').textContent='That name needs the owner code.';return}
+if(codeHash(cd.value)!==OWNER_HASH){$('nerr').textContent=cd.value.trim()?'Wrong owner code.':'That name needs the owner code.';return}try{LS.setItem('deemackClicker2.devok','1')}catch(e){}}
 if(!FB){setName(v,false);return}
 btn.disabled=true;$('nerr').textContent='Checking name...';
-claimName(v).then(function(r){btn.disabled=false;if(r==='taken'){$('nerr').textContent='Someone already has that name. Pick a different one.';return}setName(v,true)})
+claimName(v).then(function(r){btn.disabled=false;if(r==='taken'){$('nerr').textContent='Someone already has that name. Pick a different one.';return}if(oldName&&nameKey(oldName)!==nameKey(v))releaseName(oldName,uid);cd.value='';setName(v,true)})
 .catch(function(){btn.disabled=false;setName(v,false)})}
 $('nok').onclick=go;inp.onkeydown=function(e){if(e.key==='Enter')go()}}
 if(!NAME)askName();
@@ -996,16 +1032,18 @@ authToken().then(function(){migrate();pushStats(true)},function(){});return}
 if(!id){id='p'+Math.random().toString(36).slice(2,12)+Date.now().toString(36);try{LS.setItem('deemackClicker2.uid',id)}catch(e){}}
 uid=id})();
 /* Names hidden from the leaderboard for everyone (capitals and extra spaces don't matter). Add more names here to hide them. */
-var LB_HIDE=['mom'];
-/* a name is hidden if it, or any word in it, matches the list (also catches tricks like M0M, mom123, The Mom!!) */
-function lbHidden(n){var raw=String(n||'').toLowerCase(),leet=raw.replace(/0/g,'o').replace(/[@4]/g,'a').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[5$]/g,'s').replace(/7/g,'t');
-return [raw,leet].some(function(t){if(LB_HIDE.indexOf(t.trim().replace(/\s+/g,' '))>=0)return true;return t.split(/[^a-z]+/).some(function(w){return LB_HIDE.indexOf(w)>=0})})}
+var LB_HIDE=['mom','themom'];
+/* a name is hidden if it, any word in it (TheMom counts as The + Mom), or its letters run together match the list.
+   Also catches tricks like M0M, mom123, The Mom!! */
+function lbHidden(n){var raw=String(n||'').replace(/([a-z])([A-Z])/g,'$1 $2').toLowerCase(),leet=raw.replace(/0/g,'o').replace(/[@4]/g,'a').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[5$]/g,'s').replace(/7/g,'t');
+return [raw,leet].some(function(t){if(LB_HIDE.indexOf(t.replace(/[^a-z]/g,''))>=0)return true;return t.split(/[^a-z]+/).some(function(w){return LB_HIDE.indexOf(w)>=0})})}
 var lbAll=false;
 function loadLB(){if(!FB){note('The leaderboard isn\u2019t connected to a server yet.');return}
 if(document.hidden||$('lv').hidden)return;
+var ownP=fetch(FB+'/names/'+nameKey(OWNER_NAME)+'.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null});
 fetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=30')).then(function(r){return r.json().catch(function(){return null}).then(function(o){
-if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll=true;loadLB();throw 'skip'}if(r.status===401||r.status===403||/permission/i.test(m))throw 'The leaderboard server blocked the game. Check the database rules.';if(r.status===404)throw 'Leaderboard server not found. Check the FB_URL address.';throw 'Leaderboard server error: '+(m||r.status)})}).then(function(o){o=o||{};
-var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,20);
+if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll=true;loadLB();throw 'skip'}if(r.status===401||r.status===403||/permission/i.test(m))throw 'The leaderboard server blocked the game. Check the database rules.';if(r.status===404)throw 'Leaderboard server not found. Check the FB_URL address.';throw 'Leaderboard server error: '+(m||r.status)})}).then(function(o){return ownP.then(function(ow){lbOwner=typeof ow==='string'?ow:null;return o})}).then(function(o){o=o||{};
+var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)&&!(ownerLike(o[k].name)&&k!==lbOwner)}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,20);
 renderLB(docs);if(FB_KEY&&authErr){var an=document.createElement('div');an.className='note';an.textContent='You can\u2019t be added to the leaderboard right now: '+authMsg();$('lb').insertBefore(an,$('lb').firstChild)}}).catch(function(e){if(e==='skip')return;note(typeof e==='string'?e:'Could not reach the leaderboard server.')})}
 loadLB();setInterval(loadLB,5000);
 if(NAME)pushStats(true);
