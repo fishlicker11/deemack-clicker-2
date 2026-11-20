@@ -79,6 +79,10 @@ button:disabled{opacity:.35;cursor:default}
 .logent .lx{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}
 .lb .rk{width:30px;flex:none;color:var(--muted)}.lb .nmm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.lb .st{color:var(--muted);font-size:12px;text-align:right}
 .lb .note{color:var(--muted);font-size:13px}
+.lbme{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 10px;margin:0 0 10px;font-size:13px;line-height:1.35}
+.lbme[hidden]{display:none}
+.lbme b{display:block;font-size:14px}
+.lbme .lbm2,.lbme .lbm3{color:var(--muted)}
 .ov{position:fixed;inset:0;background:var(--bg);display:flex;align-items:flex-start;justify-content:center;z-index:20;padding:20px;box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
 .ov[hidden]{display:none}
 .ov .box{margin:auto;flex:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;width:100%;max-width:340px;text-align:center}
@@ -285,7 +289,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="dcv" hidden><div class="box"><h1>🛠️ Dev tools</h1><p>Enter the owner code.</p><input id="dcin" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off"><button id="dcok">Unlock</button><button id="dcx" class="sec">Cancel</button><p id="dcerr"></p></div></div>
 <div class="ov" id="pv" hidden><div class="box"><h1 id="pvn"></h1><p id="pvr"></p><div id="pvs"></div><button id="pvx">Close</button></div></div>
 <div class="ov" id="rv" hidden><div class="box rbox"><h1>Runes</h1><p id="rvs"></p><div id="rvl"></div><button id="rvx">Close</button></div></div>
-<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Top 100 players. Rank score = your best ever income per second, boosted by your runes and cards. Prestiging doesn't lower it.</p><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
+<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Top 100 players. Rank score = your best ever income per second (boosts not counted) × your runes and cards bonus. It never goes down, even when you prestige.</p><div class="lbme" id="lbme" hidden></div><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
 <div class="ov" id="rl" hidden><div class="box"><h1>Daily Roller</h1><p>Roll once every 22 hours for an income boost.</p><div id="rls"></div><p id="rlt"></p><button id="rlr">Roll</button><button id="rlx">Close</button></div></div>
 <div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvx">Close</button></div></div>
 <div class="ov" id="cv" hidden><div class="box rbox"><h1>Cards</h1><p id="cvs"></p><div class="binder" id="cvb"></div><button id="cvx">Close</button></div></div>
@@ -321,7 +325,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=53;
+var BUILD=54;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -501,7 +505,7 @@ $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))close
 $('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();
 try{LS.setItem('deemackClicker2.best','0')}catch(e){}lastSent=0;pushStats(true);toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
-var db=null,uid=null,busy=false,lastSent=0;
+var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
 function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
 function myStats(n){var rc=[0,0,0,0,0,0],eqs=[];S.runes.forEach(function(r){rc[r.r]++});
 S.eq.forEach(function(id){S.runes.forEach(function(r){if(r.id===id)eqs.push(RT[r.k].n+' ('+RN[r.r]+')')})});
@@ -543,7 +547,7 @@ sbtn(armed?'Sure?':'Delete',function(){if(delArm===r.id){S.st.deleted++;S.runes=
 $('rb').onclick=function(){delArm=null;renderRunes();$('rv').hidden=false};
 function closeRunes(){$('rv').hidden=true}
 $('rvx').onclick=closeRunes;$('rv').onclick=function(e){if(e.target===$('rv'))closeRunes()};
-$('lbb').onclick=function(){$('lv').hidden=false;lbNext=Date.now()+LB_EVERY*1000;loadLB();lbTick()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
+$('lbb').onclick=function(){$('lv').hidden=false;lbNext=Date.now()+LB_EVERY*1000;lbAfterPush=true;pushStats(true);loadLB();lbTick()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true;lbAfterPush=false}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
 var RLK='deemackClicker2.roller',RLD=22*3600*1000,DWT=[38,28,15,9,5,2.5,1.5,0.7,0.2,0.1],RL=S.rl,spinning=false;
 function rlSave(){save()}
 /* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.24 per boss
@@ -1275,7 +1279,7 @@ setInterval(function(){if(!document.hidden)checkUpdate(false)},180000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate(true)});
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
-var PSTATS=[['Rank score (best ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
+var PSTATS=[['Rank score (best ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
 function showProfile(doc,rank){var d=doc.data()||{};pvId=doc.id;$('pvn').textContent=String(d.name||'Player').slice(0,16);
 $('pvr').textContent='Rank #'+rank+(lbOwner&&doc.id===lbOwner?' · 👑 Owner':'')+(doc.id===uid?' · you':'');
 var box=$('pvs');box.textContent='';PSTATS.forEach(function(p){var r=document.createElement('div');r.className='pst';var a=document.createElement('span');a.textContent=p[0];var b=document.createElement('span');b.textContent=p[1](d);r.appendChild(a);r.appendChild(b);box.appendChild(r)});
@@ -1283,7 +1287,7 @@ $('pv').hidden=false}
 function closeProfile(){pvId=null;$('pv').hidden=true}
 $('pvx').onclick=closeProfile;$('pv').onclick=function(e){if(e.target===$('pv'))closeProfile()};
 function note(t){var el=$('lb');el.textContent='';var n=document.createElement('div');n.className='note';n.textContent=t;el.appendChild(n)}
-function renderLB(docs){var el=$('lb');el.textContent='';if(!docs.length){note('No players yet.');return}
+function renderLB(docs){var el=$('lb');el.textContent='';lbLoaded=true;lbRank=0;docs.forEach(function(x,i){if(x.id===uid)lbRank=i+1});lbMe();if(!docs.length){note('No players yet.');return}
 docs.forEach(function(doc,i){var d=doc.data()||{},r=document.createElement('div');r.className='row'+(doc.id===uid?' me':'');
 var a=document.createElement('span');a.className='rk';a.textContent=i+1;
 var b=document.createElement('span');b.className='nmm';b.textContent=String(d.name||'Player').slice(0,16);b.title='View profile';b.onclick=function(){showProfile(doc,i+1)};
@@ -1336,11 +1340,12 @@ return fbw(path,{method:'PUT',body:JSON.stringify(uid)},'print=silent').then(chk
 .catch(function(e){if(e&&e.denied&&!FB_KEY)return 'ok';throw e})}
 function releaseName(n,id){if(!FB||!n||!id)return;var path='/names/'+nameKey(n);fbw(path).then(function(r){return r.json()}).then(function(o){if(o===id)return fbw(path,{method:'DELETE'},'print=silent')}).catch(function(){})}
 function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true;var n=NAME;
-claimName(n).then(function(r){claiming=false;if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(){claiming=false})}
+claimName(n).then(function(r){claiming=false;nameErr='';if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(e){claiming=false;nameErr=/refused|denied/.test(String(e&&e.message))?'the server refused it':'the server didn\u2019t answer'})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
 function pushStats(force){if(tabDead||!FB||!NAME||busy)return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
-busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').catch(function(){}).then(function(){busy=false})}
+busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').then(function(r){if(r&&r.ok){lastOk=Date.now();pushErr='';if(lbAfterPush&&!$('lv').hidden){lbAfterPush=false;loadLB()}}else pushErr=(r&&(r.status===401||r.status===403))?'the server refused it':'server error '+(r&&r.status)},
+function(){pushErr=FB_KEY&&authErr?'can\u2019t sign in':'the server didn\u2019t answer'}).then(function(){busy=false;lbMe()})}
 function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
 $('nmsg').textContent=change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change;$('nimp').hidden=!!change;btn.textContent=change?'Save name':'Play';
 inp.value=change?NAME:'';cd.value='';cd.hidden=!ownerLike(inp.value)||!!(change&&isOwnerName(NAME));inp.oninput=function(){cd.hidden=!ownerLike(inp.value)||(isOwnerName(NAME)&&nameOk&&isOwnerName(inp.value))};
@@ -1371,15 +1376,31 @@ return [raw,leet].some(function(t){if(LB_HIDE.indexOf(t.replace(/[^a-z]/g,''))>=
 var lbAll=false;
 function loadLB(){if(!FB){note('The leaderboard isn\u2019t connected to a server yet.');return}
 if(document.hidden||$('lv').hidden)return;
-var ownP=tfetch(FB+'/names/'+nameKey(OWNER_NAME)+'.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null});
-tfetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=120')).then(function(r){return r.json().catch(function(){return null}).then(function(o){
+var ownP=tfetch(FB+'/names/'+nameKey(OWNER_NAME)+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+tfetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=120'),{cache:'no-store'}).then(function(r){return r.json().catch(function(){return null}).then(function(o){
 if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll=true;loadLB();throw 'skip'}if(r.status===401||r.status===403||/permission/i.test(m))throw 'The leaderboard server blocked the game. Check the database rules.';if(r.status===404)throw 'Leaderboard server not found. Check the FB_URL address.';throw 'Leaderboard server error: '+(m||r.status)})}).then(function(o){return ownP.then(function(ow){lbOwner=typeof ow==='string'?ow:null;return o})}).then(function(o){o=o||{};
-var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)&&!(ownerLike(o[k].name)&&k!==lbOwner)}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,100);
-renderLB(docs);if(FB_KEY&&authErr){var an=document.createElement('div');an.className='note';an.textContent='You can\u2019t be added to the leaderboard right now: '+authMsg();$('lb').insertBefore(an,$('lb').firstChild)}}).catch(function(e){if(e==='skip')return;var msg=typeof e==='string'?e:'Could not reach the leaderboard server.',el=$('lb');
+var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)&&!(ownerLike(o[k].name)&&k!==lbOwner)}).map(function(k){return{id:k,data:function(){return o[k]}}});
+/* names are unique, so two entries with one name means one is an old dead copy: show only the most recently active */
+var seen={},nk=function(x){return nameKey(String(x.data().name||''))};docs.forEach(function(x){var k=nk(x),t=+x.data().t||0;if(!seen[k]||t>seen[k].t||(t===seen[k].t&&x.id===uid))seen[k]={id:x.id,t:t}});
+docs=docs.filter(function(x){return seen[nk(x)].id===x.id}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,100);
+renderLB(docs)}).catch(function(e){if(e==='skip')return;var msg=typeof e==='string'?e:'Could not reach the leaderboard server.',el=$('lb');
 if(el.querySelector('.row')){var w=el.querySelector('.lberr');if(!w){w=document.createElement('div');w.className='note lberr';el.insertBefore(w,el.firstChild)}w.textContent='⚠️ '+msg+' Showing the last list.'}else note(msg)})}
+/* ===== The "you" box at the top of the leaderboard: your rank and rank score, and whether your score is being sent
+   (or exactly why not), so problems are easy to spot. ===== */
+function ago(t){t=+t||0;if(!t)return 'Unknown';var s=Math.max(0,(Date.now()-t)/1000);return s<60?'Just now':s<3600?Math.floor(s/60)+' min ago':s<86400?Math.floor(s/3600)+' h ago':Math.floor(s/86400)+' day'+(s<172800?'':'s')+' ago'}
+function lbStatus(){if(!NAME)return '✏️ Pick a name to join the leaderboard.';if(tabDead)return '⏸️ This tab is paused, so your score isn\u2019t being sent from here.';
+if(FB_KEY&&!uid)return authErr?'⚠️ Your score isn\u2019t being sent: '+authMsg()+' The game keeps trying.':'⏳ Signing in…';
+if(!nameOk)return nameErr?'⚠️ Your score isn\u2019t being sent yet: your name couldn\u2019t be checked ('+nameErr+'). The game keeps trying.':'⏳ Checking your name…';
+if(pushErr)return '⚠️ Your last score didn\u2019t send ('+pushErr+'). The game keeps trying.';
+if(!lastOk)return '⏳ Sending your score…';var s=Math.round((Date.now()-lastOk)/1000);return '✅ Your score is sent every 15 seconds. Last sent '+(s<3?'just now':s+'s ago')+'.'}
+function lbMe(){var el=$('lbme');if(!el)return;if(!FB){el.hidden=true;return}if($('lv').hidden)return;el.hidden=false;el.textContent='';
+var best=0;try{best=+LS.getItem('deemackClicker2.best')||0}catch(e){}var cs=cardStats(S),mul=1+(runePower(S)+cs.p)/100;
+var a=document.createElement('b');a.textContent=(NAME||'You')+' (you)'+(lbRank?' · #'+lbRank:'')+' · rank score '+fmt(best);
+var b=document.createElement('div');b.className='lbm2';b.textContent=(lbLoaded&&!lbRank?'Not in the top 100 yet. ':'')+'Your runes and cards bonus right now: ×'+mul.toFixed(2)+'.';
+var c=document.createElement('div');c.className='lbm3';c.textContent=lbStatus();el.appendChild(a);el.appendChild(b);el.appendChild(c)}
 /* the leaderboard refreshes every 15 seconds while it's open, with a countdown at the top */
 var LB_EVERY=15,lbNext=0;
-function lbTick(){if($('lv').hidden||document.hidden)return;var n=Date.now();if(n>=lbNext){lbNext=n+LB_EVERY*1000;loadLB()}$('lbref').textContent='🔄 Refreshes every '+LB_EVERY+' seconds · next in '+Math.max(1,Math.ceil((lbNext-n)/1000))+'s'}
+function lbTick(){if($('lv').hidden||document.hidden)return;lbMe();var n=Date.now();if(n>=lbNext){lbNext=n+LB_EVERY*1000;loadLB()}$('lbref').textContent='🔄 Refreshes every '+LB_EVERY+' seconds · next in '+Math.max(1,Math.ceil((lbNext-n)/1000))+'s'}
 setInterval(lbTick,1000);
 if(NAME)pushStats(true);
 if(!LS_OK)$('nosave').hidden=false;
