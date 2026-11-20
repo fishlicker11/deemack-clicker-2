@@ -318,7 +318,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=47;
+var BUILD=48;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -484,13 +484,14 @@ document.addEventListener("visibilitychange",function(){if(document.hidden)save(
 var armed=false,rt;
 $("rs").onclick=function(){var d=S,bits=[fmt(d.gb)+' Games Blocked'],own=0,pl=function(n,w){return n+' '+w+(n===1?'':'s')};T.forEach(function(t){own+=d.own[t.id]});
 if(own)bits.push(pl(own,'teacher'));if(d.prs)bits.push(pl(d.prs,'prestige'));if(d.tree.length)bits.push(pl(d.tree.length,'skill tree upgrade'));if(d.pp)bits.push(pl(d.pp,'unspent prestige point'));
-if(d.runes.length)bits.push(pl(d.runes.length,'rune'));var nc=Object.keys(d.cards).length;if(nc)bits.push(pl(nc,'card'));var na=achCount(d);if(na)bits.push(pl(na,'achievement'));
+if(d.runes.length)bits.push(pl(d.runes.length,'rune'));var nc=Object.keys(d.cards).length;if(nc)bits.push(pl(nc,'card'));var na=achCount(d);if(na)bits.push(pl(na,'achievement'));var bst=0;try{bst=+LS.getItem('deemackClicker2.best')||0}catch(e){}if(bst>=1)bits.push('your leaderboard best of '+fmt(bst));
 $('evs').textContent='This deletes all your progress and can’t be undone: '+bits.join(', ')+'. Type ERASE to confirm.';$('evi').value='';$('evgo').disabled=true;$('ev').hidden=false;$('evi').focus()};
 function evOk(){return $('evi').value.trim().toUpperCase()==='ERASE'}
 function closeEV(){$('ev').hidden=true;$('evi').value=''}
 $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=function(e){if(e.key==='Enter'&&evOk())$('evgo').click()};
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
-$('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();toast('Save erased','#ef4444')};
+$('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();
+try{LS.setItem('deemackClicker2.best','0')}catch(e){}lastSent=0;pushStats(true);toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
 var db=null,uid=null,busy=false,lastSent=0;
 function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
@@ -498,7 +499,7 @@ function myStats(n){var rc=[0,0,0,0,0,0],eqs=[];S.runes.forEach(function(r){rc[r
 S.eq.forEach(function(id){S.runes.forEach(function(r){if(r.id===id)eqs.push(RT[r.k].n+' ('+RN[r.r]+')')})});
 var ac=achCount(S),cps=totalOf(S),rp=runePower(S),cs=cardStats(S),best=bestScore();return{name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rp:rp,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cp:cs.p,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,now:cps*(1+(rp+cs.p)/100),score:best}}
 /* rank score = your best-ever income per second (boosted by runes and cards). Kept on this device,
-   so prestiging (which resets income) never lowers your leaderboard score. */
+   so prestiging (which resets income) never lowers your leaderboard score. Erasing your save resets it. */
 function rankScoreNow(){var cs=cardStats(S);return totalOf(S)*(1+(runePower(S)+cs.p)/100)}
 function bestScore(){var b=0;try{b=+LS.getItem('deemackClicker2.best')||0}catch(e){}var now=rankScoreNow();if(isFinite(now)&&now>b){b=now;try{LS.setItem('deemackClicker2.best',String(b))}catch(e){}}return b}
 function cardStats(d){var o={n:0,p:0,best:-2,byR:[0,0,0,0,0,0,0,0,0,0,0]};Object.keys(d.cards||{}).forEach(function(id){var r=d.cards[id];o.n++;o.p+=5+3*(r+1);o.byR[r+1]++;if(r>o.best)o.best=r});return o}
