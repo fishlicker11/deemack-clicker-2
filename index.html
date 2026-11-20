@@ -780,6 +780,7 @@ $('bwb').onclick=function(){$('bw').hidden=true;closeFight();renderBosses();$('b
 $('bw').hidden=false;$('bwr').focus()}
 $('bfx').onclick=closeFight;
 
+var DODGE_DMG=50,DODGE_PEN=10; /* dodge: damage dealt when it ends, minus this much per red block that hit you */
 function fCounter(m){var n=Math.max(2,Math.round(BF.base*0.10*(m||1)));fStatus('Perfect! Counterattack for '+n+'!');hurtBoss(n);return fAlive(BF&&BF.id)}
 function mashNeed(){return Math.round(17+BF.d*66)}
 ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+(1.0*(1+n*(0.6-BF.d*0.38))).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
@@ -806,7 +807,7 @@ b.onpointerdown=function(e){e.preventDefault();if(over||!fAlive(id)||!fOk())retu
 
 ATK.dodge=function(){var id=BF.id,A=arena();fStatus('Drag the blue dot to dodge!');var cv=document.createElement('canvas');cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
-var R=13,px=W/2,py=H-34,obs=[],t0=performance.now(),last=t0,dur=(6+BF.d*3)*1000,every=Math.max(230,680-BF.d*410),nextS=t0+400,speed=168+BF.d*212,inv=0,hit=Math.max(3,Math.round(BF.dmg*0.45)),down=false,hits=0;
+var R=13,px=W/2,py=H-34,obs=[],t0=performance.now(),last=t0,dur=(6+BF.d*3)*1000,every=Math.max(205,610-BF.d*370),nextS=t0+400,speed=185+BF.d*235,inv=0,hit=Math.max(3,Math.round(BF.dmg*0.45)),down=false,hits=0;
 var mut=(getComputedStyle(document.documentElement).getPropertyValue('--muted')||'').trim()||'#888';
 function setX(e){var r=cv.getBoundingClientRect();px=Math.max(R,Math.min(W-R,e.clientX-r.left))}
 cv.onpointerdown=function(e){e.preventDefault();down=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}setX(e)};
@@ -818,8 +819,8 @@ if(now>inv){for(k=0;k<obs.length;k++){var o=obs[k],cx=Math.max(o.x,Math.min(px,o
 g.clearRect(0,0,W,H);g.globalAlpha=.35;g.fillStyle=mut;g.fillRect(10,py-2,W-20,4);g.globalAlpha=1;g.fillStyle='#ef4444';
 obs.forEach(function(o){g.beginPath();if(g.roundRect)g.roundRect(o.x,o.y,o.w,o.h,6);else g.rect(o.x,o.y,o.w,o.h);g.fill()});
 if(now<inv&&Math.floor(now/90)%2)g.globalAlpha=.3;g.fillStyle='#3b82f6';g.beginPath();g.arc(px,py,R,0,6.2832);g.fill();g.lineWidth=2;g.strokeStyle='#fff';g.stroke();g.globalAlpha=1;
-g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText(Math.max(0,(dur-(now-t0))/1000).toFixed(1)+'s',12,20);
-if(now-t0>=dur){if(hits===0){if(!fCounter())return}else fStatus('Dodged!');fl(atkDone,600);return}requestAnimationFrame(frame)}
+g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText(Math.max(0,(dur-(now-t0))/1000).toFixed(1)+'s',12,20);g.textAlign='right';g.fillStyle=hits?'#ef4444':'#22a35a';g.fillText('Damage: '+Math.max(0,DODGE_DMG-hits*DODGE_PEN),W-12,20);g.textAlign='left';
+if(now-t0>=dur){var dd=Math.max(0,DODGE_DMG-hits*DODGE_PEN);if(dd>0){hurtBoss(dd);if(!fAlive(id))return;fStatus((hits?'Hit '+hits+' time'+(hits>1?'s':'')+' · ':'Perfect dodge! ')+'You hit for '+dd+'!')}else fStatus('Hit '+hits+' times · no damage');fl(atkDone,900);return}requestAnimationFrame(frame)}
 requestAnimationFrame(frame)};
 
 ATK.react=function(){var id=BF.id,A=arena(),lim=Math.max(0.38,0.9-BF.d*0.52),state='wait',t0=0,to=null;
@@ -843,7 +844,7 @@ for(var j=0;j<r;j++)(function(j){fl(function(){lit(seq[j],fms)},350+j*(fms+gap))
 fl(function(){lock(false);fStatus('Your turn! ('+r+' of '+L+')')},350+r*(fms+gap))}
 function press(k){if(!input||!fAlive(id))return;lit(k,150);
 if(k!==seq[pos]){lock(true);fStatus('Wrong!');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,800);return}
-pos++;if(pos>=r){lock(true);if(r>=L){if(!fCounter())return;fl(atkDone,800)}else fl(show,300)}}
+pos++;if(pos>=r){lock(true);if(r>=L){if(!fCounter(1.8))return;fl(atkDone,800)}else fl(show,300)}}
 show()};
 
 ATK.power=function(){var id=BF.id,A=arena(),p=0,dir=1,v=1.15+BF.d*1.55,stopped=false,last=performance.now(),deadline=last+6000;
@@ -1106,29 +1107,29 @@ $('tabgo').onclick=function(){location.reload()};
 var QDAY=22*3600*1000,QWEEK=7*24*3600*1000;
 /* each kind: daily target (d), weekly target (w), text, what it counts. "earn" targets are seconds of your current income. */
 var QK={
-clicks:{d:1000,w:25000,t:'Click Mr McCoy {n} times',v:function(){return S.st.clicks}},
-crit:{d:5,w:150,t:'Land {n} critical hits',v:function(){return S.st.crit}},
-buys:{d:50,w:2500,t:'Buy {n} teachers',v:function(){return S.st.buys}},
-ups:{d:15,w:500,t:'Buy {n} teacher upgrades',v:function(){return S.st.ups}},
-earn:{d:1800,w:86400,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true},
-runes:{d:3,w:100,t:'Find {n} runes',v:function(){return S.st.found}},
-sell:{d:3,w:60,t:'Sell {n} runes',v:function(){return S.st.sold}},
-dice:{d:3,w:60,t:'Roll the dice {n} times',v:function(){return S.st.dice}},
-boss:{d:2,w:40,t:'Beat {n} bosses',v:function(){return S.st.bw}},
-gold:{d:2,w:40,t:'Catch {n} golden teachers',v:function(){return S.st.gold}},
+clicks:{d:3000,w:25000,t:'Click Mr McCoy {n} times',v:function(){return S.st.clicks}},
+crit:{d:25,w:150,t:'Land {n} critical hits',v:function(){return S.st.crit}},
+buys:{d:150,w:2500,t:'Buy {n} teachers',v:function(){return S.st.buys}},
+ups:{d:40,w:500,t:'Buy {n} teacher upgrades',v:function(){return S.st.ups}},
+earn:{d:3600,w:86400,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true},
+runes:{d:15,w:100,t:'Find {n} runes',v:function(){return S.st.found}},
+sell:{d:10,w:60,t:'Sell {n} runes',v:function(){return S.st.sold}},
+dice:{d:10,w:60,t:'Roll the dice {n} times',v:function(){return S.st.dice},need:function(){return T.some(function(t){return !(S.cards[t.id]>=9)})}},
+boss:{d:5,w:40,t:'Beat {n} bosses',v:function(){return S.st.bw}},
+gold:{d:6,w:40,t:'Catch {n} golden teachers',v:function(){return S.st.gold}},
 roller:{d:1,t:'Use the Daily Roller',v:function(){return S.st.rolled},need:function(){return Date.now()>=RL.next}},
-prs:{w:10,t:'Prestige {n} times',v:function(){return S.prs}},
+prs:{w:10,t:'Prestige {n} times',v:function(){return S.prs},need:function(){return S.tree.length<TN.length}},
 tree:{w:15,t:'Buy {n} skill tree upgrades',v:function(){return S.tree.length},need:function(){return S.prs>0&&S.tree.length<=TN.length-15}},
 ach:{w:10,t:'Unlock {n} achievements',v:function(){return achCount(S)},need:function(){return ACH.length-achCount(S)>=20}}};
 var QREW={d:[{t:'money',s:900,l:'15 min of income'},{t:'dice',n:2},{t:'rune',m:2}],w:[{t:'boost'},{t:'rune',m:3}]};
-var QW_V=2; /* weekly quest rules version: older weekly sets get replaced (finished ones are paid out first) */
+var QW_V=2,QD_V=2; /* daily quest rules version */ /* weekly quest rules version: older weekly sets get replaced (finished ones are paid out first) */
 function qTitle(q){var K=QK[q.k];return K?K.t.replace('{n}',q.k==='earn'?fmt(q.n):String(q.n)):''}
 function qProg(q){var K=QK[q.k];if(!K)return 0;var v=+K.v()-q.b;return Math.max(0,Math.min(q.n,isFinite(v)?v:0))}
 function qDone(q){return qProg(q)>=q.n}
 function qRewText(r){return r.t==='boost'?'⚡ +'+r.p+'% money for '+r.s+' seconds ('+Math.round(r.s/60)+' min)':r.t==='money'?'💰 '+r.l+' (~'+fmt(Math.max(1000,totalOf(S)*r.s))+')':r.t==='dice'?'🎲 '+r.n+' dice rolls':'🔮 '+(/^[AEIOU]/.test(RN[r.m])?'an ':'a ')+RN[r.m]+' or better rune'}
 function qGen(per){var keys=Object.keys(QK).filter(function(k){var K=QK[k];return K[per]&&(!K.need||K.need())}),pick=[];
 while(pick.length<3&&keys.length)pick.push(keys.splice(Math.floor(Math.random()*keys.length),1)[0]);
-S.q[per]={at:Date.now(),list:pick.map(function(k){var K=QK[k],n=K.scale?Math.max(1000,Math.round(totalOf(S)*K[per])):K[per],R=QREW[per],rw=R[Math.floor(Math.random()*R.length)];if(rw.t==='boost')rw={t:'boost',p:[100,125,150,175,200][Math.floor(Math.random()*5)],s:[900,1200,1500,1800][Math.floor(Math.random()*4)]};return{k:k,n:n,b:+K.v()||0,r:rw,c:0,nt:0}})};if(per==='w')S.q.w.v=QW_V}
+S.q[per]={at:Date.now(),list:pick.map(function(k){var K=QK[k],n=K.scale?Math.max(1000,Math.round(totalOf(S)*K[per])):K[per],R=QREW[per],rw=R[Math.floor(Math.random()*R.length)];if(rw.t==='boost')rw={t:'boost',p:[100,125,150,175,200][Math.floor(Math.random()*5)],s:[900,1200,1500,1800][Math.floor(Math.random()*4)]};return{k:k,n:n,b:+K.v()||0,r:rw,c:0,nt:0}})};if(per==='w')S.q.w.v=QW_V;else S.q.d.v=QD_V}
 function qValid(Q){return Q&&typeof Q.at==='number'&&Array.isArray(Q.list)&&Q.list.length&&Q.list.every(function(q){return q&&QK[q.k]&&q.n>0&&typeof q.b==='number'&&q.r&&(q.r.t==='boost'?q.r.p>0&&q.r.s>0:QREW.d.concat(QREW.w).some(function(x){return x.t===q.r.t}))})}
 function giveRuneMin(min){var tot=0,i,x,r=RW.length-1,acc=0;for(i=min;i<RW.length;i++)tot+=RW[i];x=Math.random()*tot;for(i=min;i<RW.length;i++){acc+=RW[i];if(x<acc){r=i;break}}
 var k=Math.floor(Math.random()*RT.length);S.st.found++;S.st.rf[r]++;S.st.kf[k]=(S.st.kf[k]||0)+1;
@@ -1158,6 +1159,7 @@ o.m.textContent=(o.q.k==='earn'?fmt(p)+' / '+fmt(o.q.n):p+' / '+o.q.n)+' · Rewa
 o.bt.textContent=o.q.c?'Claimed ✓':done?'Claim':'Claim';o.bt.disabled=!!o.q.c||!done})}
 function qTick(){if(!S.q||typeof S.q!=='object')S.q={};var n=Date.now(),made=false;
 if(qValid(S.q.w)&&S.q.w.v!==QW_V){S.q.w.list.forEach(function(q,i){if(!q.c&&qDone(q))claimQ('w',i)});S.q.w.at=0}
+if(qValid(S.q.d)&&S.q.d.v!==QD_V){S.q.d.list.forEach(function(q,i){if(!q.c&&qDone(q))claimQ('d',i)});S.q.d.at=0}
 [['d',QDAY],['w',QWEEK]].forEach(function(x){var Q=S.q[x[0]];if(!qValid(Q)||n>=Q.at+x[1]||Q.at>n+60000){qGen(x[0]);made=true}});
 ['d','w'].forEach(function(per){S.q[per].list.forEach(function(q){if(!q.c&&!q.nt&&qDone(q)){q.nt=1;toast('📋 Quest complete: '+qTitle(q)+'! Claim it in Quests.','#22a35a')}})});
 if(made){save();if(!$('qv').hidden)renderQuests()}updQuests()}
