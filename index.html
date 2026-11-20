@@ -359,7 +359,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=61;
+var BUILD=62;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -404,10 +404,11 @@ var CK=[],disp=null,bestMem=0; /* bestMem: the highest "… per second" shown th
    Mr McCoy every few minutes (like little pests on the edge). Each open website steals 5% of your income and keeps it;
    block it (tap BLOCK on the beat 4 times in a row) to get back double what it stole (always at least 30 seconds of
    income). Student upgrades are bought with Games Blocked and kept forever (even when you prestige). ===== */
-/* ===== Evolving teachers: at level EVO_LV a teacher can evolve (up to EVO_MAX times). Evolving costs Games Blocked,
+/* ===== Evolving teachers: a teacher can evolve up to EVO_MAX times: ⭐1 at level EVO_LV, then EVO_STEP more levels for each
+   next star (25, 30, 35, 40, 45). Evolving costs Games Blocked (3 upgrades' worth at that level),
    resets that teacher to 0 owned and Lv 1, and gives a ⭐: each star doubles their money and makes them EVO_PRICE times
    pricier to buy. Stars are kept when you prestige. ===== */
-var EVO_LV=25,EVO_MAX=5,EVO_PRICE=3;
+var EVO_LV=25,EVO_STEP=5,EVO_MAX=5,EVO_PRICE=3;
 var STUDENTS=['Orion']; /* add more student names here */
 var WEB_AT=1e15,WEB_STEAL=0.05,WEB_SLOTS=[-135,-45,90,-90,135,45]; /* where websites sit around Mr McCoy (degrees) */
 var SUP=[{id:'filter',ic:'🧹',n:'Website Filter',d:'Get back +50% more Games Blocked when you block a website.',max:5,c:1e15,m:15},
@@ -521,15 +522,20 @@ r.b.onclick=function(){act("b",t)};r.u.onclick=function(){act("u",t)};r.e.onclic
 refs[t.id]=r;$("shop").appendChild(d)});
 /* evolve: tap twice (it resets the teacher); the button shows once the teacher reaches level EVO_LV */
 var evoArm=null,evoArmT,evoSeen={};
-function evoCost(t){return t.up*Math.pow(3.5,EVO_LV-1)*3*Math.pow(2,(S.evo&&S.evo[t.id])||0)}
-function evolve(t){var e=(S.evo&&S.evo[t.id])||0,c=evoCost(t);if(S.lvl[t.id]<EVO_LV||e>=EVO_MAX||S.gb<c)return;
+function starsOf(id,d){d=d||S;return (d.evo&&d.evo[id])||0}
+function starStr(n){return n?' '+Array(n+1).join('⭐'):''}
+function tName(t){return t.name+starStr(starsOf(t.id))}
+function totalStars(d){var n=0;T.forEach(function(t){n+=starsOf(t.id,d)});return n}
+function evoNeed(t){return EVO_LV+EVO_STEP*starsOf(t.id)}
+function evoCost(t){return t.up*Math.pow(3.5,evoNeed(t)-1)*3}
+function evolve(t){var e=(S.evo&&S.evo[t.id])||0,c=evoCost(t);if(S.lvl[t.id]<evoNeed(t)||e>=EVO_MAX||S.gb<c)return;
 if(evoArm!==t.id){evoArm=t.id;clearTimeout(evoArmT);evoArmT=setTimeout(function(){evoArm=null;update()},3000);update();return}
 evoArm=null;clearTimeout(evoArmT);S.gb-=c;if(!S.evo)S.evo={};S.evo[t.id]=e+1;S.own[t.id]=0;S.lvl[t.id]=1;save();update(true);
 toast('✨ '+t.name+' evolved to '+Array(e+2).join('⭐')+'! They make ×'+Math.pow(2,e+1)+' money now.','#f59e0b')}
 function evoUI(t,r){var e=(S.evo&&S.evo[t.id])||0;if(r.ev!==e){r.ev=e;r.nm.textContent=t.name+(e?' '+Array(e+1).join('⭐'):'')}
-var can=S.lvl[t.id]>=EVO_LV&&e<EVO_MAX;if(r.e.hidden===can)r.e.hidden=!can;if(!can)return;var c=evoCost(t);
+var can=S.lvl[t.id]>=evoNeed(t)&&e<EVO_MAX;if(r.e.hidden===can)r.e.hidden=!can;if(!can)return;var c=evoCost(t);
 var h=evoArm===t.id?'Tap again<small>resets to 0 owned</small>':'✨ Evolve ⭐'+(e+1)+'<small>'+fmt(c)+'</small>';if(r.e._h!==h){r.e.innerHTML=h;r.e._h=h}var dis=S.gb<c;if(r.e.disabled!==dis)r.e.disabled=dis;
-if(ready&&!evoSeen[t.id]){evoSeen[t.id]=1;toast('✨ '+t.name+' can evolve! Each ⭐ doubles their money.','#f59e0b')}evoSeen[t.id]=1}
+var sk=t.id+':'+e;if(ready&&!evoSeen[sk])toast('✨ '+t.name+' can evolve! Each ⭐ doubles their money.','#f59e0b');evoSeen[sk]=1}
 /* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
 function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
@@ -542,7 +548,7 @@ var rb=rbOf(S),am=allMul(),allT=allTeachers();
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0||((S.evo&&S.evo[t.id])>0);
 if(!vis){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
-var each=eachOf(t,i,rb,am);r.in.textContent=fmt(each)+"/s each · Owned "+S.own[t.id]+" · Lv "+S.lvl[t.id];
+var each=eachOf(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];r.in.textContent=fmt(each)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?" · ⭐ at Lv "+en:"");
 r.mk.textContent="Making "+fmt(each*S.own[t.id])+"/s";
 label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t));evoUI(t,r)})}
 
@@ -579,7 +585,7 @@ var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank
 function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
 function myStats(n){var rc=[0,0,0,0,0,0],eqs=[];S.runes.forEach(function(r){rc[r.r]++});
 S.eq.forEach(function(id){S.runes.forEach(function(r){if(r.id===id)eqs.push(RT[r.k].n+' ('+RN[r.r]+')')})});
-var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore();return{name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,now:isFinite(disp)?+disp||0:0,score:best}}
+var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore();return{name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,ts:totalStars(S),now:isFinite(disp)?+disp||0:0,score:best}}
 /* rank score = the highest "… per second" the game has ever shown you (boosts and fast clicking count). Kept on this
    device, so prestiging never lowers your leaderboard score. Erasing your save resets it. */
 function bestScore(){var b=0;try{b=+LS.getItem('deemackClicker2.best')||0}catch(e){}if(isFinite(bestMem)&&bestMem>b){b=bestMem;try{LS.setItem('deemackClicker2.best',String(b))}catch(e){}}return b}
@@ -662,7 +668,7 @@ function cardPct(r){return 1+(r>=0?0.5*(r+1):0)}
 function cardBonus(d){var p=0;Object.keys(d.cards||{}).forEach(function(id){p+=cardPct(d.cards[id])});return p/100}
 function cardEl(t,rar,owned){var d=document.createElement('div');d.className='card2'+(owned?'':' off');d.style.setProperty('--cc',rar>=0?DC[rar]:'#8a8f98');
 var im=document.createElement('img');im.src=PHOTOS[t.ph||t.id]||'';im.alt='';
-var n=document.createElement('div');n.className='cn';n.textContent=owned?t.name:'???';
+var n=document.createElement('div');n.className='cn';n.textContent=owned?tName(t):'???';
 var r=document.createElement('div');r.className='cr';r.textContent=owned?(rar>=0?DR[rar]:'Base')+' · +'+cardPct(rar)+'%':'Not found';
 d.appendChild(im);d.appendChild(n);d.appendChild(r);return d}
 function renderDice(res,keep){$('dvs').textContent='Rolls: '+S.rolls+' · '+T.length+'-sided die';$('dvr').disabled=S.rolls<1||rolling;
@@ -732,6 +738,9 @@ A('lv5'+t.id,'Teachers',t.name+' Level 5','Upgrade '+t.name+' to level 5',3+i*0.
 A('all1','Teachers','Full Staff','Own every teacher',8,function(d){return T.every(function(t){return d.own[t.id]>=1})});
 A('all10','Teachers','Fully Staffed','Own 10 of every teacher',14,function(d){return T.every(function(t){return d.own[t.id]>=10})});
 A('alllv','Teachers','Top Marks','Get every teacher to level 5',16,function(d){return T.every(function(t){return d.lvl[t.id]>=5})});
+A('evo1','Teachers','Evolution','Evolve a teacher',4,function(d){return totalStars(d)>=1});
+A('evo5','Teachers','Five-Star Teacher','Get a teacher to 5 stars',10,function(d){return T.some(function(t){return starsOf(t.id,d)>=5})});
+A('evo25','Teachers','Star Collector','Get 25 teacher stars in total',14,function(d){return totalStars(d)>=25});
 [10,100,1000].forEach(function(v,i){A('buys'+v,'Teachers',['Hiring Spree','Staff Meeting','Mass Hiring'][i],'Buy '+fmt(v)+' teachers',2+i*2.5,function(d){return d.st.buys>=v})});
 [10,50,200].forEach(function(v,i){A('ups'+v,'Teachers',['Training Day','Professional Development','Masterclass'][i],'Buy '+v+' upgrades',2+i*2.5,function(d){return d.st.ups>=v})});
 [1,10,50,100,250,500,1000].forEach(function(v,i){A('rune'+v,'Runes',['Rune Finder','Collector','Hoarder','Rune Hunter','Rune Master','Rune Lord','Rune God'][i],'Find '+fmt(v)+' rune'+(v>1?'s':''),1+i*1.5,function(d){return d.st.found>=v})});
@@ -843,7 +852,7 @@ function tierOf(i){return Math.min(BTIER.length-1,Math.floor(i*BTIER.length/T.le
 function bossTier(i){return BTIER[tierOf(i)]}
 function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
 var im=document.createElement('img');im.className='bimg';im.alt='';im.src=PHOTOS[t.ph||t.id]||'';
-var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=t.name;var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'');
+var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=tName(t);var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'');
 var d=document.createElement('span');d.className='dif';d.style.setProperty('--dc',tr[1]);d.textContent=tr[0];var br=document.createElement('div');br.appendChild(d);
 var rl=document.createElement('div');rl.className='brw';x.appendChild(b);x.appendChild(s);x.appendChild(br);x.appendChild(rl);
 var f=document.createElement('button');f.className='bfight';f.onclick=function(){startFight(i)};BREFS.push({t:t,i:i,rl:rl,f:f});
@@ -864,7 +873,7 @@ function hurtBoss(n,x,y){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.dealt+
 function hurtMe(n){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.taken+=n;BF.php=Math.max(0,BF.php-n);fFloat('-'+n+' HP','me',12,12);var A=$('bfa');A.classList.remove('hurt');void A.offsetWidth;A.classList.add('hurt');fRender();if(BF.php<=0)fEnd(false)}
 function startFight(i){closeBO();var t=T[i],d=fdiff(i),tr=bossTier(i);FCK=[];
 BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:3*Math.round(40+d*260),php:100,attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
-$('bf').classList.remove('mini');$('bfi').style.display='';$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=t.name;var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
+$('bf').classList.remove('mini');$('bfi').style.display='';$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=tName(t);var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
 $('bf').hidden=false;fRender();fIdle()}
 function closeFight(){BF=null;$('bf').hidden=true;$('bw').hidden=true;$('bfa').textContent='';$('bf').classList.remove('mini');$('bfi').style.display=''}
 function fIdle(){if(!BF||BF.ph==='over')return;BF.ph='idle';var id=BF.id,A=arena(),b=document.createElement('button');b.className='bfboss';b.setAttribute('aria-label','Hit '+BF.t.name);
@@ -1430,7 +1439,7 @@ setInterval(function(){if(!document.hidden)checkUpdate(false)},180000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate(true)});
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
-var PSTATS=[['Rank score (best per second ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
+var PSTATS=[['Rank score (best per second ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Teacher stars',function(d){return +d.ts||0}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
 function showProfile(doc,rank){var d=doc.data()||{};pvId=doc.id;$('pvn').textContent=String(d.name||'Player').slice(0,16);
 $('pvr').textContent='Rank #'+rank+(lbOwner&&doc.id===lbOwner?' · 👑 Owner':'')+(doc.id===uid?' · you':'');
 var box=$('pvs');box.textContent='';PSTATS.forEach(function(p){var r=document.createElement('div');r.className='pst';var a=document.createElement('span');a.textContent=p[0];var b=document.createElement('span');b.textContent=p[1](d);r.appendChild(a);r.appendChild(b);box.appendChild(r)});
