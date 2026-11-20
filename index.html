@@ -172,6 +172,8 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 .bwst b{display:block;color:var(--text);font-size:16px}
 .bwrw{font-weight:700;font-size:15px;margin:0 0 14px;color:var(--text)}.bwrw.prac{color:var(--muted);font-weight:600}
 .brw{font-size:12px;color:var(--muted);margin-top:4px}
+.bban{border:1px solid var(--accent);border-radius:10px;padding:8px 10px;margin:0 0 10px;font-size:13px;font-weight:600;text-align:left}
+.bban[hidden]{display:none}
 .phd{position:sticky;top:-20px;margin:-20px -20px 8px;padding:14px 16px 10px 20px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:2}
 .phd h1{margin:0}
 .ov .xbtn{width:36px;height:36px;padding:0;flex:none;border-radius:50%;font-size:18px;line-height:36px;margin:0}
@@ -265,7 +267,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="av" hidden><div class="box rbox"><div class="phd"><h1>Achievements</h1><button class="xbtn" id="avx" aria-label="Close">✕</button></div><p id="avs"></p><div id="avl"></div></div></div>
 <div class="ov" id="tv" hidden><div class="box rbox"><h1>Themes</h1><p id="tvs"></p><div id="tvl"></div><button id="tvx">Close</button></div></div>
 <div class="ov" id="xv" hidden><div class="box"><h1>Transfer data</h1><p>Move all 3 save slots to another device.</p><div class="xrow"><button id="xexp">Export</button><button id="ximp">Import</button></div><div id="xbody"></div><p id="xmsg"></p><button id="xvx">Close</button></div></div>
-<div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost; only your best boss boost counts at a time. After a win, that boss is practice only for an hour.</p><div id="bol"></div></div></div>
+<div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost. Only one boss boost runs at a time: while it runs, wins don't give a new one. After a boss gives you its reward, it's practice only for an hour.</p><div class="bban" id="bban" hidden></div><div id="bol"></div></div></div>
 <div id="ps" hidden><div class="psw">
 <div class="bfh"><div class="bft"><b>🌳 Prestige</b><span class="pss" id="pspts"></span></div><button class="xbtn2" id="psx" aria-label="Close">✕</button></div>
 <div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes and the skill tree. You can prestige once every 10 minutes.</div></div>
@@ -473,8 +475,8 @@ $('lbb').onclick=function(){$('lv').hidden=false;loadLB()};$('lvn').onclick=func
 var RLK='deemackClicker2.roller',RLD=22*3600*1000,DWT=[38,28,15,9,5,2.5,1.5,0.7,0.2,0.1],RL=S.rl,spinning=false;
 function rlSave(){save()}
 /* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.26 per boss
-   (doubling every 3 bosses) up to +100%. They don't stack: only your best active boss reward counts.
-   After a win, that boss gives no reward for 1 hour (practice only); losing has no cooldown. ===== */
+   (doubling every 3 bosses) up to +100%. Only ONE boss reward can run at a time: while it runs, wins give no new reward (and start no cooldown).
+   After a boss gives you its reward, that boss is practice only for 1 hour; losing has no cooldown. ===== */
 function bossRewI(i){var P=[5,6,8,10,13,16,20,25,32,40,50,63,79,100],M=[5,5,6,6,7,7,8,9,9,10,10,12,12,15];return{pct:P[i]||0,min:M[i]||0}}
 function bossIdx(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return i;return -1}
 var BOSS_CD=60*60*1000;
@@ -486,7 +488,8 @@ function multAt(t){var m=1;if(t<RL.until)m*=1+RL.pct/100;if(S.gold&&t<S.gold.unt
 function boostMul(){return multAt(Date.now())}
 function giveBossReward(i,t){var r=bossRewI(i),n=Date.now(),left=bossCdLeft(t.id);if(left>0)return{given:false,wait:left,pct:r.pct,min:r.min};
 if(!S.bossCd)S.bossCd={};if(!S.bossBuffs)S.bossBuffs={};Object.keys(S.bossBuffs).forEach(function(k){if(S.bossBuffs[k]<=n)delete S.bossBuffs[k]});
-var before=bestBossBuff();S.bossCd[t.id]=n;S.bossBuffs[t.id]=n+r.min*60000;return{given:true,pct:r.pct,min:r.min,stronger:before&&before.pct>r.pct?before:null}}
+var cur=bestBossBuff();if(cur)return{given:false,blocked:cur,pct:r.pct,min:r.min};
+S.bossCd[t.id]=n;S.bossBuffs[t.id]=n+r.min*60000;return{given:true,pct:r.pct,min:r.min}}
 function wd(){var x=Math.random()*100,w=0;for(var i=0;i<10;i++){w+=DWT[i];if(x<w)return i}return 0}
 function hms(ms){var s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);s=s%60;return h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
 function renderRoller(){var B=$('rls');B.textContent='';
@@ -697,7 +700,7 @@ var d=document.createElement('span');d.className='dif';d.style.setProperty('--dc
 var rl=document.createElement('div');rl.className='brw';x.appendChild(b);x.appendChild(s);x.appendChild(br);x.appendChild(rl);
 var f=document.createElement('button');f.className='bfight';f.onclick=function(){startFight(i)};BREFS.push({t:t,i:i,rl:rl,f:f});
 r.appendChild(im);r.appendChild(x);r.appendChild(f);L.appendChild(r)});updBossTimers()}
-var BREFS=[];function updBossTimers(){BREFS.forEach(function(o){var rw=bossRewI(o.i),cd=bossCdLeft(o.t.id);o.rl.textContent='🎁 +'+rw.pct+'% income for '+rw.min+' min'+(cd>0?' · ready in '+mmss(cd):'');o.f.textContent=cd>0?'Practice':'Fight'})}
+var BREFS=[];function updBossTimers(){var cur=bestBossBuff(),bn=$('bban');bn.hidden=!cur;if(cur)bn.textContent='⚔️ Boss boost running: +'+cur.pct+'% income ('+T[cur.i].name+') · '+mmss(cur.until-Date.now())+' left. Wins won\u2019t give a new reward until it ends.';BREFS.forEach(function(o){var rw=bossRewI(o.i),cd=bossCdLeft(o.t.id);o.rl.textContent='🎁 +'+rw.pct+'% income for '+rw.min+' min'+(cd>0?' · ready in '+mmss(cd):'');o.f.textContent=cd>0?'Practice':'Fight'})}
 setInterval(function(){if(!$('bov').hidden)updBossTimers()},1000);
 $('bob').onclick=function(){renderBosses();$('bov').hidden=false};function closeBO(){$('bov').hidden=true}$('bovx').onclick=closeBO;$('bov').onclick=function(e){if(e.target===$('bov'))closeBO()};
 var BF=null,FCK=[],ATK={};
@@ -736,7 +739,7 @@ w.appendChild(h);w.appendChild(p);w.appendChild(a);w.appendChild(bk);A.appendChi
 function showWin(i,t,first,rew){var tr=bossTier(i),secs=Math.max(0,Math.round((Date.now()-BF.t0)/1000));
 $('bwi').src=PHOTOS[t.ph||t.id]||'';$('bwi').style.borderColor=tr[1];$('bwn').textContent='You beat '+t.name+'!';
 $('bwp').textContent=(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
-var rw=$('bwrw');rw.className='bwrw'+(rew&&rew.given?'':' prac');rw.textContent=!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!'+(rew.stronger?' (Your +'+rew.stronger.pct+'% from '+T[rew.stronger.i].name+' is stronger right now.)':''):'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
+var rw=$('bwrw');rw.className='bwrw'+(rew&&rew.given?'':' prac');rw.textContent=!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!':rew.blocked?'⏳ No new reward: your +'+rew.blocked.pct+'% from '+T[rew.blocked.i].name+' still has '+mmss(rew.blocked.until-Date.now())+' left. '+t.name+' has no cooldown, so you can win its reward later.':'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
 var st=$('bws');st.textContent='';[[BF.php+'/100','HP left'],[Math.floor(secs/60)+':'+(secs%60<10?'0':'')+secs%60,'Time'],[BF.attacks,'Attacks']].forEach(function(x){var d=document.createElement('div'),b=document.createElement('b');b.textContent=x[0];d.appendChild(b);d.appendChild(document.createTextNode(x[1]));st.appendChild(d)});
 $('bwr').onclick=function(){$('bw').hidden=true;startFight(i)};
 $('bwb').onclick=function(){$('bw').hidden=true;closeFight();renderBosses();$('bov').hidden=false};
