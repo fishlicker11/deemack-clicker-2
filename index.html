@@ -317,7 +317,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=41;
+var BUILD=42;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -345,7 +345,10 @@ var MEM={},LS_OK=(function(){try{var k='deemackClicker2.test';localStorage.setIt
 var LS=LS_OK?localStorage:{getItem:function(k){return Object.prototype.hasOwnProperty.call(MEM,k)?MEM[k]:null},setItem:function(k,v){MEM[k]=String(v)},removeItem:function(k){delete MEM[k]}};
 var BASE="deemackClicker2.slot",ACT="deemackClicker2.active",PCT=0.2,PRICE=0.9;
 var CK=[],disp=null;
-var RN=['Common','Uncommon','Rare','Epic','Legendary','Mythic'],RCL=['#9aa0a6','#3fb950','#3b82f6','#a855f7','#f59e0b','#ef4444'],RW=[50,280,130,60,23,7],RP=[1,3,6,12,25,50];
+/* Runes: each click has a RUNE_CHANCE chance (0.5%) to find one, raised by Fortune runes and the skill tree.
+   Rarity odds (RW weights, out of 1100): Common 12.1%, Uncommon 67.9%, Rare 11.8%, Epic 5.5%, Legendary 2.1%, Mythic 0.64%. */
+var RUNE_CHANCE=0.005;
+var RN=['Common','Uncommon','Rare','Epic','Legendary','Mythic'],RCL=['#9aa0a6','#3fb950','#3b82f6','#a855f7','#f59e0b','#ef4444'],RW=[133,747,130,60,23,7],RP=[1,3,6,12,25,50];
 var RT=[
 {n:'Greed',t:'+{v}% teacher income',v:[5,7,10,13,17,20]},
 {n:'Might',t:'+{v}% click power',v:[10,15,22,30,40,50]},
@@ -460,7 +463,7 @@ function unlock(){locked=false;$("mc").classList.remove("locked");$("nac").hidde
 $("mc").onclick=function(e){var now=Date.now();if(locked){if(now<lockUntil)return;unlock()}
 ST.push(now);while(ST.length&&ST[0]<now-1000)ST.shift();
 if(ST.length>20){S.st.caught=1;locked=true;lockUntil=now+10000;ST=[];$("mc").classList.add("locked");$("nac").hidden=false;setTimeout(function(){if(Date.now()>=lockUntil)unlock()},10000);return}
-var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2:1);if(!(c>=0)||!isFinite(c))c=0;S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});S.st.clicks++;if(crit)S.st.crit++;S.st.earned+=c;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<0.01*(1+rbOf(S)[4]+tfx(S).rune))giveRune();
+var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2:1);if(!(c>=0)||!isFinite(c))c=0;S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});S.st.clicks++;if(crit)S.st.crit++;S.st.earned+=c;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<RUNE_CHANCE*(1+rbOf(S)[4]+tfx(S).rune))giveRune();
 var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top;
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
 var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmt(c);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
