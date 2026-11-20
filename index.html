@@ -29,7 +29,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .mk{color:var(--text)}
 .bt{display:flex;flex-direction:column;gap:5px;flex:none}
 .bt button,.cu button{border:0;border-radius:9px;background:var(--btn);color:var(--btntext);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;min-width:104px;cursor:pointer;line-height:1.2}
-.bt button small,.cu button small{display:block;font-weight:500;opacity:.9}
+.bt button small,.cu button small{display:block;font-weight:500;opacity:.9;pointer-events:none}
+button{touch-action:manipulation}
 button:disabled{opacity:.35;cursor:default}
 .cu{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:12px}
 .cu .mid{font-weight:700}
@@ -317,7 +318,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=46;
+var BUILD=47;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -399,7 +400,7 @@ var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
 function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
 /* ===== One save: older versions had 3 save slots. On start (and after loading a code) the slot with the most
    progress (most Games Blocked ever earned) becomes the one save. The other slots are kept on this device as hidden
    backups (deemackClicker2.slot1.bak / slot2.bak / slot3.bak) and never loaded again, so erasing your save can't bring
@@ -448,7 +449,8 @@ d.onanimationend=function(){d.classList.remove("pop")};
 var r={card:d,in:d.querySelector(".in"),mk:d.querySelector(".mk"),b:d.querySelector(".b"),u:d.querySelector(".u")};
 r.b.onclick=function(){act("b",t)};r.u.onclick=function(){act("u",t)};
 refs[t.id]=r;$("shop").appendChild(d)});
-function label(btn,name,p){btn.innerHTML=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";btn.disabled=!p.ok}
+/* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
+function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
 var base=total(),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
@@ -535,8 +537,8 @@ $('rvx').onclick=closeRunes;$('rv').onclick=function(e){if(e.target===$('rv'))cl
 $('lbb').onclick=function(){$('lv').hidden=false;lbNext=Date.now()+LB_EVERY*1000;loadLB();lbTick()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
 var RLK='deemackClicker2.roller',RLD=22*3600*1000,DWT=[38,28,15,9,5,2.5,1.5,0.7,0.2,0.1],RL=S.rl,spinning=false;
 function rlSave(){save()}
-/* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.26 per boss
-   (doubling every 3 bosses) up to +100%. Only ONE boss reward can run at a time: while it runs, wins give no new reward (and start no cooldown).
+/* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.24 per boss
+   (doubling about every 3 bosses) up to +100%. Only ONE boss reward can run at a time: while it runs, wins give no new reward (and start no cooldown).
    After a boss gives you its reward, that boss is practice only for 1 hour; losing has no cooldown. ===== */
 /* boss reward: +5% income from the first boss growing exponentially to +100% from the last (the cap), for 5 to 15 min */
 function bossRewI(i){var M=[5,5,6,6,7,7,8,8,9,9,10,10,12,12,15],n=T.length;if(!(i>=0&&i<n))return{pct:0,min:0};var f=n>1?i/(n-1):0;
@@ -729,7 +731,7 @@ function doImportUI(){xArm=false;xPending=null;var B=$('xbody');B.textContent=''
 var go=document.createElement('button');go.id='xgo';go.textContent='Load';go.onclick=doImport;B.appendChild(go);ta.oninput=function(){xArm=false;xPending=null;go.textContent='Load'};xMsg('');ta.focus()}
 function getData(t){if(/^DM2[rz]/.test(t))return unzipCode(t);var fb=xFB();
 if(/^[A-Za-z0-9]{6,16}$/.test(t)){if(!fb)return Promise.reject(new Error('Short codes need the online server. Use the full code instead.'));
-return fetch(fb+'/saves/'+t.toUpperCase()+'.json').then(function(r){return r.json()}).then(function(o){if(!o||typeof o.d!=='string')throw new Error('No save found for that code.');return unzipCode(o.d)})}
+return tfetch(fb+'/saves/'+t.toUpperCase()+'.json').then(function(r){return r.json()}).then(function(o){if(!o||typeof o.d!=='string')throw new Error('No save found for that code.');return unzipCode(o.d)})}
 return Promise.reject(new Error('That is not a DeeMack Clicker 2 code.'))}
 function doImport(){var go=$('xgo');if(xArm&&xPending){applyImport(xPending);return}
 var t=($('xin').value||'').replace(/\s+/g,'');if(!t){xMsg('Paste a code first.',true);return}
@@ -837,20 +839,21 @@ b.onpointerdown=function(e){e.preventDefault();if(over||!fAlive(id)||!fOk())retu
 
 ATK.dodge=function(){var id=BF.id,A=arena();fStatus('Drag the blue dot to dodge!');var cv=document.createElement('canvas');cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
-var R=13,px=W/2,py=H-34,obs=[],t0=performance.now(),last=t0,dur=(6+BF.d*3)*1000,every=Math.max(205,610-BF.d*370),nextS=t0+400,speed=185+BF.d*235,inv=0,hit=Math.max(3,Math.round(BF.dmg*0.45)),down=false,hits=0;
+var R=13,px=W/2,py=H-34,obs=[],t0=performance.now(),last=t0,gt=0,dur=(6+BF.d*3)*1000,every=Math.max(205,610-BF.d*370),nextS=400,speed=185+BF.d*235,inv=0,hit=Math.max(3,Math.round(BF.dmg*0.45)),down=false,hits=0;
 var mut=(getComputedStyle(document.documentElement).getPropertyValue('--muted')||'').trim()||'#888';
 function setX(e){var r=cv.getBoundingClientRect();px=Math.max(R,Math.min(W-R,e.clientX-r.left))}
 cv.onpointerdown=function(e){e.preventDefault();down=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}setX(e)};
 cv.onpointermove=function(e){if(down||e.pointerType==='mouse')setX(e)};cv.onpointerup=cv.onpointercancel=function(){down=false};
-function frame(now){if(!fAlive(id))return;var dt=Math.min(0.05,(now-last)/1000);last=now;
-if(now>=nextS&&now-t0<dur-900){var w=36+Math.random()*Math.min(110,W*0.3);obs.push({x:Math.random()*(W-w),y:-24,w:w,h:18});nextS=now+every*(0.7+Math.random()*0.6)}
+/* gt = game time in ms: it only moves while frames run, so hiding the tab pauses the dodge */
+function frame(now){if(!fAlive(id))return;var dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;gt+=dt*1000;
+if(gt>=nextS&&gt<dur-900){var w=36+Math.random()*Math.min(110,W*0.3);obs.push({x:Math.random()*(W-w),y:-24,w:w,h:18});nextS=gt+every*(0.7+Math.random()*0.6)}
 for(var k=0;k<obs.length;k++)obs[k].y+=speed*dt;obs=obs.filter(function(o){return o.y<H+30});
-if(now>inv){for(k=0;k<obs.length;k++){var o=obs[k],cx=Math.max(o.x,Math.min(px,o.x+o.w)),cy=Math.max(o.y,Math.min(py,o.y+o.h));if((px-cx)*(px-cx)+(py-cy)*(py-cy)<R*R){inv=now+900;obs.splice(k,1);hits++;hurtMe(hit);if(!fAlive(id))return;break}}}
+if(gt>inv){for(k=0;k<obs.length;k++){var o=obs[k],cx=Math.max(o.x,Math.min(px,o.x+o.w)),cy=Math.max(o.y,Math.min(py,o.y+o.h));if((px-cx)*(px-cx)+(py-cy)*(py-cy)<R*R){inv=gt+900;obs.splice(k,1);hits++;hurtMe(hit);if(!fAlive(id))return;break}}}
 g.clearRect(0,0,W,H);g.globalAlpha=.35;g.fillStyle=mut;g.fillRect(10,py-2,W-20,4);g.globalAlpha=1;g.fillStyle='#ef4444';
 obs.forEach(function(o){g.beginPath();if(g.roundRect)g.roundRect(o.x,o.y,o.w,o.h,6);else g.rect(o.x,o.y,o.w,o.h);g.fill()});
-if(now<inv&&Math.floor(now/90)%2)g.globalAlpha=.3;g.fillStyle='#3b82f6';g.beginPath();g.arc(px,py,R,0,6.2832);g.fill();g.lineWidth=2;g.strokeStyle='#fff';g.stroke();g.globalAlpha=1;
-g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText(Math.max(0,(dur-(now-t0))/1000).toFixed(1)+'s',12,20);g.textAlign='right';g.fillStyle=hits?'#ef4444':'#22a35a';g.fillText('Damage: '+Math.max(0,DODGE_DMG-hits*DODGE_PEN),W-12,20);g.textAlign='left';
-if(now-t0>=dur){var dd=Math.max(0,DODGE_DMG-hits*DODGE_PEN);if(dd>0){hurtBoss(dd);if(!fAlive(id))return;fStatus((hits?'Hit '+hits+' time'+(hits>1?'s':'')+' · ':'Perfect dodge! ')+'You hit for '+dd+'!')}else fStatus('Hit '+hits+' times · no damage');fl(atkDone,900);return}requestAnimationFrame(frame)}
+if(gt<inv&&Math.floor(gt/90)%2)g.globalAlpha=.3;g.fillStyle='#3b82f6';g.beginPath();g.arc(px,py,R,0,6.2832);g.fill();g.lineWidth=2;g.strokeStyle='#fff';g.stroke();g.globalAlpha=1;
+g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText(Math.max(0,(dur-gt)/1000).toFixed(1)+'s',12,20);g.textAlign='right';g.fillStyle=hits?'#ef4444':'#22a35a';g.fillText('Damage: '+Math.max(0,DODGE_DMG-hits*DODGE_PEN),W-12,20);g.textAlign='left';
+if(gt>=dur){var dd=Math.max(0,DODGE_DMG-hits*DODGE_PEN);if(dd>0){hurtBoss(dd);if(!fAlive(id))return;fStatus((hits?'Hit '+hits+' time'+(hits>1?'s':'')+' · ':'Perfect dodge! ')+'You hit for '+dd+'!')}else fStatus('Hit '+hits+' times · no damage');fl(atkDone,900);return}requestAnimationFrame(frame)}
 requestAnimationFrame(frame)};
 
 ATK.react=function(){var id=BF.id,A=arena(),lim=Math.max(0.38,0.9-BF.d*0.52),state='wait',t0=0,to=null;
@@ -904,7 +907,8 @@ for(var b=0;b<beats;b++){var tb=lead+b*bt;
 if(b===0||Math.random()<0.85){var l=Math.floor(Math.random()*4);add(tb,l);if(b>0&&Math.random()<Math.max(0,d-0.35)*0.45)add(tb,(l+1+Math.floor(Math.random()*3))%4)}
 if(b<beats-1&&Math.random()<0.15+d*0.5){add(tb+bt/2,Math.floor(Math.random()*4));if(d>0.55&&Math.random()<(d-0.55)*0.5)add(tb+bt*0.75,Math.floor(Math.random()*4))}}
 notes.sort(function(x,y){return x.t-y.t});
-var end=lead+beats*bt+0.6,tot=notes.length,score=0,ghost=0,combo=0,miss=0,hurt=0,cap=BF.dmg*2,mhit=Math.max(2,Math.round(BF.dmg*0.3));
+/* missing hurts you: mhit per missed circle (half that for a tap with no circle), at most cap per rhythm attack */
+var end=lead+beats*bt+0.6,tot=notes.length,score=0,ghost=0,combo=0,miss=0,hurt=0,cap=BF.dmg,mhit=Math.max(1,Math.round(BF.dmg*0.15));
 var judg={txt:'',c:'',t:-9},press=[-9,-9,-9,-9],over=false,t0=performance.now()/1000+0.4;
 function songNow(){return performance.now()/1000-t0}
 var KM={ArrowLeft:0,ArrowDown:1,ArrowUp:2,ArrowRight:3,a:0,s:1,w:2,d:3,A:0,S:1,W:2,D:3};
@@ -1235,7 +1239,8 @@ function updGo(){save();location.replace(location.pathname+'?v='+updBuild)}
 function checkUpdate(auto){if(!/^https?:$/.test(location.protocol))return;
 fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){var b=j&&+j.build;if(!(b>BUILD))return;updBuild=b;
 var tried=null;try{tried=sessionStorage.getItem(updKey)}catch(e){}
-var busy=!!BF||!$('ps').hidden||!$('tabv').hidden;
+/* never reload by itself in the middle of something: a fight, the prestige screen, any open panel, or while typing a name */
+var busy=!!BF||!$('ps').hidden||!$('tabv').hidden||!!document.querySelector('.ov:not([hidden]):not(#ov)')||(!$('ov').hidden&&!!$('nin').value.trim());
 if(auto&&!busy&&tried!==String(b)){try{sessionStorage.setItem(updKey,String(b))}catch(e){}updGo();return}
 $('updbar').hidden=false}).catch(function(){})}
 $('updbar').onclick=updGo;
@@ -1266,12 +1271,14 @@ var nameOk=false,claiming=false;
    rules can check that each player only changes their own entry. Players from before this keep their name and
    entry: their old id is moved over once (LEGACY). */
 var AUTH=null,authP=null,authErr='',LEGACY='',legacyGone=false;
+/* fetch that gives up after 15 seconds, so a network that never answers can't freeze sign-in, names or the leaderboard */
+function tfetch(u,o,ms){o=o||{};if(typeof AbortController==='undefined')return fetch(u,o);var ac=new AbortController(),o2={};for(var k in o)o2[k]=o[k];o2.signal=ac.signal;setTimeout(function(){ac.abort()},ms||15000);return fetch(u,o2)}
 function authLoad(){AUTH=null;try{var a=JSON.parse(LS.getItem('deemackClicker2.auth')||'null');if(a&&typeof a.refreshToken==='string'&&typeof a.uid==='string')AUTH={idToken:a.idToken||'',refreshToken:a.refreshToken,exp:+a.exp||0,uid:a.uid}}catch(e){}}
 function authSave(){try{LS.setItem('deemackClicker2.auth',JSON.stringify(AUTH))}catch(e){}}
-function authSignUp(){return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+encodeURIComponent(FB_KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:'{"returnSecureToken":true}'})
+function authSignUp(){return tfetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+encodeURIComponent(FB_KEY),{method:'POST',headers:{'Content-Type':'application/json'},body:'{"returnSecureToken":true}'})
 .then(function(r){return r.json()}).then(function(j){if(!j||!j.idToken)throw new Error((j&&j.error&&j.error.message)||'sign-in failed');return{idToken:j.idToken,refreshToken:j.refreshToken,exp:Date.now()+(+j.expiresIn||3600)*1000,uid:j.localId}})}
-function authRefresh(){return fetch('https://securetoken.googleapis.com/v1/token?key='+encodeURIComponent(FB_KEY),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(AUTH.refreshToken)})
-.then(function(r){return r.json().then(function(j){if(!r.ok||!j||!j.id_token){var e=new Error((j&&j.error&&j.error.message)||'refresh failed');e.bad=true;throw e}return{idToken:j.id_token,refreshToken:j.refresh_token||AUTH.refreshToken,exp:Date.now()+(+j.expires_in||3600)*1000,uid:j.user_id||AUTH.uid}})})}
+function authRefresh(){return tfetch('https://securetoken.googleapis.com/v1/token?key='+encodeURIComponent(FB_KEY),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(AUTH.refreshToken)})
+.then(function(r){return r.json().catch(function(){return null}).then(function(j){if(!r.ok||!j||!j.id_token){var m=(j&&j.error&&j.error.message)||('refresh failed ('+r.status+')'),e=new Error(m);e.bad=/INVALID_REFRESH_TOKEN|TOKEN_EXPIRED|USER_DISABLED|USER_NOT_FOUND|INVALID_GRANT_TYPE|MISSING_REFRESH_TOKEN|PROJECT_NUMBER_MISMATCH/.test(m);throw e}return{idToken:j.id_token,refreshToken:j.refresh_token||AUTH.refreshToken,exp:Date.now()+(+j.expires_in||3600)*1000,uid:j.user_id||AUTH.uid}})})}
 /* if sign-in fails (e.g. too many new players on one school network), wait longer before each retry: 15s, 30s, 1m … up to 10m */
 var authWait=0,authFails=0;
 function authToken(){if(!FB_KEY)return Promise.resolve('');if(!(AUTH&&AUTH.idToken&&Date.now()<AUTH.exp-60000)&&Date.now()<authWait)return Promise.reject(new Error(authErr||'waiting to retry sign-in'));
@@ -1281,7 +1288,7 @@ authP=pr.then(function(a){AUTH=a;authSave();authErr='';uid=a.uid;authP=null;auth
 return authP}
 function authMsg(){return /OPERATION_NOT_ALLOWED|ADMIN_ONLY/.test(authErr)?'Anonymous sign-in is turned off in Firebase.':/API.?KEY|key not valid/i.test(authErr)?'the Firebase Web API key (FB_KEY) is wrong.':'sign-in failed ('+authErr+').'}
 /* database request; adds the sign-in token when there is one */
-function fbw(path,opt,q){return authToken().then(function(tok){var qs=[];if(q)qs.push(q);if(tok)qs.push('auth='+encodeURIComponent(tok));return fetch(FB+path+'.json'+(qs.length?'?'+qs.join('&'):''),opt)})}
+function fbw(path,opt,q){return authToken().then(function(tok){var qs=[];if(q)qs.push(q);if(tok)qs.push('auth='+encodeURIComponent(tok));return tfetch(FB+path+'.json'+(qs.length?'?'+qs.join('&'):''),opt)})}
 function clearLegacy(){LEGACY='';try{LS.removeItem('deemackClicker2.uid')}catch(e){}}
 function migrate(){if(!FB||!FB_KEY||!LEGACY||legacyGone)return;var old=LEGACY;
 fbw('/players/'+old,{method:'DELETE'},'print=silent').then(function(r){if(r.ok&&old===LEGACY){legacyGone=true;if(nameOk||!NAME)clearLegacy()}}).catch(function(){})}
@@ -1294,8 +1301,13 @@ function nameKey(n){var u=new TextEncoder().encode(String(n).trim().replace(/\s+
 function claimName(n){var path='/names/'+nameKey(n);
 function chk(r){if(r.status===401||r.status===403){var e=new Error('denied');e.denied=1;throw e}if(!r.ok)throw 0;return r}
 function get(){return fbw(path).then(chk).then(function(r){return r.json()})}
-return authToken().then(get).then(function(o){if(o===uid)return 'ok';if(o&&!(LEGACY&&o===LEGACY))return 'taken';
-return fbw(path,{method:'PUT',body:JSON.stringify(uid)},'print=silent').then(chk).then(function(){return new Promise(function(res){setTimeout(res,400)})}).then(get).then(function(o2){return o2===uid?'ok':'taken'})}).catch(function(e){if(e&&e.denied)return FB_KEY?'taken':'ok';throw e})}
+/* a refused request only means "taken" when the name really belongs to someone else. If the server refuses
+   everything (e.g. its rules ran out), that's a server problem: the player keeps playing and it's checked again later. */
+function heldByOther(o){return !!o&&o!==uid&&!(LEGACY&&o===LEGACY)}
+return authToken().then(get).then(function(o){if(o===uid)return 'ok';if(heldByOther(o))return 'taken';
+return fbw(path,{method:'PUT',body:JSON.stringify(uid)},'print=silent').then(chk).then(function(){return new Promise(function(res){setTimeout(res,400)})}).then(get).then(function(o2){return o2===uid?'ok':'taken'})
+.catch(function(e){if(!(e&&e.denied))throw e;return get().then(function(o3){if(heldByOther(o3))return 'taken';throw new Error('the server refused the name')})})})
+.catch(function(e){if(e&&e.denied&&!FB_KEY)return 'ok';throw e})}
 function releaseName(n,id){if(!FB||!n||!id)return;var path='/names/'+nameKey(n);fbw(path).then(function(r){return r.json()}).then(function(o){if(o===id)return fbw(path,{method:'DELETE'},'print=silent')}).catch(function(){})}
 function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true;var n=NAME;
 claimName(n).then(function(r){claiming=false;if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(){claiming=false})}
@@ -1313,9 +1325,9 @@ if(badName(v)){$('nerr').textContent='Please pick a different name.';return}
 if(ownerLike(v)&&!(isOwnerName(NAME)&&nameOk&&isOwnerName(v))){if(cd.hidden){cd.hidden=false;cd.focus();$('nerr').textContent='That name needs the owner code.';return}
 if(codeHash(cd.value)!==OWNER_HASH){$('nerr').textContent=cd.value.trim()?'Wrong owner code.':'That name needs the owner code.';return}try{LS.setItem('deemackClicker2.devok','1')}catch(e){}}
 if(!FB){setName(v,false);return}
-btn.disabled=true;$('nerr').textContent='Checking name...';
-claimName(v).then(function(r){btn.disabled=false;if(r==='taken'){$('nerr').textContent='Someone already has that name. Pick a different one.';return}if(oldName&&nameKey(oldName)!==nameKey(v))releaseName(oldName,uid);cd.value='';setName(v,true)})
-.catch(function(){btn.disabled=false;setName(v,false)})}
+btn.disabled=true;$('nerr').textContent='Checking name...';var settled=false,slow=setTimeout(function(){if(settled)return;settled=true;btn.disabled=false;cd.value='';setName(v,false)},8000);
+claimName(v).then(function(r){if(settled)return;settled=true;clearTimeout(slow);btn.disabled=false;if(r==='taken'){$('nerr').textContent='Someone already has that name. Pick a different one.';return}if(oldName&&nameKey(oldName)!==nameKey(v))releaseName(oldName,uid);cd.value='';setName(v,true)})
+.catch(function(){if(settled)return;settled=true;clearTimeout(slow);btn.disabled=false;setName(v,false)})}
 $('nok').onclick=go;inp.onkeydown=function(e){if(e.key==='Enter')go()}}
 if(!NAME)askName();
 var FB=(FB_URL||'').replace(/\/+$/,'');
@@ -1333,11 +1345,12 @@ return [raw,leet].some(function(t){if(LB_HIDE.indexOf(t.replace(/[^a-z]/g,''))>=
 var lbAll=false;
 function loadLB(){if(!FB){note('The leaderboard isn\u2019t connected to a server yet.');return}
 if(document.hidden||$('lv').hidden)return;
-var ownP=fetch(FB+'/names/'+nameKey(OWNER_NAME)+'.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null});
-fetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=120')).then(function(r){return r.json().catch(function(){return null}).then(function(o){
+var ownP=tfetch(FB+'/names/'+nameKey(OWNER_NAME)+'.json').then(function(r){return r.ok?r.json():null}).catch(function(){return null});
+tfetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=120')).then(function(r){return r.json().catch(function(){return null}).then(function(o){
 if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll=true;loadLB();throw 'skip'}if(r.status===401||r.status===403||/permission/i.test(m))throw 'The leaderboard server blocked the game. Check the database rules.';if(r.status===404)throw 'Leaderboard server not found. Check the FB_URL address.';throw 'Leaderboard server error: '+(m||r.status)})}).then(function(o){return ownP.then(function(ow){lbOwner=typeof ow==='string'?ow:null;return o})}).then(function(o){o=o||{};
 var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)&&!(ownerLike(o[k].name)&&k!==lbOwner)}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,100);
-renderLB(docs);if(FB_KEY&&authErr){var an=document.createElement('div');an.className='note';an.textContent='You can\u2019t be added to the leaderboard right now: '+authMsg();$('lb').insertBefore(an,$('lb').firstChild)}}).catch(function(e){if(e==='skip')return;note(typeof e==='string'?e:'Could not reach the leaderboard server.')})}
+renderLB(docs);if(FB_KEY&&authErr){var an=document.createElement('div');an.className='note';an.textContent='You can\u2019t be added to the leaderboard right now: '+authMsg();$('lb').insertBefore(an,$('lb').firstChild)}}).catch(function(e){if(e==='skip')return;var msg=typeof e==='string'?e:'Could not reach the leaderboard server.',el=$('lb');
+if(el.querySelector('.row')){var w=el.querySelector('.lberr');if(!w){w=document.createElement('div');w.className='note lberr';el.insertBefore(w,el.firstChild)}w.textContent='⚠️ '+msg+' Showing the last list.'}else note(msg)})}
 /* the leaderboard refreshes every 15 seconds while it's open, with a countdown at the top */
 var LB_EVERY=15,lbNext=0;
 function lbTick(){if($('lv').hidden||document.hidden)return;var n=Date.now();if(n>=lbNext){lbNext=n+LB_EVERY*1000;loadLB()}$('lbref').textContent='🔄 Refreshes every '+LB_EVERY+' seconds · next in '+Math.max(1,Math.ceil((lbNext-n)/1000))+'s'}
