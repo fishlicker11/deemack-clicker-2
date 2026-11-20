@@ -1,0 +1,26 @@
+{
+  "rules": {
+    "players": {
+      ".read": true,
+      ".indexOn": ["score"],
+      "$uid": {
+        ".write": "auth != null && (auth.uid === $uid || (!newData.exists() && $uid.matches(/^p[a-z0-9]+$/)))",
+        ".validate": "newData.hasChildren(['name', 'score']) && newData.child('name').isString() && newData.child('name').val().length <= 16 && newData.child('score').isNumber()"
+      }
+    },
+    "names": {
+      "$key": {
+        ".read": true,
+        ".write": "auth != null && (!newData.exists() || newData.val() === auth.uid) && (!data.exists() || data.val() === auth.uid || data.val().matches(/^p[a-z0-9]+$/))",
+        ".validate": "newData.isString() && newData.val().length <= 128"
+      }
+    },
+    "saves": {
+      "$code": {
+        ".read": true,
+        ".write": "auth != null && !data.exists()",
+        ".validate": "newData.hasChildren(['d']) && newData.child('d').isString() && newData.child('d').val().length < 200000"
+      }
+    }
+  }
+}
