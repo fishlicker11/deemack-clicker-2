@@ -53,11 +53,18 @@ button:disabled{opacity:.35;cursor:default}
 .devrow{display:flex;gap:6px;margin-top:6px;align-items:center}
 .ov .devin{width:110px;margin:0;padding:7px 9px;font-size:14px}
 .obadge{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#f59e0b;color:#1a1300;white-space:nowrap}
+.runebtn{position:relative}
 .runebtn[hidden]{display:none}
 .runebtn.logbtn{position:relative;font-size:18px;padding:8px 11px}
 .runebtn.logbtn small{font-size:12px;font-weight:700;color:var(--text)}
 .ldot{position:absolute;top:-7px;right:-7px;background:var(--accent);color:var(--btntext);font-size:9px;font-weight:800;line-height:1;padding:3px 5px;border-radius:999px;letter-spacing:.03em}
 .ldot[hidden]{display:none}
+.qhd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:12px 0 6px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.qhd span{text-transform:none;letter-spacing:0;font-weight:600}
+.qrow{border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:7px;background:var(--bg);display:flex;gap:10px;align-items:center;text-align:left}
+.qrow.done{border-color:#22a35a}.qrow.claimed{opacity:.55}
+.qrow .qt{flex:1;min-width:0}.qrow .qt b{display:block;font-size:14px}
+.qbar{height:7px;border-radius:99px;background:var(--line);overflow:hidden;margin:6px 0 4px}.qfill{height:100%;background:#22a35a;border-radius:99px;transition:width .3s}
+.qrow .qm{font-size:12px;color:var(--muted)}
 .crsec{text-align:center;margin:16px 0}
 .crsec .crr{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--accent);margin-bottom:4px}
 .crsec .crn{font-size:20px;font-weight:700;line-height:1.35}
@@ -106,7 +113,7 @@ button:disabled{opacity:.35;cursor:default}
 .card2.off img{filter:grayscale(1) brightness(.4)}
 .dres .card2{max-width:150px;margin:8px auto}
 .dnum{font-size:40px;font-weight:700;margin:6px 0}
-.stage{min-height:290px;display:flex;align-items:center;justify-content:center}
+.stage{min-height:340px;display:flex;align-items:center;justify-content:center}
 .side{top:0!important;transform:none!important;gap:5px!important}
 .mc{width:min(48vw,240px)!important}
 .arow{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin-bottom:5px;background:var(--bg)}
@@ -262,7 +269,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="warn" id="nosave" hidden>⚠️ This page can't save your progress, so it will be lost when you close it. Open the game in its own browser tab (not inside another website or app) to keep your progress.</div>
 <div class="slots" id="slots"></div>
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
-<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
+<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
 <button class="rs" id="rs">Erase this slot</button>
@@ -291,6 +298,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="logv" hidden><div class="box rbox"><div class="phd"><h1>📜 Update log</h1><button class="xbtn" id="logx" aria-label="Close">✕</button></div><div id="logl"></div></div></div>
 <div class="ov" id="crv" hidden><div class="box rbox"><div class="phd"><h1>🎬 Credits</h1><button class="xbtn" id="crx" aria-label="Close">✕</button></div><div id="crl"></div></div></div>
 <div id="tabv" hidden><div class="tabbox"><div class="tabi">⏸️</div><h1>Game paused</h1><p id="tabmsg"></p><button id="tabgo">Continue here</button></div></div>
+<div class="ov" id="qv" hidden><div class="box rbox"><div class="phd"><h1>📋 Quests</h1><button class="xbtn" id="qvx" aria-label="Close">✕</button></div><div id="ql"></div></div></div>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
 </div>
@@ -339,7 +347,7 @@ var RT=[
 {n:'Dawn',t:'+{v}% income from the first 8 teachers',v:[10,15,22,30,40,55]},
 {n:'Dusk',t:'+{v}% income from the last 8 teachers',v:[10,15,22,30,40,55]}];
 function rlParse(r){var x={next:0,pct:0,until:0,d:[0,0,0,0,0,0]};if(r&&typeof r==='object'){x.next=+r.next||0;x.pct=+r.pct||0;x.until=+r.until||0;if(Array.isArray(r.d)&&r.d.length===6)x.d=r.d.map(function(v){return(+v>=0&&+v<=9)?Math.floor(+v):0})}return x}
-function stParse(o){var x={clicks:0,crit:0,maxcps:0,caught:0,earned:0,found:0,sold:0,deleted:0,dice:0,rolled:0,bp:0,bs:0,buys:0,ups:0,rf:[0,0,0,0,0,0],kf:[]};
+function stParse(o){var x={clicks:0,crit:0,maxcps:0,caught:0,earned:0,found:0,sold:0,deleted:0,dice:0,rolled:0,bp:0,bs:0,buys:0,ups:0,bw:0,gold:0,rf:[0,0,0,0,0,0],kf:[]};
 if(o&&typeof o==='object'){Object.keys(x).forEach(function(k){if(k==='rf'||k==='kf')return;x[k]=+o[k]>0?+o[k]:0});
 if(Array.isArray(o.rf))for(var i=0;i<6;i++)x.rf[i]=+o.rf[i]>0?+o.rf[i]:0;
 if(Array.isArray(o.kf))for(var j=0;j<o.kf.length&&j<64;j++)x.kf[j]=+o.kf[j]>0?+o.kf[j]:0}return x}
@@ -373,8 +381,8 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,theme:-1,tv:2,gold:{m:1,until:0},bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
 var slot=1;try{slot=+LS.getItem(ACT)||1}catch(e){}
 if(slot<1||slot>3)slot=1;
 var S=load(slot),mult=1,ready=false,last=Date.now();
@@ -756,7 +764,7 @@ var A=arena(),w=document.createElement('div');w.className='acol';w.style.animati
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over')fIdle()}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
-var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;rew=giveBossReward(i,t);save()}
+var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;rew=giveBossReward(i,t);save()}
 var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=win?'Victory!':'Defeated';
 var p=document.createElement('p');p.textContent=win?('You beat '+t.name+(first?' for the first time!':'!')):(t.name+' was too strong this time.');
 var a=document.createElement('button');a.textContent='Fight again';a.onclick=function(){startFight(i)};
@@ -1062,7 +1070,7 @@ b.style.top=Math.round(H*(0.12+Math.random()*0.58))+'px';b.style.transform='tran
 function end(){if(done)return;done=true;b.remove();goldOn=null}
 (function mv(now){if(done)return;var k=Math.min(1,(now-t0)/GOLD_STAY);b.style.transform='translateX('+(x0+(x1-x0)*k).toFixed(1)+'px)';if(k>=1){end();return}requestAnimationFrame(mv)})(t0);
 b.onclick=function(e){if(done)return;end();claimGold(t,e)}}
-function claimGold(t,e){var m=Math.round((1.3+Math.random()*1.7)*10)/10,secs=Math.round((30+Math.random()*90)/5)*5;S.gold={m:m,until:Date.now()+secs*1000};save();
+function claimGold(t,e){var m=Math.round((1.3+Math.random()*1.7)*10)/10,secs=Math.round((30+Math.random()*90)/5)*5;S.gold={m:m,until:Date.now()+secs*1000};S.st.gold++;save();
 var f=document.createElement('div');f.className='gfx';f.textContent='×'+m+' MONEY!';f.style.left=Math.max(4,(e&&e.clientX||window.innerWidth/2)-70)+'px';f.style.top=((e&&e.clientY||200)-30)+'px';$('goldl').appendChild(f);setTimeout(function(){f.remove()},1200);
 toast('✨ Golden '+t.name+'! ×'+m+' money for '+secs+' seconds','#f59e0b');CK=[];disp=null;update()}
 function goldTick(){var n=Date.now();if(goldOn||n<nextGold)return;if(document.hidden||anyOpen()){nextGold=n+3000;return}spawnGold();nextGold=n+GOLD_EVERY}
@@ -1093,6 +1101,66 @@ window.addEventListener('storage',function(e){if(e.key==='deemackClicker2.tab'&&
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&!tabDead&&storedRev()>(S.rev||0))killTab(STALE_MSG)});
 window.addEventListener('pageshow',function(e){if(e.persisted&&!tabDead&&storedRev()>(S.rev||0))killTab(STALE_MSG)});
 $('tabgo').onclick=function(){location.reload()};
+/* ===== Quests: 3 daily quests (new every 22 hours) and 3 weekly quests (new every 7 days).
+   Progress counts from when a quest appears. Finish one, then tap Claim for its reward. ===== */
+var QDAY=22*3600*1000,QWEEK=7*24*3600*1000;
+/* each kind: daily target (d), weekly target (w), text, what it counts. "earn" targets are seconds of your current income. */
+var QK={
+clicks:{d:1000,w:10000,t:'Click Mr McCoy {n} times',v:function(){return S.st.clicks}},
+crit:{d:5,w:40,t:'Land {n} critical hits',v:function(){return S.st.crit}},
+buys:{d:50,w:400,t:'Buy {n} teachers',v:function(){return S.st.buys}},
+ups:{d:15,w:100,t:'Buy {n} teacher upgrades',v:function(){return S.st.ups}},
+earn:{d:1800,w:21600,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true},
+runes:{d:3,w:25,t:'Find {n} runes',v:function(){return S.st.found}},
+sell:{d:3,w:20,t:'Sell {n} runes',v:function(){return S.st.sold}},
+dice:{d:3,w:20,t:'Roll the dice {n} times',v:function(){return S.st.dice}},
+boss:{d:2,w:15,t:'Beat {n} bosses',v:function(){return S.st.bw}},
+gold:{d:2,w:15,t:'Catch {n} golden teachers',v:function(){return S.st.gold}},
+roller:{d:1,t:'Use the Daily Roller',v:function(){return S.st.rolled},need:function(){return Date.now()>=RL.next}},
+prs:{w:3,t:'Prestige {n} times',v:function(){return S.prs}},
+tree:{w:5,t:'Buy {n} skill tree upgrades',v:function(){return S.tree.length},need:function(){return S.prs>0}},
+ach:{w:5,t:'Unlock {n} achievements',v:function(){return achCount(S)}}};
+var QREW={d:[{t:'money',s:900,l:'15 min of income'},{t:'dice',n:2},{t:'rune',m:2}],w:[{t:'money',s:10800,l:'3 hours of income'},{t:'dice',n:8},{t:'rune',m:3}]};
+function qTitle(q){var K=QK[q.k];return K?K.t.replace('{n}',q.k==='earn'?fmt(q.n):String(q.n)):''}
+function qProg(q){var K=QK[q.k];if(!K)return 0;var v=+K.v()-q.b;return Math.max(0,Math.min(q.n,isFinite(v)?v:0))}
+function qDone(q){return qProg(q)>=q.n}
+function qRewText(r){return r.t==='money'?'💰 '+r.l+' (~'+fmt(Math.max(1000,totalOf(S)*r.s))+')':r.t==='dice'?'🎲 '+r.n+' dice rolls':'🔮 '+(/^[AEIOU]/.test(RN[r.m])?'an ':'a ')+RN[r.m]+' or better rune'}
+function qGen(per){var keys=Object.keys(QK).filter(function(k){var K=QK[k];return K[per]&&(!K.need||K.need())}),pick=[];
+while(pick.length<3&&keys.length)pick.push(keys.splice(Math.floor(Math.random()*keys.length),1)[0]);
+S.q[per]={at:Date.now(),list:pick.map(function(k){var K=QK[k],n=K.scale?Math.max(1000,Math.round(totalOf(S)*K[per])):K[per],R=QREW[per];return{k:k,n:n,b:+K.v()||0,r:R[Math.floor(Math.random()*R.length)],c:0,nt:0}})}}
+function qValid(Q){return Q&&typeof Q.at==='number'&&Array.isArray(Q.list)&&Q.list.length&&Q.list.every(function(q){return q&&QK[q.k]&&q.n>0&&typeof q.b==='number'&&q.r&&QREW.d.concat(QREW.w).some(function(x){return x.t===q.r.t})})}
+function giveRuneMin(min){var tot=0,i,x,r=RW.length-1,acc=0;for(i=min;i<RW.length;i++)tot+=RW[i];x=Math.random()*tot;for(i=min;i<RW.length;i++){acc+=RW[i];if(x<acc){r=i;break}}
+var k=Math.floor(Math.random()*RT.length);S.st.found++;S.st.rf[r]++;S.st.kf[k]=(S.st.kf[k]||0)+1;
+if(S.runes.length>=100){toast('Rune inventory full: the '+RN[r]+' Rune of '+RT[k].n+' was lost',RCL[r]);return}
+S.runes.push({id:'r'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36),k:k,r:r});toast('Quest reward: '+RN[r]+' Rune of '+RT[k].n+'!',RCL[r])}
+function claimQ(per,i){var q=S.q&&S.q[per]&&S.q[per].list[i];if(!q||q.c||!qDone(q))return;q.c=1;var r=q.r;
+if(r.t==='money'){var amt=Math.max(1000,totalOf(S)*r.s);S.gb=Math.min(1e300,S.gb+amt);S.run=Math.min(1e300,S.run+amt);S.st.earned+=amt;toast('Quest reward: +'+fmt(amt)+' Games Blocked','#22a35a')}
+else if(r.t==='dice'){S.rolls+=r.n;toast('Quest reward: +'+r.n+' dice rolls','#3b82f6')}else giveRuneMin(r.m);
+save();update();updQuests()}
+function qLeft(ms){if(ms>=86400000){var d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000);return d+'d '+h+'h'}return hms(ms)}
+var QREFS=[];
+function renderQuests(){var L=$('ql');L.textContent='';QREFS=[];if(!S.q)return;
+[['d','Daily quests',QDAY],['w','Weekly quests',QWEEK]].forEach(function(sec){var per=sec[0],Q=S.q[per];if(!Q)return;
+var h=document.createElement('div');h.className='qhd';var a=document.createElement('div');a.textContent=sec[1];var tm=document.createElement('span');h.appendChild(a);h.appendChild(tm);L.appendChild(h);QREFS.push({tm:tm,per:per,len:sec[2]});
+Q.list.forEach(function(q,i){var r=document.createElement('div');r.className='qrow';var x=document.createElement('div');x.className='qt';var b=document.createElement('b');b.textContent=qTitle(q);
+var bar=document.createElement('div');bar.className='qbar';var f=document.createElement('div');f.className='qfill';bar.appendChild(f);var m=document.createElement('div');m.className='qm';
+x.appendChild(b);x.appendChild(bar);x.appendChild(m);var bt=document.createElement('button');bt.className='bfight';bt.onclick=function(){claimQ(per,i)};
+r.appendChild(x);r.appendChild(bt);L.appendChild(r);QREFS.push({q:q,row:r,f:f,m:m,bt:bt})})})
+updQuests()}
+function updQuests(){var n=Date.now(),ready=0;
+if(S.q)['d','w'].forEach(function(per){var Q=S.q[per];if(Q)Q.list.forEach(function(q){if(!q.c&&qDone(q))ready++})});
+var dot=$('qdot');dot.textContent=ready;dot.hidden=!ready;if($('qv').hidden)return;
+QREFS.forEach(function(o){if(o.tm){var Q=S.q[o.per];o.tm.textContent='new quests in '+qLeft(Math.max(0,Q.at+o.len-n));return}
+var p=qProg(o.q),done=p>=o.q.n;o.row.className='qrow'+(o.q.c?' claimed':done?' done':'');o.f.style.width=(100*p/o.q.n).toFixed(1)+'%';
+o.m.textContent=(o.q.k==='earn'?fmt(p)+' / '+fmt(o.q.n):p+' / '+o.q.n)+' · Reward: '+qRewText(o.q.r);
+o.bt.textContent=o.q.c?'Claimed ✓':done?'Claim':'Claim';o.bt.disabled=!!o.q.c||!done})}
+function qTick(){if(!S.q||typeof S.q!=='object')S.q={};var n=Date.now(),made=false;
+[['d',QDAY],['w',QWEEK]].forEach(function(x){var Q=S.q[x[0]];if(!qValid(Q)||n>=Q.at+x[1]||Q.at>n+60000){qGen(x[0]);made=true}});
+['d','w'].forEach(function(per){S.q[per].list.forEach(function(q){if(!q.c&&!q.nt&&qDone(q)){q.nt=1;toast('📋 Quest complete: '+qTitle(q)+'! Claim it in Quests.','#22a35a')}})});
+if(made){save();if(!$('qv').hidden)renderQuests()}updQuests()}
+$('qb').onclick=function(){qTick();$('qv').hidden=false;renderQuests();$('ql').parentNode.scrollTop=0};
+function closeQV(){$('qv').hidden=true}$('qvx').onclick=closeQV;$('qv').onclick=function(e){if(e.target===$('qv'))closeQV()};
+setInterval(qTick,1000);
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
