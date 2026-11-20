@@ -997,7 +997,9 @@ if(!id){id='p'+Math.random().toString(36).slice(2,12)+Date.now().toString(36);tr
 uid=id})();
 /* Names hidden from the leaderboard for everyone (capitals and extra spaces don't matter). Add more names here to hide them. */
 var LB_HIDE=['mom'];
-function lbHidden(n){return LB_HIDE.indexOf(String(n||'').trim().replace(/\s+/g,' ').toLowerCase())>=0}
+/* a name is hidden if it, or any word in it, matches the list (also catches tricks like M0M, mom123, The Mom!!) */
+function lbHidden(n){var raw=String(n||'').toLowerCase(),leet=raw.replace(/0/g,'o').replace(/[@4]/g,'a').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[5$]/g,'s').replace(/7/g,'t');
+return [raw,leet].some(function(t){if(LB_HIDE.indexOf(t.trim().replace(/\s+/g,' '))>=0)return true;return t.split(/[^a-z]+/).some(function(w){return LB_HIDE.indexOf(w)>=0})})}
 var lbAll=false;
 function loadLB(){if(!FB){note('The leaderboard isn\u2019t connected to a server yet.');return}
 if(document.hidden||$('lv').hidden)return;
