@@ -321,7 +321,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=38;
+var BUILD=39;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -1127,7 +1127,7 @@ clicks:{d:3000,w:75000,t:'Click Mr McCoy {n} times',v:function(){return S.st.cli
 crit:{d:25,w:500,t:'Land {n} critical hits',v:function(){return S.st.crit}},
 buys:{d:150,w:8000,t:'Buy {n} teachers',v:function(){return S.st.buys}},
 ups:{d:40,w:1500,t:'Buy {n} teacher upgrades',v:function(){return S.st.ups}},
-earn:{d:3600,w:259200,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true},
+earn:{d:3600,w:259200,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true,retired:true},
 runes:{d:15,w:300,t:'Find {n} runes',v:function(){return S.st.found}},
 sell:{d:10,w:150,t:'Sell {n} runes',v:function(){return S.st.sold}},
 dice:{d:10,w:150,t:'Roll the dice {n} times',v:function(){return S.st.dice},need:function(){return T.some(function(t){return !(S.cards[t.id]>=9)})}},
@@ -1143,9 +1143,11 @@ function qTitle(q){var K=QK[q.k];return K?K.t.replace('{n}',q.k==='earn'?fmt(q.n
 function qProg(q){var K=QK[q.k];if(!K)return 0;var v=+K.v()-q.b;return Math.max(0,Math.min(q.n,isFinite(v)?v:0))}
 function qDone(q){return qProg(q)>=q.n}
 function qRewText(r){return r.t==='boost'?'⚡ +'+r.p+'% money for '+r.s+' seconds ('+Math.round(r.s/60)+' min)':r.t==='money'?'💰 '+r.l+' (~'+fmt(Math.max(1000,totalOf(S)*r.s))+')':r.t==='dice'?'🎲 '+r.n+' dice rolls':'🔮 '+(/^[AEIOU]/.test(RN[r.m])?'an ':'a ')+RN[r.m]+' or better rune'}
-function qGen(per){var keys=Object.keys(QK).filter(function(k){var K=QK[k];return K[per]&&(!K.need||K.need())}),pick=[];
+function qKinds(per,skip){return Object.keys(QK).filter(function(k){var K=QK[k];return K[per]&&!K.retired&&(!skip||skip.indexOf(k)<0)&&(!K.need||K.need())})}
+function qMake(k,per){var K=QK[k],n=K.scale?Math.max(1000,Math.round(totalOf(S)*K[per])):K[per],R=QREW[per],rw=R[Math.floor(Math.random()*R.length)];if(rw.t==='boost')rw={t:'boost',p:[100,125,150,175,200][Math.floor(Math.random()*5)],s:[900,1200,1500,1800][Math.floor(Math.random()*4)]};return{k:k,n:n,b:+K.v()||0,r:rw,c:0,nt:0}}
+function qGen(per){var keys=qKinds(per),pick=[];
 while(pick.length<3&&keys.length)pick.push(keys.splice(Math.floor(Math.random()*keys.length),1)[0]);
-S.q[per]={at:Date.now(),list:pick.map(function(k){var K=QK[k],n=K.scale?Math.max(1000,Math.round(totalOf(S)*K[per])):K[per],R=QREW[per],rw=R[Math.floor(Math.random()*R.length)];if(rw.t==='boost')rw={t:'boost',p:[100,125,150,175,200][Math.floor(Math.random()*5)],s:[900,1200,1500,1800][Math.floor(Math.random()*4)]};return{k:k,n:n,b:+K.v()||0,r:rw,c:0,nt:0}})};if(per==='w')S.q.w.v=QW_V;else S.q.d.v=QD_V}
+S.q[per]={at:Date.now(),list:pick.map(function(k){return qMake(k,per)})};if(per==='w')S.q.w.v=QW_V;else S.q.d.v=QD_V}
 function qValid(Q){return Q&&typeof Q.at==='number'&&Array.isArray(Q.list)&&Q.list.length&&Q.list.every(function(q){return q&&QK[q.k]&&q.n>0&&typeof q.b==='number'&&q.r&&(q.r.t==='boost'?q.r.p>0&&q.r.s>0:QREW.d.concat(QREW.w).some(function(x){return x.t===q.r.t}))})}
 function giveRuneMin(min){var tot=0,i,x,r=RW.length-1,acc=0;for(i=min;i<RW.length;i++)tot+=RW[i];x=Math.random()*tot;for(i=min;i<RW.length;i++){acc+=RW[i];if(x<acc){r=i;break}}
 var k=Math.floor(Math.random()*RT.length);S.st.found++;S.st.rf[r]++;S.st.kf[k]=(S.st.kf[k]||0)+1;
@@ -1176,6 +1178,7 @@ o.bt.textContent=o.q.c?'Claimed ✓':done?'Claim':'Claim';o.bt.disabled=!!o.q.c|
 function qTick(){if(!S.q||typeof S.q!=='object')S.q={};var n=Date.now(),made=false;
 if(qValid(S.q.w)&&S.q.w.v!==QW_V){S.q.w.list.forEach(function(q,i){if(!q.c&&qDone(q))claimQ('w',i)});S.q.w.at=0}
 if(qValid(S.q.d)&&S.q.d.v!==QD_V){S.q.d.list.forEach(function(q,i){if(!q.c&&qDone(q))claimQ('d',i)});S.q.d.at=0}
+['d','w'].forEach(function(per){var Q=S.q[per];if(!qValid(Q))return;Q.list.forEach(function(q,i){if(!QK[q.k].retired)return;if(!q.c&&qDone(q))claimQ(per,i);var keys=qKinds(per,Q.list.map(function(x){return x.k}));if(keys.length){Q.list[i]=qMake(keys[Math.floor(Math.random()*keys.length)],per);made=true}})});
 [['d',QDAY],['w',QWEEK]].forEach(function(x){var Q=S.q[x[0]];if(!qValid(Q)||n>=Q.at+x[1]||Q.at>n+60000){qGen(x[0]);made=true}});
 ['d','w'].forEach(function(per){S.q[per].list.forEach(function(q){if(!q.c&&!q.nt&&qDone(q)){q.nt=1;toast('📋 Quest complete: '+qTitle(q)+'! Claim it in Quests.','#22a35a')}})});
 if(made){save();if(!$('qv').hidden)renderQuests()}updQuests()}
