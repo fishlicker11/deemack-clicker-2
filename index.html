@@ -315,7 +315,7 @@ var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
 {role:'ORIGINAL IDEA',names:['Xander']},
 {role:'MARKETING-ish',names:['Oliver']},
-{role:'PLAYTESTERS',names:['Oliver','Robbie']}];
+{role:'PLAYTESTERS',names:['Oliver','Robbie','Xander','Garrett']}];
 var UPDATES=[];
 (function(){
 var T=[
@@ -1107,22 +1107,22 @@ $('tabgo').onclick=function(){location.reload()};
 var QDAY=22*3600*1000,QWEEK=7*24*3600*1000;
 /* each kind: daily target (d), weekly target (w), text, what it counts. "earn" targets are seconds of your current income. */
 var QK={
-clicks:{d:3000,w:25000,t:'Click Mr McCoy {n} times',v:function(){return S.st.clicks}},
-crit:{d:25,w:150,t:'Land {n} critical hits',v:function(){return S.st.crit}},
-buys:{d:150,w:2500,t:'Buy {n} teachers',v:function(){return S.st.buys}},
-ups:{d:40,w:500,t:'Buy {n} teacher upgrades',v:function(){return S.st.ups}},
-earn:{d:3600,w:86400,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true},
-runes:{d:15,w:100,t:'Find {n} runes',v:function(){return S.st.found}},
-sell:{d:10,w:60,t:'Sell {n} runes',v:function(){return S.st.sold}},
-dice:{d:10,w:60,t:'Roll the dice {n} times',v:function(){return S.st.dice},need:function(){return T.some(function(t){return !(S.cards[t.id]>=9)})}},
-boss:{d:5,w:40,t:'Beat {n} bosses',v:function(){return S.st.bw}},
-gold:{d:6,w:40,t:'Catch {n} golden teachers',v:function(){return S.st.gold}},
+clicks:{d:3000,w:75000,t:'Click Mr McCoy {n} times',v:function(){return S.st.clicks}},
+crit:{d:25,w:500,t:'Land {n} critical hits',v:function(){return S.st.crit}},
+buys:{d:150,w:8000,t:'Buy {n} teachers',v:function(){return S.st.buys}},
+ups:{d:40,w:1500,t:'Buy {n} teacher upgrades',v:function(){return S.st.ups}},
+earn:{d:3600,w:259200,t:'Earn {n} Games Blocked',v:function(){return S.st.earned},scale:true},
+runes:{d:15,w:300,t:'Find {n} runes',v:function(){return S.st.found}},
+sell:{d:10,w:150,t:'Sell {n} runes',v:function(){return S.st.sold}},
+dice:{d:10,w:150,t:'Roll the dice {n} times',v:function(){return S.st.dice},need:function(){return T.some(function(t){return !(S.cards[t.id]>=9)})}},
+boss:{d:5,w:100,t:'Beat {n} bosses',v:function(){return S.st.bw}},
+gold:{d:6,w:100,t:'Catch {n} golden teachers',v:function(){return S.st.gold}},
 roller:{d:1,t:'Use the Daily Roller',v:function(){return S.st.rolled},need:function(){return Date.now()>=RL.next}},
-prs:{w:10,t:'Prestige {n} times',v:function(){return S.prs},need:function(){return S.tree.length<TN.length}},
-tree:{w:15,t:'Buy {n} skill tree upgrades',v:function(){return S.tree.length},need:function(){return S.prs>0&&S.tree.length<=TN.length-15}},
-ach:{w:10,t:'Unlock {n} achievements',v:function(){return achCount(S)},need:function(){return ACH.length-achCount(S)>=20}}};
+prs:{w:25,t:'Prestige {n} times',v:function(){return S.prs},need:function(){return S.tree.length<TN.length}},
+tree:{w:40,t:'Buy {n} skill tree upgrades',v:function(){return S.tree.length},need:function(){return S.prs>0&&S.tree.length<=TN.length-40}},
+ach:{w:20,t:'Unlock {n} achievements',v:function(){return achCount(S)},need:function(){return ACH.length-achCount(S)>=40}}};
 var QREW={d:[{t:'money',s:900,l:'15 min of income'},{t:'dice',n:2},{t:'rune',m:2}],w:[{t:'boost'},{t:'rune',m:3}]};
-var QW_V=2,QD_V=2; /* daily quest rules version */ /* weekly quest rules version: older weekly sets get replaced (finished ones are paid out first) */
+var QW_V=3,QD_V=2; /* daily quest rules version */ /* weekly quest rules version: older weekly sets get replaced (finished ones are paid out first) */
 function qTitle(q){var K=QK[q.k];return K?K.t.replace('{n}',q.k==='earn'?fmt(q.n):String(q.n)):''}
 function qProg(q){var K=QK[q.k];if(!K)return 0;var v=+K.v()-q.b;return Math.max(0,Math.min(q.n,isFinite(v)?v:0))}
 function qDone(q){return qProg(q)>=q.n}
