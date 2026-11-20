@@ -726,7 +726,7 @@ $('bfx').onclick=closeFight;
 
 function fCounter(m){var n=Math.max(2,Math.round(BF.base*0.10*(m||1)));fStatus('Perfect! Counterattack for '+n+'!');hurtBoss(n);return fAlive(BF&&BF.id)}
 function mashNeed(){return Math.round(17+BF.d*66)}
-ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+(0.9*(1+n*(0.6-BF.d*0.38))).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
+ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+(1.0*(1+n*(0.6-BF.d*0.38))).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
 fStatus(n>1?'Tap all '+n+' red circles!':'Tap the red circle!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var W=A.clientWidth,H=A.clientHeight,pts=[],cs=[];
 function draw(){tm.textContent=left+' left · '+Math.max(0,(end-Date.now())/1000).toFixed(1)+'s'}
