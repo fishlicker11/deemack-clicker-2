@@ -170,6 +170,8 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 .bwimg{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 10px;border:3px solid #f59e0b}
 .bwst{display:flex;justify-content:center;gap:18px;font-size:12px;color:var(--muted);margin:0 0 14px}
 .bwst b{display:block;color:var(--text);font-size:16px}
+.bwrw{font-weight:700;font-size:15px;margin:0 0 14px;color:var(--text)}.bwrw.prac{color:var(--muted);font-weight:600}
+.brw{font-size:12px;color:var(--muted);margin-top:4px}
 .phd{position:sticky;top:-20px;margin:-20px -20px 8px;padding:14px 16px 10px 20px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:2}
 .phd h1{margin:0}
 .ov .xbtn{width:36px;height:36px;padding:0;flex:none;border-radius:50%;font-size:18px;line-height:36px;margin:0}
@@ -263,7 +265,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="av" hidden><div class="box rbox"><div class="phd"><h1>Achievements</h1><button class="xbtn" id="avx" aria-label="Close">✕</button></div><p id="avs"></p><div id="avl"></div></div></div>
 <div class="ov" id="tv" hidden><div class="box rbox"><h1>Themes</h1><p id="tvs"></p><div id="tvl"></div><button id="tvx">Close</button></div></div>
 <div class="ov" id="xv" hidden><div class="box"><h1>Transfer data</h1><p>Move all 3 save slots to another device.</p><div class="xrow"><button id="xexp">Export</button><button id="ximp">Import</button></div><div id="xbody"></div><p id="xmsg"></p><button id="xvx">Close</button></div></div>
-<div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Higher bosses are harder.</p><div id="bol"></div></div></div>
+<div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost; only your best boss boost counts at a time. After a win, that boss is practice only for an hour.</p><div id="bol"></div></div></div>
 <div id="ps" hidden><div class="psw">
 <div class="bfh"><div class="bft"><b>🌳 Prestige</b><span class="pss" id="pspts"></span></div><button class="xbtn2" id="psx" aria-label="Close">✕</button></div>
 <div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes and the skill tree. You can prestige once every 10 minutes.</div></div>
@@ -272,7 +274,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 </div></div>
 <div id="bf" hidden><div class="bfw"><div class="bfh"><img id="bfi" alt=""><div class="bft"><b id="bfn"></b><span class="dif" id="bfd"></span></div><button class="xbtn2" id="bfx" aria-label="Run away">✕</button></div><div class="hpl"><span>Boss</span><span id="bfht"></span></div><div class="hp"><div id="bfhb" class="hpf boss"></div></div><div class="hpl"><span>You</span><span id="bfpt"></span></div><div class="hp"><div id="bfpb" class="hpf me"></div></div><div id="bfs" class="bfs"></div><div id="bfa" class="bfa"></div></div></div>
 <div class="ov" id="ev" hidden><div class="box"><h1>Erase this slot?</h1><p id="evs"></p><input id="evi" maxlength="10" placeholder="Type ERASE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="evgo" disabled>Erase slot</button><button id="evx" class="sec">Cancel</button></div></div>
-<div class="ov" id="bw" hidden><div class="box"><div class="bwt">🏆</div><img id="bwi" class="bwimg" alt=""><h1 id="bwn"></h1><p id="bwp"></p><div class="bwst" id="bws"></div><button id="bwr">Replay boss</button><button id="bwb" class="sec">Back to boss menu</button></div></div>
+<div class="ov" id="bw" hidden><div class="box"><div class="bwt">🏆</div><img id="bwi" class="bwimg" alt=""><h1 id="bwn"></h1><p id="bwp"></p><div class="bwrw" id="bwrw"></div><div class="bwst" id="bws"></div><button id="bwr">Replay boss</button><button id="bwb" class="sec">Back to boss menu</button></div></div>
 <div class="ov" id="logv" hidden><div class="box rbox"><div class="phd"><h1>📜 Update log</h1><button class="xbtn" id="logx" aria-label="Close">✕</button></div><div id="logl"></div></div></div>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
@@ -350,8 +352,8 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),theme:-1,tv:2,gold:{m:1,until:0},bossWins:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o.gb==="number"){d.gb=o.gb;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),theme:-1,tv:2,gold:{m:1,until:0},bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o.gb==="number"){d.gb=o.gb;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
 var slot=1;try{slot=+LS.getItem(ACT)||1}catch(e){}
 if(slot<1||slot>3)slot=1;
 var S=load(slot),mult=1,ready=false,last=Date.now();
@@ -386,7 +388,7 @@ function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.sh
 var base=total(),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
 function update(noAnim){var anim=ready&&!noAnim;
-$("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
+$("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||S.own[T[i-1].id]>0;
 if(!vis){r.card.hidden=true;return}
@@ -413,7 +415,7 @@ var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
 var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmt(c);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
 $("stage").appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800);update()};
-setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),bt=Math.min(dt,Math.max(0,Math.min(n,RL.until)-from)/1000),GB=S.gold||{m:1,until:0},gt=Math.min(dt,Math.max(0,Math.min(n,GB.until)-from)/1000),rp=RL.pct/100,gm=GB.m-1,g=base*(dt+rp*bt+gm*gt+rp*gm*Math.min(bt,gt));S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
+setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0].concat(Object.keys(BB).map(function(k){return BB[k]})).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
 var lr=Date.now();setInterval(function(){var n=Date.now();rate((n-lr)/1000);lr=n},80);
 setInterval(function(){save();updateSlots();pushStats()},5000);
 window.addEventListener("pagehide",save);
@@ -470,7 +472,21 @@ $('rvx').onclick=closeRunes;$('rv').onclick=function(e){if(e.target===$('rv'))cl
 $('lbb').onclick=function(){$('lv').hidden=false;loadLB()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
 var RLK='deemackClicker2.roller',RLD=22*3600*1000,DWT=[38,28,15,9,5,2.5,1.5,0.7,0.2,0.1],RL=S.rl,spinning=false;
 function rlSave(){save()}
-function boostMul(){var n=Date.now();return (n<RL.until?1+RL.pct/100:1)*(S.gold&&n<S.gold.until?S.gold.m:1)}
+/* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.26 per boss
+   (doubling every 3 bosses) up to +100%. They don't stack: only your best active boss reward counts.
+   After a win, that boss gives no reward for 1 hour (practice only); losing has no cooldown. ===== */
+function bossRewI(i){var P=[5,6,8,10,13,16,20,25,32,40,50,63,79,100],M=[5,5,6,6,7,7,8,9,9,10,10,12,12,15];return{pct:P[i]||0,min:M[i]||0}}
+function bossIdx(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return i;return -1}
+var BOSS_CD=60*60*1000;
+function bossCdLeft(id){var w=S.bossCd&&S.bossCd[id];if(!w)return 0;var n=Date.now();if(w>n){S.bossCd[id]=n;w=n}return Math.max(0,w+BOSS_CD-n)}
+function bossPctAt(t){var b=0,B=S.bossBuffs||{};for(var k in B){if(t<B[k]){var i=bossIdx(k);if(i>=0){var p=bossRewI(i).pct;if(p>b)b=p}}}return b}
+function bestBossBuff(){var n=Date.now(),best=null,B=S.bossBuffs||{};for(var k in B){if(n<B[k]){var i=bossIdx(k);if(i<0)continue;var p=bossRewI(i).pct;if(!best||p>best.pct)best={id:k,i:i,pct:p,until:B[k]}}}return best}
+/* total boost at a moment: daily roller x golden teacher x best boss reward */
+function multAt(t){var m=1;if(t<RL.until)m*=1+RL.pct/100;if(S.gold&&t<S.gold.until)m*=S.gold.m;var bp=bossPctAt(t);if(bp)m*=1+bp/100;return m}
+function boostMul(){return multAt(Date.now())}
+function giveBossReward(i,t){var r=bossRewI(i),n=Date.now(),left=bossCdLeft(t.id);if(left>0)return{given:false,wait:left,pct:r.pct,min:r.min};
+if(!S.bossCd)S.bossCd={};if(!S.bossBuffs)S.bossBuffs={};Object.keys(S.bossBuffs).forEach(function(k){if(S.bossBuffs[k]<=n)delete S.bossBuffs[k]});
+var before=bestBossBuff();S.bossCd[t.id]=n;S.bossBuffs[t.id]=n+r.min*60000;return{given:true,pct:r.pct,min:r.min,stronger:before&&before.pct>r.pct?before:null}}
 function wd(){var x=Math.random()*100,w=0;for(var i=0;i<10;i++){w+=DWT[i];if(x<w)return i}return 0}
 function hms(ms){var s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);s=s%60;return h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
 function renderRoller(){var B=$('rls');B.textContent='';
@@ -674,13 +690,15 @@ $('xexp').onclick=doExport;$('ximp').onclick=doImportUI;
 function closeXV(){$('xv').hidden=true;xArm=false;xPending=null}$('xvx').onclick=closeXV;$('xv').onclick=function(e){if(e.target===$('xv'))closeXV()};
 var BTIER=[['Easy','#22a35a'],['Normal','#3b82f6'],['Hard','#f59e0b'],['Expert','#f97316'],['Insane','#ef4444'],['Extreme','#c026d3'],['Nightmare','#7c3aed'],['Impossible','#111827']];
 function bossTier(i){return BTIER[Math.min(BTIER.length-1,Math.floor(i*BTIER.length/T.length))]}
-function renderBosses(){var L=$('bol');L.textContent='';T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
+function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
 var im=document.createElement('img');im.className='bimg';im.alt='';im.src=PHOTOS[t.ph||t.id]||'';
 var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=t.name;var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'');
 var d=document.createElement('span');d.className='dif';d.style.setProperty('--dc',tr[1]);d.textContent=tr[0];var br=document.createElement('div');br.appendChild(d);
-x.appendChild(b);x.appendChild(s);x.appendChild(br);
-var f=document.createElement('button');f.className='bfight';f.textContent='Fight';f.onclick=function(){startFight(i)};
-r.appendChild(im);r.appendChild(x);r.appendChild(f);L.appendChild(r)})}
+var rl=document.createElement('div');rl.className='brw';x.appendChild(b);x.appendChild(s);x.appendChild(br);x.appendChild(rl);
+var f=document.createElement('button');f.className='bfight';f.onclick=function(){startFight(i)};BREFS.push({t:t,i:i,rl:rl,f:f});
+r.appendChild(im);r.appendChild(x);r.appendChild(f);L.appendChild(r)});updBossTimers()}
+var BREFS=[];function updBossTimers(){BREFS.forEach(function(o){var rw=bossRewI(o.i),cd=bossCdLeft(o.t.id);o.rl.textContent='🎁 +'+rw.pct+'% income for '+rw.min+' min'+(cd>0?' · ready in '+mmss(cd):'');o.f.textContent=cd>0?'Practice':'Fight'})}
+setInterval(function(){if(!$('bov').hidden)updBossTimers()},1000);
 $('bob').onclick=function(){renderBosses();$('bov').hidden=false};function closeBO(){$('bov').hidden=true}$('bovx').onclick=closeBO;$('bov').onclick=function(e){if(e.target===$('bov'))closeBO()};
 var BF=null,FCK=[],ATK={};
 function fdiff(i){return T.length>1?i/(T.length-1):0}
@@ -709,15 +727,16 @@ var A=arena(),w=document.createElement('div');w.className='acol';w.style.animati
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over')fIdle()}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
-if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;save()}
+var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;rew=giveBossReward(i,t);save()}
 var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=win?'Victory!':'Defeated';
 var p=document.createElement('p');p.textContent=win?('You beat '+t.name+(first?' for the first time!':'!')):(t.name+' was too strong this time.');
 var a=document.createElement('button');a.textContent='Fight again';a.onclick=function(){startFight(i)};
 var bk=document.createElement('button');bk.className='sec';bk.textContent='Back to bosses';bk.onclick=function(){closeFight();renderBosses();$('bov').hidden=false};
-w.appendChild(h);w.appendChild(p);w.appendChild(a);w.appendChild(bk);A.appendChild(w);fStatus(win?'You won':'You lost');if(win)showWin(i,t,first)}
-function showWin(i,t,first){var tr=bossTier(i),secs=Math.max(0,Math.round((Date.now()-BF.t0)/1000));
+w.appendChild(h);w.appendChild(p);w.appendChild(a);w.appendChild(bk);A.appendChild(w);fStatus(win?'You won':'You lost');if(win)showWin(i,t,first,rew)}
+function showWin(i,t,first,rew){var tr=bossTier(i),secs=Math.max(0,Math.round((Date.now()-BF.t0)/1000));
 $('bwi').src=PHOTOS[t.ph||t.id]||'';$('bwi').style.borderColor=tr[1];$('bwn').textContent='You beat '+t.name+'!';
 $('bwp').textContent=(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
+var rw=$('bwrw');rw.className='bwrw'+(rew&&rew.given?'':' prac');rw.textContent=!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!'+(rew.stronger?' (Your +'+rew.stronger.pct+'% from '+T[rew.stronger.i].name+' is stronger right now.)':''):'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
 var st=$('bws');st.textContent='';[[BF.php+'/100','HP left'],[Math.floor(secs/60)+':'+(secs%60<10?'0':'')+secs%60,'Time'],[BF.attacks,'Attacks']].forEach(function(x){var d=document.createElement('div'),b=document.createElement('b');b.textContent=x[0];d.appendChild(b);d.appendChild(document.createTextNode(x[1]));st.appendChild(d)});
 $('bwr').onclick=function(){$('bw').hidden=true;startFight(i)};
 $('bwb').onclick=function(){$('bw').hidden=true;closeFight();renderBosses();$('bov').hidden=false};
