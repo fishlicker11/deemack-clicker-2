@@ -244,6 +244,10 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 .gt::after{content:"\2726";position:absolute;top:-10px;right:-4px;font-size:24px;color:#fff;text-shadow:0 0 8px #ffd54f;animation:gtw .6s infinite alternate}
 @keyframes gtw{to{opacity:.35}}
 .gfx{position:absolute;font:900 22px Impact,"Arial Black",sans-serif;color:#f59e0b;text-shadow:0 0 8px rgba(255,213,79,.9);pointer-events:none;white-space:nowrap;animation:up 1.2s ease-out forwards}
+#tabv{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}#tabv[hidden]{display:none}
+.tabbox{max-width:340px;width:100%;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-sizing:border-box}
+.tabbox .tabi{font-size:38px}.tabbox h1{font-size:20px;margin:6px 0}.tabbox p{color:var(--muted);font-size:14px;margin:0 0 16px}
+.tabbox button{width:100%;padding:11px;border:0;border-radius:10px;background:var(--btn);color:var(--btntext);font:inherit;font-weight:700;cursor:pointer}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;border-left:4px solid var(--rc,#999);padding:10px 14px;border-radius:10px;font-size:14px;z-index:30;animation:tst .25s ease-out;max-width:90vw}
 .toast[hidden]{display:none}
 @keyframes tst{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -285,6 +289,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="bw" hidden><div class="box"><div class="bwt">🏆</div><img id="bwi" class="bwimg" alt=""><h1 id="bwn"></h1><p id="bwp"></p><div class="bwrw" id="bwrw"></div><div class="bwst" id="bws"></div><button id="bwr">Replay boss</button><button id="bwb" class="sec">Back to boss menu</button></div></div>
 <div class="ov" id="logv" hidden><div class="box rbox"><div class="phd"><h1>📜 Update log</h1><button class="xbtn" id="logx" aria-label="Close">✕</button></div><div id="logl"></div></div></div>
 <div class="ov" id="crv" hidden><div class="box rbox"><div class="phd"><h1>🎬 Credits</h1><button class="xbtn" id="crx" aria-label="Close">✕</button></div><div id="crl"></div></div></div>
+<div id="tabv" hidden><div class="tabbox"><div class="tabi">⏸️</div><h1>Game paused</h1><p id="tabmsg"></p><button id="tabgo">Continue here</button></div></div>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
 </div>
@@ -367,12 +372,19 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),theme:-1,tv:2,gold:{m:1,until:0},bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o.gb==="number"){d.gb=o.gb;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,theme:-1,tv:2,gold:{m:1,until:0},bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v))d.cards[k]=v})}T.forEach(function(t){d.own[t.id]=(o.own&&o.own[t.id])||0;d.lvl[t.id]=(o.lvl&&o.lvl[t.id])||1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
 var slot=1;try{slot=+LS.getItem(ACT)||1}catch(e){}
 if(slot<1||slot>3)slot=1;
 var S=load(slot),mult=1,ready=false,last=Date.now();
-function save(){try{LS.setItem(BASE+slot,JSON.stringify(S));LS.setItem(ACT,String(slot))}catch(e){}}
+/* ===== Safe saving: only one copy of the game saves at a time. Each save gets a number (rev) that goes up;
+   a copy that finds a newer save than its own (e.g. an old tab left open) never overwrites it. It pauses and
+   offers "Continue here" instead. Opening the game in a new tab also pauses older tabs. ===== */
+var TAB_ID=Math.random().toString(36).slice(2)+Date.now().toString(36),tabDead=false;
+function storedRev(){try{var o=JSON.parse(LS.getItem(BASE+slot));return o&&+o.rev>0?+o.rev:0}catch(e){return 0}}
+function killTab(why){if(tabDead)return;tabDead=true;$('tabmsg').textContent=why;$('tabv').hidden=false}
+var STALE_MSG='Your game was played in another tab or window since this one was open. This copy has paused so it can’t overwrite your newer progress.';
+function save(){if(tabDead)return;try{var cur=storedRev();if(cur>(S.rev||0)){killTab(STALE_MSG);return}S.rev=cur+1;LS.setItem(BASE+slot,JSON.stringify(S));LS.setItem(ACT,String(slot))}catch(e){}}
 function geo(b,r,k){return Math.ceil(b*(Math.pow(r,k)-1)/(r-1))}
 function maxK(b,r,m){var k=Math.max(0,Math.floor(Math.log(m*(r-1)/b+1)/Math.log(r)));while(geo(b,r,k+1)<=m)k++;while(k>0&&geo(b,r,k)>m)k--;return k}
 function fmt(x){x=+x;if(!isFinite(x))return x>0?"∞":"0";if(x<0)x=0;if(x<1000)return String(x<100?Math.floor(x*100+1e-6)/100:Math.floor(x+1e-9));if(x>=1e66){var ex=Math.floor(Math.log10(x)),mt=x/Math.pow(10,ex);if(mt>=9.995){mt/=10;ex++}return mt.toFixed(2)+"e"+ex}var u=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod","Vg"],e=Math.min(Math.floor(Math.log10(x)/3+1e-12),u.length-1),v=x/Math.pow(1000,e);if(v>=1000&&e<u.length-1){e++;v/=1000}var d=v<10?100:v<100?10:1,f=Math.floor(v*d+1e-6)/d;if(f>=1000&&e<u.length-1){e++;f=Math.floor(f/1000*100+1e-6)/100}return f.toFixed(f<10?2:f<100?1:0)+u[e]}
@@ -425,12 +437,12 @@ function unlock(){locked=false;$("mc").classList.remove("locked");$("nac").hidde
 $("mc").onclick=function(e){var now=Date.now();if(locked){if(now<lockUntil)return;unlock()}
 ST.push(now);while(ST.length&&ST[0]<now-1000)ST.shift();
 if(ST.length>20){S.st.caught=1;locked=true;lockUntil=now+10000;ST=[];$("mc").classList.add("locked");$("nac").hidden=false;setTimeout(function(){if(Date.now()>=lockUntil)unlock()},10000);return}
-var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2:1);S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});S.st.clicks++;if(crit)S.st.crit++;S.st.earned+=c;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<0.01*(1+rbOf(S)[4]+tfx(S).rune))giveRune();
+var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2:1);if(!(c>=0)||!isFinite(c))c=0;S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});S.st.clicks++;if(crit)S.st.crit++;S.st.earned+=c;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<0.01*(1+rbOf(S)[4]+tfx(S).rune))giveRune();
 var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top;
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
 var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmt(c);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
 $("stage").appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800);update()};
-setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0].concat(Object.keys(BB).map(function(k){return BB[k]})).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
+setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0].concat(Object.keys(BB).map(function(k){return BB[k]})).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}if(!(g>=0)||!isFinite(g))g=0;S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
 var lr=Date.now();setInterval(function(){var n=Date.now();rate((n-lr)/1000);lr=n},80);
 setInterval(function(){save();updateSlots();pushStats()},5000);
 window.addEventListener("pagehide",save);
@@ -444,7 +456,7 @@ function evOk(){return $('evi').value.trim().toUpperCase()==='ERASE'}
 function closeEV(){$('ev').hidden=true;$('evi').value=''}
 $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=function(e){if(e.key==='Enter'&&evOk())$('evgo').click()};
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
-$('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();RL=S.rl;applyTheme(S.theme);update(true);save();updateSlots();toast('Slot '+slot+' erased','#ef4444')};
+$('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();updateSlots();toast('Slot '+slot+' erased','#ef4444')};
 var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
 var db=null,uid=null,busy=false,lastSent=0;
 function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
@@ -1074,6 +1086,12 @@ var r=document.createElement('div');r.className='crr';r.textContent=c.role;d.app
 var e=document.createElement('div');e.className='crend';e.textContent='Thanks for playing DeeMack Clicker 2!';L.appendChild(e)}
 $('crb').onclick=function(){renderCredits();$('crv').hidden=false;$('crl').parentNode.scrollTop=0};
 function closeCR(){$('crv').hidden=true}$('crx').onclick=closeCR;$('crv').onclick=function(e){if(e.target===$('crv'))closeCR()};
+/* this copy is now the active one; older tabs pause */
+try{LS.setItem('deemackClicker2.tab',TAB_ID)}catch(e){}
+window.addEventListener('storage',function(e){if(e.key==='deemackClicker2.tab'&&e.newValue&&e.newValue!==TAB_ID)killTab('DeeMack Clicker 2 was opened in another tab or window, so this copy has paused to keep your progress safe.')});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&!tabDead&&storedRev()>(S.rev||0))killTab(STALE_MSG)});
+window.addEventListener('pageshow',function(e){if(e.persisted&&!tabDead&&storedRev()>(S.rev||0))killTab(STALE_MSG)});
+$('tabgo').onclick=function(){location.reload()};
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
@@ -1131,7 +1149,7 @@ function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true
 claimName(n).then(function(r){claiming=false;if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(){claiming=false})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
-function pushStats(force){if(!FB||!uid||!NAME||busy)return;if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<10000)return;
+function pushStats(force){if(tabDead||!FB||!uid||!NAME||busy)return;if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<10000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').catch(function(){}).then(function(){busy=false})}
 function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
 $('nmsg').textContent=change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change;$('nimp').hidden=!!change;btn.textContent=change?'Save name':'Play';
