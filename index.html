@@ -261,6 +261,8 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 .tabbox{max-width:340px;width:100%;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;box-sizing:border-box}
 .tabbox .tabi{font-size:38px}.tabbox h1{font-size:20px;margin:6px 0}.tabbox p{color:var(--muted);font-size:14px;margin:0 0 16px}
 .tabbox button{width:100%;padding:11px;border:0;border-radius:10px;background:var(--btn);color:var(--btntext);font:inherit;font-weight:700;cursor:pointer}
+#updbar{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:45;border:0;border-radius:999px;padding:9px 16px;background:var(--btn);color:var(--btntext);font:inherit;font-size:14px;font-weight:800;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;white-space:nowrap}
+#updbar[hidden]{display:none}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;border-left:4px solid var(--rc,#999);padding:10px 14px;border-radius:10px;font-size:14px;z-index:30;animation:tst .25s ease-out;max-width:90vw}
 .toast[hidden]{display:none}
 @keyframes tst{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -305,6 +307,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div id="tabv" hidden><div class="tabbox"><div class="tabi">⏸️</div><h1>Game paused</h1><p id="tabmsg"></p><button id="tabgo">Continue here</button></div></div>
 <div class="ov" id="qv" hidden><div class="box rbox"><div class="phd"><h1>📋 Quests</h1><button class="xbtn" id="qvx" aria-label="Close">✕</button></div><div id="ql"></div></div></div>
 <div class="ov" id="mgv" hidden><div class="box rbox"><div class="phd"><h1>🎮 Minigames</h1><button class="xbtn" id="mgvx" aria-label="Close">✕</button></div><p>Play any boss-fight minigame just for fun. No rewards, nothing to lose.</p><div class="rsec">Difficulty</div><div class="mgdiff" id="mgd"></div><div class="rsec">Pick a minigame</div><div id="mgl"></div></div></div>
+<button id="updbar" hidden>🔄 New update! Tap to get it</button>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
 </div>
@@ -316,6 +319,9 @@ var FB_URL='https://deemack-clicker-2-default-rtdb.firebaseio.com';
 var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
 /* ===== UPDATE LOG: posts shown in the 📜 Log button, NEWEST FIRST. Only the owner adds these.
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
+/* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
+   Open copies of the game check version.json and move players onto the newest version. ===== */
+var BUILD=36;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -1196,6 +1202,21 @@ var x=document.createElement('button');x.className='sec';x.textContent='Close';x
 w.appendChild(h);w.appendChild(pp);w.appendChild(a);w.appendChild(c);w.appendChild(x);A.appendChild(w)}
 $('mgb').onclick=function(){renderMG();$('mgv').hidden=false};
 function closeMGV(){$('mgv').hidden=true}$('mgvx').onclick=closeMGV;$('mgv').onclick=function(e){if(e.target===$('mgv'))closeMGV()};
+/* ===== Updates: browsers may keep an old copy of the game for a while, and open tabs never change by themselves.
+   The game checks version.json; if a newer version is out it saves and reloads into it when it's safe
+   (just opened, or you came back to the tab), otherwise it shows a "New update" button. ===== */
+var updBuild=0,updKey='deemackClicker2.autoUpd';
+function updGo(){save();location.replace(location.pathname+'?v='+updBuild)}
+function checkUpdate(auto){if(!/^https?:$/.test(location.protocol))return;
+fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).then(function(j){var b=j&&+j.build;if(!(b>BUILD))return;updBuild=b;
+var tried=null;try{tried=sessionStorage.getItem(updKey)}catch(e){}
+var busy=!!BF||!$('ps').hidden||!$('tabv').hidden;
+if(auto&&!busy&&tried!==String(b)){try{sessionStorage.setItem(updKey,String(b))}catch(e){}updGo();return}
+$('updbar').hidden=false}).catch(function(){})}
+$('updbar').onclick=updGo;
+setTimeout(function(){checkUpdate(true)},1500);
+setInterval(function(){if(!document.hidden)checkUpdate(false)},180000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate(true)});
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
