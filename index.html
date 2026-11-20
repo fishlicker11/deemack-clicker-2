@@ -321,7 +321,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=39;
+var BUILD=40;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -1254,10 +1254,12 @@ function authSignUp(){return fetch('https://identitytoolkit.googleapis.com/v1/ac
 .then(function(r){return r.json()}).then(function(j){if(!j||!j.idToken)throw new Error((j&&j.error&&j.error.message)||'sign-in failed');return{idToken:j.idToken,refreshToken:j.refreshToken,exp:Date.now()+(+j.expiresIn||3600)*1000,uid:j.localId}})}
 function authRefresh(){return fetch('https://securetoken.googleapis.com/v1/token?key='+encodeURIComponent(FB_KEY),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=refresh_token&refresh_token='+encodeURIComponent(AUTH.refreshToken)})
 .then(function(r){return r.json().then(function(j){if(!r.ok||!j||!j.id_token){var e=new Error((j&&j.error&&j.error.message)||'refresh failed');e.bad=true;throw e}return{idToken:j.id_token,refreshToken:j.refresh_token||AUTH.refreshToken,exp:Date.now()+(+j.expires_in||3600)*1000,uid:j.user_id||AUTH.uid}})})}
-function authToken(){if(!FB_KEY)return Promise.resolve('');
+/* if sign-in fails (e.g. too many new players on one school network), wait longer before each retry: 15s, 30s, 1m … up to 10m */
+var authWait=0,authFails=0;
+function authToken(){if(!FB_KEY)return Promise.resolve('');if(!(AUTH&&AUTH.idToken&&Date.now()<AUTH.exp-60000)&&Date.now()<authWait)return Promise.reject(new Error(authErr||'waiting to retry sign-in'));
 if(AUTH&&AUTH.idToken&&Date.now()<AUTH.exp-60000)return Promise.resolve(AUTH.idToken);
 if(!authP){var pr=AUTH&&AUTH.refreshToken?authRefresh().catch(function(e){if(e&&e.bad)return authSignUp();throw e}):authSignUp();
-authP=pr.then(function(a){AUTH=a;authSave();authErr='';uid=a.uid;authP=null;return a.idToken},function(e){authP=null;authErr=String(e&&e.message||e);throw e})}
+authP=pr.then(function(a){AUTH=a;authSave();authErr='';uid=a.uid;authP=null;authFails=0;authWait=0;return a.idToken},function(e){authP=null;authErr=String(e&&e.message||e);authFails++;authWait=Date.now()+Math.min(600000,15000*Math.pow(2,authFails-1));throw e})}
 return authP}
 function authMsg(){return /OPERATION_NOT_ALLOWED|ADMIN_ONLY/.test(authErr)?'Anonymous sign-in is turned off in Firebase.':/API.?KEY|key not valid/i.test(authErr)?'the Firebase Web API key (FB_KEY) is wrong.':'sign-in failed ('+authErr+').'}
 /* database request; adds the sign-in token when there is one */
@@ -1281,7 +1283,7 @@ function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true
 claimName(n).then(function(r){claiming=false;if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(){claiming=false})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
-function pushStats(force){if(tabDead||!FB||!uid||!NAME||busy)return;if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
+function pushStats(force){if(tabDead||!FB||!NAME||busy)return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').catch(function(){}).then(function(){busy=false})}
 function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
 $('nmsg').textContent=change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change;$('nimp').hidden=!!change;btn.textContent=change?'Save name':'Play';
