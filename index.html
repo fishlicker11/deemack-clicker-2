@@ -325,7 +325,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=56;
+var BUILD=57;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -470,8 +470,8 @@ var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per
 function update(noAnim){var anim=ready&&!noAnim;
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
-var rb=rbOf(S),am=allMul();
-T.forEach(function(t,i){var r=refs[t.id],vis=i===0||S.own[T[i-1].id]>0||S.own[t.id]>0;
+var rb=rbOf(S),am=allMul(),allT=allTeachers();
+T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0;
 if(!vis){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
 var each=eachOf(t,i,rb,am);r.in.textContent=fmt(each)+"/s each · Owned "+S.own[t.id]+" · Lv "+S.lvl[t.id];
@@ -1092,11 +1092,14 @@ function showDev(){return isOwnerName(NAME)&&(devOk()||nameOk||!FB)}
 function devFlag(k){try{return LS.getItem('deemackClicker2.dev.'+k)==='1'}catch(e){return false}}
 function setDevFlag(k,on){try{if(on)LS.setItem('deemackClicker2.dev.'+k,'1');else LS.removeItem('deemackClicker2.dev.'+k)}catch(e){}}
 function allThemes(){return isOwnerName(NAME)&&devOk()&&devFlag('themes')}
+function allTeachers(){return isOwnerName(NAME)&&devOk()&&devFlag('allteach')}
 /* dev commands: add more here */
 /* dev commands: add more here. type 'toggle' (on/off), 'input' (type a value, tap Set) or 'action' (tap twice to run) */
 var DEVCMDS=[
 {id:'themes',type:'toggle',name:'Unlock all themes',desc:'Every theme can be used, no achievements needed.',
  run:function(on){if(on)toast('All themes unlocked','#a855f7');else{var n=achCount(S);if(S.theme>=0&&n<5*(S.theme+1)){S.theme=-1;applyTheme(-1);save()}toast('Themes back to normal','#a855f7')}if(!$('tv').hidden)renderThemes()}},
+{id:'allteach',type:'toggle',name:'Show all teachers',desc:'Shows every teacher in the shop, even ones you haven\u2019t unlocked yet. Doesn\u2019t buy anything.',
+ run:function(on){update(true);toast(on?'All teachers shown':'Teachers back to normal','#a855f7')}},
 {id:'setpp',type:'input',name:'Set prestige points',desc:'Sets how many prestige points you have to spend.',ph:'Points',
  now:function(){return 'Now: '+S.pp},
  run:function(v){var t=String(v).replace(/[,\s]/g,'');if(!/^\d+$/.test(t)||+t>1e12){toast('Type a whole number (0 or more)','#ef4444');return false}S.pp=+t;save();update();toast('Prestige points set to '+S.pp,'#a855f7');return true}},
