@@ -49,6 +49,8 @@ button:disabled{opacity:.35;cursor:default}
 .lb{margin-top:18px}.lb h2{font-size:15px;margin:0 0 6px}
 .lb .row{display:flex;gap:8px;align-items:baseline;padding:6px 10px;border:1px solid var(--line);background:var(--card);border-radius:10px;margin-bottom:5px;font-size:14px}
 .lb .row.me{border-color:var(--accent)}
+.devrow{display:flex;gap:6px;margin-top:6px;align-items:center}
+.ov .devin{width:110px;margin:0;padding:7px 9px;font-size:14px}
 .obadge{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#f59e0b;color:#1a1300;white-space:nowrap}
 .runebtn[hidden]{display:none}
 .runebtn.logbtn{position:relative;font-size:18px;padding:8px 11px}
@@ -1004,12 +1006,27 @@ function devFlag(k){try{return LS.getItem('deemackClicker2.dev.'+k)==='1'}catch(
 function setDevFlag(k,on){try{if(on)LS.setItem('deemackClicker2.dev.'+k,'1');else LS.removeItem('deemackClicker2.dev.'+k)}catch(e){}}
 function allThemes(){return isOwnerName(NAME)&&devOk()&&devFlag('themes')}
 /* dev commands: add more here */
-var DEVCMDS=[{id:'themes',name:'Unlock all themes',desc:'Every theme can be used on all your save slots, no achievements needed.',
- run:function(on){if(on)toast('All themes unlocked','#a855f7');else{var n=achCount(S);if(S.theme>=0&&n<5*(S.theme+1)){S.theme=-1;applyTheme(-1);save()}toast('Themes back to normal','#a855f7')}if(!$('tv').hidden)renderThemes()}}];
-function renderDev(){var L=$('devl');L.textContent='';DEVCMDS.forEach(function(c){var on=devFlag(c.id),r=document.createElement('div');r.className='arow'+(on?' trow on':'');
-var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=c.name+(on?' · ON':'');var sp=document.createElement('span');sp.textContent=c.desc;x.appendChild(b);x.appendChild(sp);
-var bt=document.createElement('button');bt.className='bfight';bt.textContent=on?'Turn off':'Turn on';bt.onclick=function(){setDevFlag(c.id,!on);c.run(!on);renderDev()};
-r.appendChild(x);r.appendChild(bt);L.appendChild(r)})}
+/* dev commands: add more here. type 'toggle' (on/off), 'input' (type a value, tap Set) or 'action' (tap twice to run) */
+var DEVCMDS=[
+{id:'themes',type:'toggle',name:'Unlock all themes',desc:'Every theme can be used on all your save slots, no achievements needed.',
+ run:function(on){if(on)toast('All themes unlocked','#a855f7');else{var n=achCount(S);if(S.theme>=0&&n<5*(S.theme+1)){S.theme=-1;applyTheme(-1);save()}toast('Themes back to normal','#a855f7')}if(!$('tv').hidden)renderThemes()}},
+{id:'setpp',type:'input',name:'Set prestige points',desc:'Sets how many prestige points you have to spend on this save slot.',ph:'Points',
+ now:function(){return 'Now: '+S.pp},
+ run:function(v){var t=String(v).replace(/[,\s]/g,'');if(!/^\d+$/.test(t)||+t>1e12){toast('Type a whole number (0 or more)','#ef4444');return false}S.pp=+t;save();update();toast('Prestige points set to '+S.pp,'#a855f7');return true}},
+{id:'resettree',type:'action',name:'Reset skill tree',desc:'Removes every skill tree upgrade on this save slot. Points are not refunded (set them above).',btn:'Reset',
+ now:function(){return 'Owned: '+S.tree.length+' / '+TN.length},
+ run:function(){S.tree=[];TFXC={d:null,n:-1,v:null};tsel=-1;save();update();toast('Skill tree reset','#a855f7')}}];
+var devArm=null,devArmT;
+function renderDev(){var L=$('devl');L.textContent='';DEVCMDS.forEach(function(c){var on=c.type==='toggle'&&devFlag(c.id),r=document.createElement('div');r.className='arow'+(on?' trow on':'');
+var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=c.name+(on?' · ON':'');var sp=document.createElement('span');sp.textContent=c.desc+(c.now?' ('+c.now()+')':'');x.appendChild(b);x.appendChild(sp);r.appendChild(x);
+if(c.type==='input'){var row=document.createElement('div');row.className='devrow';var inp=document.createElement('input');inp.className='devin';inp.inputMode='numeric';inp.placeholder=c.ph||'';inp.autocomplete='off';
+ var go=document.createElement('button');go.className='bfight';go.textContent='Set';go.onclick=function(){if(c.run(inp.value))renderDev()};inp.onkeydown=function(e){if(e.key==='Enter')go.click()};
+ row.appendChild(inp);row.appendChild(go);x.appendChild(row)}
+else{var bt=document.createElement('button');bt.className='bfight';
+ if(c.type==='action'){bt.textContent=devArm===c.id?'Sure?':c.btn;bt.onclick=function(){if(devArm===c.id){devArm=null;clearTimeout(devArmT);c.run();renderDev()}else{devArm=c.id;clearTimeout(devArmT);devArmT=setTimeout(function(){devArm=null;if(!$('devv').hidden)renderDev()},3000);renderDev()}}}
+ else{bt.textContent=on?'Turn off':'Turn on';bt.onclick=function(){setDevFlag(c.id,!on);c.run(!on);renderDev()}}
+ r.appendChild(bt)}
+L.appendChild(r)})}
 function openDev(){if(!showDev())return;if(devOk()){renderDev();$('devv').hidden=false}else{$('dcin').value='';$('dcerr').textContent='';$('dcv').hidden=false;$('dcin').focus()}}
 $('devb').onclick=openDev;
 $('dcok').onclick=function(){if(codeHash($('dcin').value)===OWNER_HASH){try{LS.setItem('deemackClicker2.devok','1')}catch(e){}$('dcv').hidden=true;$('dcin').value='';renderDev();$('devv').hidden=false}else $('dcerr').textContent='Wrong code.'};
