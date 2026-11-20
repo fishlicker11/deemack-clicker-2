@@ -318,7 +318,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=49;
+var BUILD=50;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -429,7 +429,11 @@ function maxK(b,r,m){var k=Math.max(0,Math.floor(Math.log(m*(r-1)/b+1)/Math.log(
 function fmt(x){x=+x;if(!isFinite(x))return x>0?"∞":"0";if(x<0)x=0;if(x<1000)return String(x<100?Math.floor(x*100+1e-6)/100:Math.floor(x+1e-9));if(x>=1e66){var ex=Math.floor(Math.log10(x)),mt=x/Math.pow(10,ex);if(mt>=9.995){mt/=10;ex++}return mt.toFixed(2)+"e"+ex}var u=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod","Vg"],e=Math.min(Math.floor(Math.log10(x)/3+1e-12),u.length-1),v=x/Math.pow(1000,e);if(v>=1000&&e<u.length-1){e++;v/=1000}var d=v<10?100:v<100?10:1,f=Math.floor(v*d+1e-6)/d;if(f>=1000&&e<u.length-1){e++;f=Math.floor(f/1000*100+1e-6)/100}return f.toFixed(f<10?2:f<100?1:0)+u[e]}
 function totalOf(d){var b=rbOf(d),s=1;T.forEach(function(t,i){s+=t.cps*Math.pow(2,d.lvl[t.id]-1)*d.own[t.id]*tm(i,b)});return s*(1+cardBonus(d)+achBonus(d))*tfx(d).inc}
 function total(){return totalOf(S)*boostMul()}
-function tcps(t){return t.cps*Math.pow(2,S.lvl[t.id]-1)*S.own[t.id]*tm(T.indexOf(t),rbOf(S))}
+/* what one teacher really earns per second right now: level x runes (Greed, Dawn, Dusk) x cards x achievements
+   x skill tree income upgrades x active boosts. All the teachers' amounts add up to your income per second. */
+function allMul(){return (1+cardBonus(S)+achBonus(S))*tfx(S).inc*boostMul()}
+function eachOf(t,i,rb,am){return t.cps*Math.pow(2,S.lvl[t.id]-1)*tm(i,rb||rbOf(S))*(am==null?allMul():am)}
+function tcps(t){return eachOf(t,T.indexOf(t))*S.own[t.id]}
 function plan(kind,t){var b,r;
 if(kind==="b"){b=PRICE*(1-Math.min(.75,rbOf(S)[2]))*t.buy*Math.pow(1.15,S.own[t.id])*tfx(S).tc;r=1.15}else{b=PRICE*(1-Math.min(.75,rbOf(S)[3]))*t.up*Math.pow(3.5,S.lvl[t.id]-1)*tfx(S).uc;r=3.5}
 var k=mult==="max"?maxK(b,r,S.gb):mult,show=Math.max(k,1),cost=geo(b,r,show);
@@ -457,11 +461,12 @@ var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per
 function update(noAnim){var anim=ready&&!noAnim;
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
+var rb=rbOf(S),am=allMul();
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||S.own[T[i-1].id]>0||S.own[t.id]>0;
 if(!vis){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
-r.in.textContent=fmt(t.cps*Math.pow(2,S.lvl[t.id]-1))+"/s each · Owned "+S.own[t.id]+" · Lv "+S.lvl[t.id];
-r.mk.textContent="Making "+fmt(tcps(t))+"/s";
+var each=eachOf(t,i,rb,am);r.in.textContent=fmt(each)+"/s each · Owned "+S.own[t.id]+" · Lv "+S.lvl[t.id];
+r.mk.textContent="Making "+fmt(each*S.own[t.id])+"/s";
 label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t))})}
 
 $("bar").onclick=function(e){var m=e.target.getAttribute&&e.target.getAttribute("data-m");if(!m)return;
