@@ -317,7 +317,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=43;
+var BUILD=44;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -346,11 +346,11 @@ var LS=LS_OK?localStorage:{getItem:function(k){return Object.prototype.hasOwnPro
 var BASE="deemackClicker2.slot",ACT="deemackClicker2.active",PCT=0.2,PRICE=0.9;
 var CK=[],disp=null;
 /* Runes: each click has a RUNE_CHANCE chance (0.5%) to find a rune (raised by Fortune runes and the skill tree's Luck
-   nodes). Only when a rune drops is its rarity rolled, using the RW weights (out of 1000):
-   Common 50%, Uncommon 30%, Rare 12%, Epic 5.5%, Legendary 2%, Mythic 0.5%.
-   Quest reward runes roll from the same weights, starting at their minimum rarity. */
+   nodes). Only when a rune drops is its rarity rolled, using the RW weights (out of 10000):
+   Common 70%, Uncommon 22%, Rare 6%, Epic 1.5%, Legendary 0.49%, Mythic 0.01%.
+   Quest reward runes have their own odds (QRW, next to giveRuneMin). */
 var RUNE_CHANCE=0.005;
-var RN=['Common','Uncommon','Rare','Epic','Legendary','Mythic'],RCL=['#9aa0a6','#3fb950','#3b82f6','#a855f7','#f59e0b','#ef4444'],RW=[500,300,120,55,20,5],RP=[1,3,6,12,25,50];
+var RN=['Common','Uncommon','Rare','Epic','Legendary','Mythic'],RCL=['#9aa0a6','#3fb950','#3b82f6','#a855f7','#f59e0b','#ef4444'],RW=[7000,2200,600,150,49,1],RP=[1,3,6,12,25,50];
 var RT=[
 {n:'Greed',t:'+{v}% teacher income',v:[5,7,10,13,17,20]},
 {n:'Might',t:'+{v}% click power',v:[10,15,22,30,40,50]},
@@ -1156,7 +1156,11 @@ function qGen(per){var keys=qKinds(per),pick=[];
 while(pick.length<3&&keys.length)pick.push(keys.splice(Math.floor(Math.random()*keys.length),1)[0]);
 S.q[per]={at:Date.now(),list:pick.map(function(k){return qMake(k,per)})};if(per==='w')S.q.w.v=QW_V;else S.q.d.v=QD_V}
 function qValid(Q){return Q&&typeof Q.at==='number'&&Array.isArray(Q.list)&&Q.list.length&&Q.list.every(function(q){return q&&QK[q.k]&&q.n>0&&typeof q.b==='number'&&q.r&&(q.r.t==='boost'?q.r.p>0&&q.r.s>0:QREW.d.concat(QREW.w).some(function(x){return x.t===q.r.t}))})}
-function giveRuneMin(min){var tot=0,i,x,r=RW.length-1,acc=0;for(i=min;i<RW.length;i++)tot+=RW[i];x=Math.random()*tot;for(i=min;i<RW.length;i++){acc+=RW[i];if(x<acc){r=i;break}}
+/* Quest reward rune odds (weights by rarity):
+   daily, Rare or better:  Rare 62%, Epic 27.5%, Legendary 10%, Mythic 0.5%
+   weekly, Epic or better: Epic 68.75%, Legendary 25%, Mythic 6.25% */
+var QRW={2:[0,0,1240,550,200,10],3:[0,0,0,1100,400,100]};
+function giveRuneMin(min){var W=QRW[min]||RW.map(function(w,j){return j<min?0:w}),tot=0,i,x,r=W.length-1,acc=0;for(i=0;i<W.length;i++)tot+=W[i];x=Math.random()*tot;for(i=0;i<W.length;i++){acc+=W[i];if(x<acc){r=i;break}}
 var k=Math.floor(Math.random()*RT.length);S.st.found++;S.st.rf[r]++;S.st.kf[k]=(S.st.kf[k]||0)+1;
 if(S.runes.length>=100){toast('Rune inventory full: the '+RN[r]+' Rune of '+RT[k].n+' was lost',RCL[r]);return}
 S.runes.push({id:'r'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36),k:k,r:r});toast('Quest reward: '+RN[r]+' Rune of '+RT[k].n+'!',RCL[r])}
