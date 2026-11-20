@@ -58,6 +58,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .in,.mk{font-size:13px;color:var(--muted)}
 .mk{color:var(--text)}
 .bt{display:flex;flex-direction:column;gap:5px;flex:none}
+.bt button.e{background:linear-gradient(135deg,#f59e0b,#a855f7);color:#fff}
 .bt button,.cu button{border:0;border-radius:9px;background:var(--btn);color:var(--btntext);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;min-width:104px;cursor:pointer;line-height:1.2}
 .bt button small,.cu button small{display:block;font-weight:500;opacity:.9;pointer-events:none}
 button{touch-action:manipulation}
@@ -331,7 +332,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost. Only one boss boost runs at a time: while it runs, wins don't give a new one. After a boss gives you its reward, it's practice only for an hour.</p><div class="bban" id="bban" hidden></div><div id="bol"></div></div></div>
 <div id="ps" hidden><div class="psw">
 <div class="bfh"><div class="bft"><b>🌳 Prestige</b><span class="pss" id="pspts"></span></div><button class="xbtn2" id="psx" aria-label="Close">✕</button></div>
-<div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes, student upgrades and the skill tree. You can prestige once every 10 minutes.</div></div>
+<div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes, teacher ⭐s, student upgrades and the skill tree. You can prestige once every 10 minutes.</div></div>
 <div class="tarea" id="tarea"><svg id="tsvg" aria-label="Skill tree"></svg><div class="tlock" id="tlock"><span>🔒</span><b>Skill tree</b>Prestige once to unlock it.</div><div class="tctl" id="tctl"><span id="tcount"></span><button id="tball" class="tball">🛒 Buy all</button><button id="tfit" aria-label="Show the whole tree">⤢</button></div></div>
 <div class="tinfo" id="tinfo"></div>
 </div></div>
@@ -358,7 +359,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=60;
+var BUILD=61;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -403,6 +404,10 @@ var CK=[],disp=null,bestMem=0; /* bestMem: the highest "… per second" shown th
    Mr McCoy every few minutes (like little pests on the edge). Each open website steals 5% of your income and keeps it;
    block it (tap BLOCK on the beat 4 times in a row) to get back double what it stole (always at least 30 seconds of
    income). Student upgrades are bought with Games Blocked and kept forever (even when you prestige). ===== */
+/* ===== Evolving teachers: at level EVO_LV a teacher can evolve (up to EVO_MAX times). Evolving costs Games Blocked,
+   resets that teacher to 0 owned and Lv 1, and gives a ⭐: each star doubles their money and makes them EVO_PRICE times
+   pricier to buy. Stars are kept when you prestige. ===== */
+var EVO_LV=25,EVO_MAX=5,EVO_PRICE=3;
 var STUDENTS=['Orion']; /* add more student names here */
 var WEB_AT=1e15,WEB_STEAL=0.05,WEB_SLOTS=[-135,-45,90,-90,135,45]; /* where websites sit around Mr McCoy (degrees) */
 var SUP=[{id:'filter',ic:'🧹',n:'Website Filter',d:'Get back +50% more Games Blocked when you block a website.',max:5,c:1e15,m:15},
@@ -454,13 +459,14 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0},web:[]};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0},web:[],evo:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
 function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)})}
-if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}}}catch(e){}return d}
+if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
+if(o.evo&&typeof o.evo==='object')T.forEach(function(t){var v=+o.evo[t.id];if(v>0&&v===Math.floor(v))d.evo[t.id]=Math.min(EVO_MAX,v)})}}catch(e){}return d}
 /* ===== One save: older versions had 3 save slots. On start (and after loading a code) the slot with the most
    progress (most Games Blocked ever earned) becomes the one save. The other slots are kept on this device as hidden
    backups (deemackClicker2.slot1.bak / slot2.bak / slot3.bak) and never loaded again, so erasing your save can't bring
@@ -487,15 +493,15 @@ function save(){if(tabDead)return;try{var cur=storedRev();if(cur>(S.rev||0)){kil
 function geo(b,r,k){return Math.ceil(b*(Math.pow(r,k)-1)/(r-1))}
 function maxK(b,r,m){var k=Math.max(0,Math.floor(Math.log(m*(r-1)/b+1)/Math.log(r)));while(geo(b,r,k+1)<=m)k++;while(k>0&&geo(b,r,k)>m)k--;return k}
 function fmt(x){x=+x;if(!isFinite(x))return x>0?"∞":"0";if(x<0)x=0;if(x<1000)return String(x<100?Math.floor(x*100+1e-6)/100:Math.floor(x+1e-9));if(x>=1e66){var ex=Math.floor(Math.log10(x)),mt=x/Math.pow(10,ex);if(mt>=9.995){mt/=10;ex++}return mt.toFixed(2)+"e"+ex}var u=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod","Vg"],e=Math.min(Math.floor(Math.log10(x)/3+1e-12),u.length-1),v=x/Math.pow(1000,e);if(v>=1000&&e<u.length-1){e++;v/=1000}var d=v<10?100:v<100?10:1,f=Math.floor(v*d+1e-6)/d;if(f>=1000&&e<u.length-1){e++;f=Math.floor(f/1000*100+1e-6)/100}return f.toFixed(f<10?2:f<100?1:0)+u[e]}
-function totalOf(d){var b=rbOf(d),s=1;T.forEach(function(t,i){s+=t.cps*Math.pow(2,d.lvl[t.id]-1)*d.own[t.id]*tm(i,b)});return s*(1+cardBonus(d)+achBonus(d))*tfx(d).inc}
+function totalOf(d){var b=rbOf(d),s=1;T.forEach(function(t,i){s+=t.cps*Math.pow(2,d.lvl[t.id]-1+((d.evo&&d.evo[t.id])||0))*d.own[t.id]*tm(i,b)});return s*(1+cardBonus(d)+achBonus(d))*tfx(d).inc}
 function total(){return totalOf(S)*boostMul()}
 /* what one teacher really earns per second right now: level x runes (Greed, Dawn, Dusk) x cards x achievements
    x skill tree income upgrades x active boosts. All the teachers' amounts add up to your income per second. */
 function allMul(){return (1+cardBonus(S)+achBonus(S))*tfx(S).inc*boostMul()}
-function eachOf(t,i,rb,am){return t.cps*Math.pow(2,S.lvl[t.id]-1)*tm(i,rb||rbOf(S))*(am==null?allMul():am)}
+function eachOf(t,i,rb,am){return t.cps*Math.pow(2,S.lvl[t.id]-1+((S.evo&&S.evo[t.id])||0))*tm(i,rb||rbOf(S))*(am==null?allMul():am)}
 function tcps(t){return eachOf(t,T.indexOf(t))*S.own[t.id]}
 function plan(kind,t){var b,r;
-if(kind==="b"){b=PRICE*(1-Math.min(.75,rbOf(S)[2]))*t.buy*Math.pow(1.15,S.own[t.id])*tfx(S).tc;r=1.15}else{b=PRICE*(1-Math.min(.75,rbOf(S)[3]))*t.up*Math.pow(3.5,S.lvl[t.id]-1)*tfx(S).uc;r=3.5}
+if(kind==="b"){b=PRICE*(1-Math.min(.75,rbOf(S)[2]))*t.buy*Math.pow(EVO_PRICE,(S.evo&&S.evo[t.id])||0)*Math.pow(1.15,S.own[t.id])*tfx(S).tc;r=1.15}else{b=PRICE*(1-Math.min(.75,rbOf(S)[3]))*t.up*Math.pow(3.5,S.lvl[t.id]-1)*tfx(S).uc;r=3.5}
 var k=mult==="max"?maxK(b,r,S.gb):mult,show=Math.max(k,1),cost=geo(b,r,show);
 return{k:show,cost:cost,ok:cost<=S.gb&&(kind==="b"||S.own[t.id]>0)}}
 function act(kind,t){var p=plan(kind,t);if(!p.ok)return;S.gb=Math.max(0,S.gb-p.cost);
@@ -506,13 +512,24 @@ $("mcimg").src=PHOTOS.mccoy||"";
 var refs={};
 T.forEach(function(t){
 var d=document.createElement("div");d.className="card";d.hidden=true;
-d.innerHTML='<img class="ph" alt=""><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button><button class="u"></button></div>';
+d.innerHTML='<img class="ph" alt=""><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button><button class="u"></button><button class="e" hidden></button></div>';
 d.querySelector("img").src=PHOTOS[t.ph||t.id]||"";
 d.querySelector(".nm").textContent=t.name;
 d.onanimationend=function(){d.classList.remove("pop")};
-var r={card:d,in:d.querySelector(".in"),mk:d.querySelector(".mk"),b:d.querySelector(".b"),u:d.querySelector(".u")};
-r.b.onclick=function(){act("b",t)};r.u.onclick=function(){act("u",t)};
+var r={card:d,in:d.querySelector(".in"),mk:d.querySelector(".mk"),b:d.querySelector(".b"),u:d.querySelector(".u"),e:d.querySelector(".e"),nm:d.querySelector(".nm"),ev:-1};
+r.b.onclick=function(){act("b",t)};r.u.onclick=function(){act("u",t)};r.e.onclick=function(){evolve(t)};
 refs[t.id]=r;$("shop").appendChild(d)});
+/* evolve: tap twice (it resets the teacher); the button shows once the teacher reaches level EVO_LV */
+var evoArm=null,evoArmT,evoSeen={};
+function evoCost(t){return t.up*Math.pow(3.5,EVO_LV-1)*3*Math.pow(2,(S.evo&&S.evo[t.id])||0)}
+function evolve(t){var e=(S.evo&&S.evo[t.id])||0,c=evoCost(t);if(S.lvl[t.id]<EVO_LV||e>=EVO_MAX||S.gb<c)return;
+if(evoArm!==t.id){evoArm=t.id;clearTimeout(evoArmT);evoArmT=setTimeout(function(){evoArm=null;update()},3000);update();return}
+evoArm=null;clearTimeout(evoArmT);S.gb-=c;if(!S.evo)S.evo={};S.evo[t.id]=e+1;S.own[t.id]=0;S.lvl[t.id]=1;save();update(true);
+toast('✨ '+t.name+' evolved to '+Array(e+2).join('⭐')+'! They make ×'+Math.pow(2,e+1)+' money now.','#f59e0b')}
+function evoUI(t,r){var e=(S.evo&&S.evo[t.id])||0;if(r.ev!==e){r.ev=e;r.nm.textContent=t.name+(e?' '+Array(e+1).join('⭐'):'')}
+var can=S.lvl[t.id]>=EVO_LV&&e<EVO_MAX;if(r.e.hidden===can)r.e.hidden=!can;if(!can)return;var c=evoCost(t);
+var h=evoArm===t.id?'Tap again<small>resets to 0 owned</small>':'✨ Evolve ⭐'+(e+1)+'<small>'+fmt(c)+'</small>';if(r.e._h!==h){r.e.innerHTML=h;r.e._h=h}var dis=S.gb<c;if(r.e.disabled!==dis)r.e.disabled=dis;
+if(ready&&!evoSeen[t.id]){evoSeen[t.id]=1;toast('✨ '+t.name+' can evolve! Each ⭐ doubles their money.','#f59e0b')}evoSeen[t.id]=1}
 /* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
 function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
@@ -522,12 +539,12 @@ function update(noAnim){var anim=ready&&!noAnim;var su=!!(S.stu&&S.stu.u);$('tab
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 var rb=rbOf(S),am=allMul(),allT=allTeachers();
-T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0;
+T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0||((S.evo&&S.evo[t.id])>0);
 if(!vis){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
 var each=eachOf(t,i,rb,am);r.in.textContent=fmt(each)+"/s each · Owned "+S.own[t.id]+" · Lv "+S.lvl[t.id];
 r.mk.textContent="Making "+fmt(each*S.own[t.id])+"/s";
-label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t))})}
+label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t));evoUI(t,r)})}
 
 $("bar").onclick=function(e){var m=e.target.getAttribute&&e.target.getAttribute("data-m");if(!m)return;
 mult=m==="max"?"max":+m;Array.prototype.forEach.call($("bar").children,function(b){b.className=b===e.target?"on":""});update()};
