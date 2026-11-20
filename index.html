@@ -317,7 +317,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=45;
+var BUILD=46;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -326,27 +326,25 @@ var CREDITS=[
 {role:'PLAYTESTERS',names:['Oliver','Robbie','Xander','Garrett','Kale','Ty']}];
 var UPDATES=[];
 (function(){
-/* Teachers, cheapest first. rk = the teacher's fixed rank: older teachers keep the rank they always had, so adding a
-   teacher in between never changes anyone else's boss difficulty, boss reward, achievement value or Dawn/Dusk rune bonus.
-   An added teacher gets an in-between rank (Mr Cluver: 0.5, between Kid Davis and Mr Finney). */
+/* Teachers, weakest first. Each spot in the list has a fixed strength (income and prices). When a teacher is added,
+   everyone after it moves up one spot and takes that spot's strength: Mr Cluver took Mr Finney's old spot, Mr Finney
+   took Mr Uhlman's, and so on; Mr Linboom got a new top spot. Bosses follow the same order. */
 var T=[
-{id:"davis",name:"Kid Davis",cps:2,buy:25,up:200,rk:0},
-{id:"cluver",name:"Mr Cluver",cps:15,buy:265,up:2120,rk:0.5},
-{id:"tompkins",name:"Mr Finney",ph:"finney",cps:100,buy:2507,up:20010,rk:1},
-{id:"lawrence",name:"Mr Uhlman",ph:"uhlman",cps:1000,buy:36225,up:289800,rk:2},
-{id:"finney",name:"Ms Tompkins",ph:"tompkins",cps:1e4,buy:525550,up:4209000,rk:3},
-{id:"reiman",name:"Adult Davis",ph:"adavis",cps:1e5,buy:7624500,up:60950000,rk:4},
-{id:"mac",name:"Mr Rutan",ph:"rutan",cps:1e6,buy:110515000,up:884350000,rk:5},
-{id:"hill",name:"Mr Lawrence",ph:"lawrence",cps:1e7,buy:1.5985e9,up:1.288e10,rk:6},
-{id:"adavis",name:"Mr Mac",ph:"mac",cps:1e8,buy:2.323e10,up:1.863e11,rk:7},
-{id:"uhlman",name:"Young Hill",ph:"hill",cps:4e8,buy:1.3455e11,up:1.0787e12,rk:8},
-{id:"rutan",name:"Mr Reiman",ph:"reiman",cps:1.6e9,buy:7.82e11,up:6.256e12,rk:9},
-{id:"scott",name:"Mr Scott",cps:6.4e9,buy:4.531e12,up:3.634e13,rk:10},
-{id:"holmgren",name:"Mr Holmgren",cps:2.6e10,buy:2.668e13,up:2.139e14,rk:11},
-{id:"stokes",name:"Mr Stokes",cps:1e11,buy:1.495e14,up:1.196e15,rk:12},
-{id:"linboom",name:"Mr Linboom",cps:4e11,buy:8.625e14,up:6.9e15,rk:13}];
-var RKMAX=T.reduce(function(m,t){return Math.max(m,t.rk)},0);
-function rkIdx(k){for(var i=0;i<T.length;i++)if(T[i].rk===k)return i;return 0}
+{id:"davis",name:"Kid Davis",cps:2,buy:25,up:200},
+{id:"cluver",name:"Mr Cluver",cps:100,buy:2507,up:20010},
+{id:"tompkins",name:"Mr Finney",ph:"finney",cps:1000,buy:36225,up:289800},
+{id:"lawrence",name:"Mr Uhlman",ph:"uhlman",cps:1e4,buy:525550,up:4209000},
+{id:"finney",name:"Ms Tompkins",ph:"tompkins",cps:1e5,buy:7624500,up:60950000},
+{id:"reiman",name:"Adult Davis",ph:"adavis",cps:1e6,buy:110515000,up:884350000},
+{id:"mac",name:"Mr Rutan",ph:"rutan",cps:1e7,buy:1.5985e9,up:1.288e10},
+{id:"hill",name:"Mr Lawrence",ph:"lawrence",cps:1e8,buy:2.323e10,up:1.863e11},
+{id:"adavis",name:"Mr Mac",ph:"mac",cps:4e8,buy:1.3455e11,up:1.0787e12},
+{id:"uhlman",name:"Young Hill",ph:"hill",cps:1.6e9,buy:7.82e11,up:6.256e12},
+{id:"rutan",name:"Mr Reiman",ph:"reiman",cps:6.4e9,buy:4.531e12,up:3.634e13},
+{id:"scott",name:"Mr Scott",cps:2.6e10,buy:2.668e13,up:2.139e14},
+{id:"holmgren",name:"Mr Holmgren",cps:1e11,buy:1.495e14,up:1.196e15},
+{id:"stokes",name:"Mr Stokes",cps:4e11,buy:8.625e14,up:6.9e15},
+{id:"linboom",name:"Mr Linboom",cps:1.6e12,buy:4.97e15,up:3.98e16}];
 var MEM={},LS_OK=(function(){try{var k='deemackClicker2.test';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch(e){return false}})();
 var LS=LS_OK?localStorage:{getItem:function(k){return Object.prototype.hasOwnProperty.call(MEM,k)?MEM[k]:null},setItem:function(k,v){MEM[k]=String(v)},removeItem:function(k){delete MEM[k]}};
 var BASE="deemackClicker2.slot",ACT="deemackClicker2.active",PCT=0.2,PRICE=0.9;
@@ -363,7 +361,7 @@ var RT=[
 {n:'Thrift',t:'-{v}% teacher buy prices',v:[3,4,6,8,11,15]},
 {n:'Mastery',t:'-{v}% upgrade prices',v:[3,5,7,10,13,18]},
 {n:'Fortune',t:'+{v}% rune drop chance',v:[10,15,22,30,40,60]},
-{n:'Dawn',t:'+{v}% income from the first 9 teachers',v:[10,15,22,30,40,55]},
+{n:'Dawn',t:'+{v}% income from the first 8 teachers',v:[10,15,22,30,40,55]},
 {n:'Dusk',t:'+{v}% income from the last 8 teachers',v:[10,15,22,30,40,55]}];
 function rlParse(r){var x={next:0,pct:0,until:0,d:[0,0,0,0,0,0]};if(r&&typeof r==='object'){x.next=+r.next||0;x.pct=+r.pct||0;x.until=+r.until||0;if(Array.isArray(r.d)&&r.d.length===6)x.d=r.d.map(function(v){return(+v>=0&&+v<=9)?Math.floor(+v):0})}return x}
 function stParse(o){var x={clicks:0,crit:0,maxcps:0,caught:0,earned:0,found:0,sold:0,deleted:0,dice:0,rolled:0,bp:0,bs:0,buys:0,ups:0,bw:0,gold:0,rf:[0,0,0,0,0,0],kf:[]};
@@ -503,7 +501,7 @@ function rankScoreNow(){var cs=cardStats(S);return totalOf(S)*(1+(runePower(S)+c
 function bestScore(){var b=0;try{b=+LS.getItem('deemackClicker2.best')||0}catch(e){}var now=rankScoreNow();if(isFinite(now)&&now>b){b=now;try{LS.setItem('deemackClicker2.best',String(b))}catch(e){}}return b}
 function cardStats(d){var o={n:0,p:0,best:-2,byR:[0,0,0,0,0,0,0,0,0,0,0]};Object.keys(d.cards||{}).forEach(function(id){var r=d.cards[id];o.n++;o.p+=5+3*(r+1);o.byR[r+1]++;if(r>o.best)o.best=r});return o}
 function rbOf(d){var b=[0,0,0,0,0,0,0];(d.eq||[]).forEach(function(id){for(var i=0;i<d.runes.length;i++){var r=d.runes[i];if(r.id===id){b[r.k]+=RT[r.k].v[r.r]/100;break}}});return b}
-function tm(i,b){var k=T[i].rk;return 1+b[0]+(k<8?b[5]:0)+(k>=RKMAX-7?b[6]:0)}
+function tm(i,b){return 1+b[0]+(i<8?b[5]:0)+(i>=T.length-8?b[6]:0)}
 function clickVal(){return total()*PCT*(1+rbOf(S)[1])*tfx(S).clk}
 function rtext(r){return RT[r.k].t.replace('{v}',RT[r.k].v[r.r])}
 var tstT;function toast(t,c){var el=$('tst');el.textContent=t;el.style.setProperty('--rc',c);el.hidden=false;el.style.animation='none';void el.offsetWidth;el.style.animation='';clearTimeout(tstT);tstT=setTimeout(function(){el.hidden=true},2600)}
@@ -540,8 +538,9 @@ function rlSave(){save()}
 /* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.26 per boss
    (doubling every 3 bosses) up to +100%. Only ONE boss reward can run at a time: while it runs, wins give no new reward (and start no cooldown).
    After a boss gives you its reward, that boss is practice only for 1 hour; losing has no cooldown. ===== */
-function bossRewI(i){var P=[5,6,8,10,13,16,20,25,32,40,50,63,79,100],M=[5,5,6,6,7,7,8,9,9,10,10,12,12,15],k=T[i]?T[i].rk:-1,a=Math.floor(k),f=k-a,b=Math.min(a+1,P.length-1);
-if(!(a>=0&&a<P.length))return{pct:0,min:0};return{pct:Math.round(P[a]+(P[b]-P[a])*f),min:Math.round(M[a]+(M[b]-M[a])*f)}} /* by rank; in-between ranks get in-between rewards */
+/* boss reward: +5% income from the first boss growing exponentially to +100% from the last (the cap), for 5 to 15 min */
+function bossRewI(i){var M=[5,5,6,6,7,7,8,8,9,9,10,10,12,12,15],n=T.length;if(!(i>=0&&i<n))return{pct:0,min:0};var f=n>1?i/(n-1):0;
+return{pct:Math.round(5*Math.pow(20,f)),min:M[Math.round(f*(M.length-1))]}}
 function bossIdx(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return i;return -1}
 var BOSS_CD=60*60*1000;
 function bossCdLeft(id){var w=S.bossCd&&S.bossCd[id];if(!w)return 0;var n=Date.now();if(w>n){S.bossCd[id]=n;w=n}return Math.max(0,w+BOSS_CD-n)}
@@ -643,9 +642,9 @@ cl.forEach(function(v,i){A('clk'+v,'Clicking',cn[i],'Click Mr McCoy '+fmt(v)+' t
 [1e3,1e5,1e7,1e9,1e11,1e13,1e15,1e17,1e20,1e23,1e26,1e29,1e32,1e35,1e38,1e40].forEach(function(v,i){A('earn'+i,'Money',['Pocket Change','Paycheck','Savings','Fortune','Tycoon','Mogul','Empire','Economy','Galaxy','Universe','Multiverse','Infinity','Beyond','Omega','Eternity','Absolute'][i],'Earn '+fmt(v)+' Games Blocked in total',1.5+i*1.1,function(d){return d.st.earned>=v})});
 [10,1e3,1e5,1e7,1e9,1e11,1e13,1e15,1e17].forEach(function(v,i){A('inc'+i,'Money',['Steady Flow','Trickle','Stream','River','Flood','Torrent','Tsunami','Ocean','Cosmos'][i],'Reach '+fmt(v)+' income per second',1.5+i*1.6,function(d,inc){return inc>=v})});
 T.forEach(function(t,i){
-A('own1'+t.id,'Teachers','Hire '+t.name,'Buy '+t.name,1+t.rk*0.5,function(d){return d.own[t.id]>=1});
-A('own10'+t.id,'Teachers',t.name+' x10','Own 10 of '+t.name,2+t.rk*0.7,function(d){return d.own[t.id]>=10});
-A('lv5'+t.id,'Teachers',t.name+' Level 5','Upgrade '+t.name+' to level 5',3+t.rk*0.8,function(d){return d.lvl[t.id]>=5})});
+A('own1'+t.id,'Teachers','Hire '+t.name,'Buy '+t.name,1+i*0.5,function(d){return d.own[t.id]>=1});
+A('own10'+t.id,'Teachers',t.name+' x10','Own 10 of '+t.name,2+i*0.7,function(d){return d.own[t.id]>=10});
+A('lv5'+t.id,'Teachers',t.name+' Level 5','Upgrade '+t.name+' to level 5',3+i*0.8,function(d){return d.lvl[t.id]>=5})});
 A('all1','Teachers','Full Staff','Own every teacher',8,function(d){return T.every(function(t){return d.own[t.id]>=1})});
 A('all10','Teachers','Fully Staffed','Own 10 of every teacher',14,function(d){return T.every(function(t){return d.own[t.id]>=10})});
 A('alllv','Teachers','Top Marks','Get every teacher to level 5',16,function(d){return T.every(function(t){return d.lvl[t.id]>=5})});
@@ -756,7 +755,8 @@ $('xb').onclick=function(){$('xbody').textContent='';xMsg('');xArm=false;xPendin
 $('xexp').onclick=doExport;$('ximp').onclick=doImportUI;
 function closeXV(){$('xv').hidden=true;xArm=false;xPending=null}$('xvx').onclick=closeXV;$('xv').onclick=function(e){if(e.target===$('xv'))closeXV()};
 var BTIER=[['Easy','#22a35a'],['Normal','#3b82f6'],['Hard','#f59e0b'],['Expert','#f97316'],['Insane','#ef4444'],['Extreme','#c026d3'],['Nightmare','#7c3aed'],['Impossible','#111827']];
-function bossTier(i){return BTIER[Math.min(BTIER.length-1,Math.floor(T[i].rk*BTIER.length/(RKMAX+1)))]}
+function tierOf(i){return Math.min(BTIER.length-1,Math.floor(i*BTIER.length/T.length))}
+function bossTier(i){return BTIER[tierOf(i)]}
 function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
 var im=document.createElement('img');im.className='bimg';im.alt='';im.src=PHOTOS[t.ph||t.id]||'';
 var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=t.name;var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'');
@@ -768,7 +768,7 @@ var BREFS=[];function updBossTimers(){var cur=bestBossBuff(),bn=$('bban');bn.hid
 setInterval(function(){if(!$('bov').hidden)updBossTimers()},1000);
 $('bob').onclick=function(){renderBosses();$('bov').hidden=false};function closeBO(){$('bov').hidden=true}$('bovx').onclick=closeBO;$('bov').onclick=function(e){if(e.target===$('bov'))closeBO()};
 var BF=null,FCK=[],ATK={};
-function fdiff(i){return RKMAX>0?T[i].rk/RKMAX:0}
+function fdiff(i){return T.length>1?i/(T.length-1):0}
 function fAlive(id){return !!(BF&&BF.id===id&&BF.ph!=='over')}
 function fl(fn,ms){var id=BF&&BF.id;return setTimeout(function(){if(fAlive(id))fn()},ms)}
 function fOk(){var n=Date.now();FCK.push(n);while(FCK.length&&FCK[0]<n-1000)FCK.shift();return FCK.length<=20}
@@ -1208,7 +1208,7 @@ var MG=[['circles','🔴','Red circles','Tap every red circle before time runs o
 ['dodge','🟦','Dodge','Drag the blue dot to dodge the falling blocks.'],['react','🟢','Reaction test','Tap the moment the button turns green.'],
 ['simon','🎨','Simon says','Watch the pattern, then repeat it.'],['power','💥','Power strike','Stop the moving line as high as you can.'],
 ['rhythm','🎵','Rhythm battle','Tap each lane as its circle reaches the bottom.'],['trace','✏️','Path trace','Drag the circle along the path to the flag.']];
-var MG_BOSS=[0,2,4,6,7,9,11,13].map(rkIdx); /* one boss per difficulty level: Easy … Impossible (by rank) */
+var MG_BOSS=BTIER.map(function(_,k){for(var i=0;i<T.length;i++)if(tierOf(i)===k)return i;return T.length-1}); /* the first boss of each difficulty level: Easy … Impossible */
 var mgTier=0;try{mgTier=Math.max(0,Math.min(7,+LS.getItem('deemackClicker2.mgdiff')||0))}catch(e){}
 function renderMG(){var D=$('mgd');D.textContent='';BTIER.forEach(function(tr,ti){var b=document.createElement('button');b.textContent=tr[0];b.style.setProperty('--dc',tr[1]);b.className=ti===mgTier?'on':'';
 b.onclick=function(){mgTier=ti;try{LS.setItem('deemackClicker2.mgdiff',String(ti))}catch(e){}renderMG()};D.appendChild(b)});
