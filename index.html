@@ -19,6 +19,31 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .f{position:absolute;pointer-events:none;font-weight:700;color:var(--accent);animation:up .8s ease-out forwards}
 @keyframes up{to{transform:translateY(-70px);opacity:0}}
 .bar{display:flex;gap:6px;justify-content:center;margin:14px 0 10px}
+.tabs{display:flex;gap:6px;margin:14px 0 0}
+.tabs[hidden],.bar[hidden]{display:none}
+.tabs button{flex:1;padding:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.tabs button.on{background:var(--btn);color:var(--btntext);border-color:var(--btn)}
+#stushop{margin-top:14px}
+.stuinfo{font-size:13px;color:var(--muted);text-align:center;margin:0 0 10px;line-height:1.4}
+.sui{width:56px;height:56px;border-radius:12px;flex:none;background:var(--line);display:flex;align-items:center;justify-content:center;font-size:28px}
+.web{position:absolute;left:0;top:0;width:46px;height:42px;border:2px solid var(--accent);border-radius:9px;background:var(--card);padding:0;cursor:pointer;z-index:3;box-shadow:0 3px 10px rgba(0,0,0,.25);overflow:hidden;animation:wob 1.3s ease-in-out infinite;-webkit-tap-highlight-color:transparent}
+.web .wtb{display:flex;gap:2px;padding:3px 4px;background:var(--accent)}
+.web .wtb i{width:4px;height:4px;border-radius:50%;background:#fff;opacity:.85}
+.web .wic{display:block;font-size:18px;line-height:26px;text-align:center}
+.web.in{animation:webin .35s ease-out,wob 1.3s ease-in-out .35s infinite}
+@keyframes wob{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+@keyframes webin{from{transform:scale(0)}to{transform:scale(1) rotate(-7deg)}}
+.webbox{text-align:center}
+.webbox .wsub{color:var(--muted);font-size:14px}
+.wbeat{position:relative;width:220px;height:220px;margin:6px auto 8px;display:flex;align-items:center;justify-content:center}
+.wring{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border:4px solid var(--accent);border-radius:50%;pointer-events:none;box-sizing:border-box}
+.ov .wbtn{width:120px;height:120px;padding:0;border-radius:50%;border:0;background:var(--btn);color:var(--btntext);font:inherit;font-size:20px;font-weight:800;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.25);transition:transform .06s}
+.ov .wbtn.pulse{transform:scale(1.06)}
+.wdots{display:flex;gap:10px;justify-content:center;margin:2px 0 6px}
+.wdots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);box-sizing:border-box}
+.wdots i.on{background:#22a35a;border-color:#22a35a}
+.wjudge{min-height:24px;font-weight:800;font-size:17px}
+.wst{color:var(--muted);font-size:13px;margin:4px 0 0}
 .bar button{flex:1;max-width:90px;padding:8px 0;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
 .bar button.on{background:var(--btn);color:var(--btntext);border-color:var(--btn)}
 .card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
@@ -281,8 +306,10 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
 <div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="mgb">🎮<small>Minigames</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
+<div class="tabs" id="tabs" hidden><button data-t="t" class="on">👩‍🏫 Teachers</button><button data-t="s">🎮 Students</button></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
+<div id="stushop" hidden></div>
 <button class="rs" id="rs">Erase save</button>
 <div class="ov" id="ov" hidden><div class="box"><h1>DeeMack Clicker 2</h1><p id="nmsg">Pick a display name for the leaderboard.</p><input id="nin" maxlength="16" placeholder="Display name" autocomplete="off"><input id="ncode" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off" hidden><button id="nok">Play</button><button id="nimp" class="sec">I have a save code</button><button id="ncancel" class="sec" hidden>Cancel</button><p id="nerr"></p></div></div>
 <div class="ov" id="devv" hidden><div class="box rbox"><div class="phd"><h1>🛠️ Dev tools</h1><button class="xbtn" id="devvx" aria-label="Close">✕</button></div><p>Owner only. Commands only change your own game.</p><div id="devl"></div></div></div>
@@ -299,7 +326,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost. Only one boss boost runs at a time: while it runs, wins don't give a new one. After a boss gives you its reward, it's practice only for an hour.</p><div class="bban" id="bban" hidden></div><div id="bol"></div></div></div>
 <div id="ps" hidden><div class="psw">
 <div class="bfh"><div class="bft"><b>🌳 Prestige</b><span class="pss" id="pspts"></span></div><button class="xbtn2" id="psx" aria-label="Close">✕</button></div>
-<div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes and the skill tree. You can prestige once every 10 minutes.</div></div>
+<div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes, student upgrades and the skill tree. You can prestige once every 10 minutes.</div></div>
 <div class="tarea" id="tarea"><svg id="tsvg" aria-label="Skill tree"></svg><div class="tlock" id="tlock"><span>🔒</span><b>Skill tree</b>Prestige once to unlock it.</div><div class="tctl" id="tctl"><span id="tcount"></span><button id="tball" class="tball">🛒 Buy all</button><button id="tfit" aria-label="Show the whole tree">⤢</button></div></div>
 <div class="tinfo" id="tinfo"></div>
 </div></div>
@@ -311,6 +338,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div id="tabv" hidden><div class="tabbox"><div class="tabi">⏸️</div><h1>Game paused</h1><p id="tabmsg"></p><button id="tabgo">Continue here</button></div></div>
 <div class="ov" id="qv" hidden><div class="box rbox"><div class="phd"><h1>📋 Quests</h1><button class="xbtn" id="qvx" aria-label="Close">✕</button></div><div id="ql"></div></div></div>
 <div class="ov" id="mgv" hidden><div class="box rbox"><div class="phd"><h1>🎮 Minigames</h1><button class="xbtn" id="mgvx" aria-label="Close">✕</button></div><p>Play any boss-fight minigame just for fun. No rewards, nothing to lose.</p><div class="rsec">Difficulty</div><div class="mgdiff" id="mgd"></div><div class="rsec">Pick a minigame</div><div id="mgl"></div></div></div>
+<div class="ov" id="webv" hidden><div class="box webbox"><div class="phd"><h1 id="webn"></h1><button class="xbtn" id="webx" aria-label="Close">✕</button></div><p class="wsub">Tap BLOCK when the ring lands on it, 4 beats in a row. Miss one and you start over.</p><div class="wbeat"><div class="wring" id="wring"></div><button class="wbtn" id="wbtn">BLOCK</button></div><div class="wdots" id="wdots"></div><div class="wjudge" id="wjudge"></div><p class="wst" id="wst"></p></div></div>
 <button id="updbar" hidden>🔄 New update! Tap to get it</button>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
@@ -325,7 +353,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=58;
+var BUILD=59;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -366,6 +394,16 @@ var CK=[],disp=null,bestMem=0; /* bestMem: the highest "… per second" shown th
    nodes). Only when a rune drops is its rarity rolled, using the RW weights (out of 10000):
    Common 70%, Uncommon 22%, Rare 6%, Epic 1.5%, Legendary 0.49%, Mythic 0.01%.
    Quest reward runes have their own odds (QRW, next to giveRuneMin). */
+/* ===== Students & game websites: once your Games Blocked reaches 1Qa, students' game websites pop up around
+   Mr McCoy every few minutes (like little pests on the edge). Each open website steals 5% of your income and keeps it;
+   block it (tap BLOCK on the beat 4 times in a row) to get back double what it stole (always at least 30 seconds of
+   income). Student upgrades are bought with Games Blocked and kept forever (even when you prestige). ===== */
+var STUDENTS=['Orion']; /* add more student names here */
+var WEB_AT=1e15,WEB_STEAL=0.05,WEB_SLOTS=[-135,-45,90,-90,135,45]; /* where websites sit around Mr McCoy (degrees) */
+var SUP=[{id:'filter',ic:'🧹',n:'Website Filter',d:'Get back +50% more Games Blocked when you block a website.',max:5,c:1e15,m:15},
+{id:'more',ic:'🧑‍🎓',n:'More Students',d:'One more website can be open at once.',max:3,c:5e15,m:30},
+{id:'pop',ic:'📣',n:'Popular Sites',d:'Websites show up 15% more often.',max:4,c:2e15,m:15},
+{id:'steady',ic:'🥁',n:'Steady Rhythm',d:'An easier beat: a little more time to hit each beat.',max:4,c:1e15,m:12}];
 var RUNE_CHANCE=0.005;
 var RN=['Common','Uncommon','Rare','Epic','Legendary','Mythic'],RCL=['#9aa0a6','#3fb950','#3b82f6','#a855f7','#f59e0b','#ef4444'],RW=[7000,2200,600,150,49,1],RP=[1,3,6,12,25,50];
 var RT=[
@@ -411,8 +449,10 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned)}}catch(e){}return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0},web:[]};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
+if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)})}
+if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}}}catch(e){}return d}
 /* ===== One save: older versions had 3 save slots. On start (and after loading a code) the slot with the most
    progress (most Games Blocked ever earned) becomes the one save. The other slots are kept on this device as hidden
    backups (deemackClicker2.slot1.bak / slot2.bak / slot3.bak) and never loaded again, so erasing your save can't bring
@@ -468,9 +508,9 @@ refs[t.id]=r;$("shop").appendChild(d)});
 /* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
 function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
-var base=total(),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);if(disp>bestMem&&isFinite(disp))bestMem=disp;
+var base=total()*(1-webDrain()),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);if(disp>bestMem&&isFinite(disp))bestMem=disp;
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
-function update(noAnim){var anim=ready&&!noAnim;
+function update(noAnim){var anim=ready&&!noAnim;var su=!!(S.stu&&S.stu.u);$('tabs').hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 var rb=rbOf(S),am=allMul(),allT=allTeachers();
@@ -493,7 +533,7 @@ var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
 var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmt(c);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
 $("stage").appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800);update()};
-setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0].concat(Object.keys(BB).map(function(k){return BB[k]})).concat((S.qb||[]).reduce(function(a,q){a.push(q.st,q.un);return a},[])).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}if(!(g>=0)||!isFinite(g))g=0;S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
+setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0].concat(Object.keys(BB).map(function(k){return BB[k]})).concat((S.qb||[]).reduce(function(a,q){a.push(q.st,q.un);return a},[])).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}if(!(g>=0)||!isFinite(g))g=0;g=webSteal(g);S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
 var lr=Date.now();setInterval(function(){var n=Date.now();rate((n-lr)/1000);lr=n},80);
 setInterval(function(){save();bestScore();pushStats()},5000);
 window.addEventListener("pagehide",save);
@@ -507,14 +547,14 @@ function evOk(){return $('evi').value.trim().toUpperCase()==='ERASE'}
 function closeEV(){$('ev').hidden=true;$('evi').value=''}
 $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=function(e){if(e.key==='Enter'&&evOk())$('evgo').click()};
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
-$('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();
+$('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();renderWebs();
 try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;pushStats(true);toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
 var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
 function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
 function myStats(n){var rc=[0,0,0,0,0,0],eqs=[];S.runes.forEach(function(r){rc[r.r]++});
 S.eq.forEach(function(id){S.runes.forEach(function(r){if(r.id===id)eqs.push(RT[r.k].n+' ('+RN[r.r]+')')})});
-var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore();return{name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,now:isFinite(disp)?+disp||0:0,score:best}}
+var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore();return{name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,now:isFinite(disp)?+disp||0:0,score:best}}
 /* rank score = the highest "… per second" the game has ever shown you (boosts and fast clicking count). Kept on this
    device, so prestiging never lowers your leaderboard score. Erasing your save resets it. */
 function bestScore(){var b=0;try{b=+LS.getItem('deemackClicker2.best')||0}catch(e){}if(isFinite(bestMem)&&bestMem>b){b=bestMem;try{LS.setItem('deemackClicker2.best',String(b))}catch(e){}}return b}
@@ -768,7 +808,7 @@ try{NAME=LS.getItem('deemackClicker2.name')||NAME}catch(e){}if(NAME)$('ov').hidd
 if(FB_KEY){authLoad();if(AUTH)uid=AUTH.uid;var lg=null;try{lg=LS.getItem('deemackClicker2.uid')}catch(e){}LEGACY=lg&&/^p[a-z0-9]+$/.test(lg)?lg:'';legacyGone=false;if(LEGACY)authToken().then(migrate,function(){})}
 else{try{uid=LS.getItem('deemackClicker2.uid')||uid}catch(e){}}
 if(NAME!==oldName||uid!==oldUid){nameOk=false;if(oldOk&&(uid!==oldUid||nameKey(NAME)!==nameKey(oldName)))releaseName(oldName,oldUid)}
-xArm=false;xPending=null;$('xv').hidden=true;$('xbody').textContent='';update(true);checkAch();pushStats(true);if(LS_OK)toast('Data loaded!','#3fb950');else toast('Data loaded, but this page can\u2019t save it. Open the game in its own browser tab.','#f59e0b')}
+xArm=false;xPending=null;$('xv').hidden=true;$('xbody').textContent='';renderWebs();update(true);checkAch();pushStats(true);if(LS_OK)toast('Data loaded!','#3fb950');else toast('Data loaded, but this page can\u2019t save it. Open the game in its own browser tab.','#f59e0b')}
 $('nimp').onclick=function(){doImportUI();$('xv').hidden=false};
 $('xb').onclick=function(){$('xbody').textContent='';xMsg('');xArm=false;xPending=null;$('xv').hidden=false};
 $('xexp').onclick=doExport;$('ximp').onclick=doImportUI;
@@ -1078,7 +1118,7 @@ var b=$('psgo'),w=prsWait();b.disabled=pn<1||w>0;b.textContent=pn<1?'Prestige (n
 $('tlock').hidden=!L;$('tctl').hidden=L;$('tsvg').style.visibility=L?'hidden':'';if(!L)tBallUpd()}
 function doPrestige(){var pn=ppPending();if(pn<1||prsWait()>0)return;
 if(!psArm){psArm=true;clearTimeout(psArmT);psArmT=setTimeout(function(){psArm=false;if(PSO)psStats()},3000);psStats();return}
-psArm=false;clearTimeout(psArmT);var first=tLocked();S.pp+=pn;S.ppt+=pn;S.prs++;S.prsAt=Date.now();S.gb=tfx(S).start;T.forEach(function(t){S.own[t.id]=0;S.lvl[t.id]=1});S.run=0;CK=[];disp=null;
+psArm=false;clearTimeout(psArmT);if(S.web&&S.web.length){webCashAll();pn=ppPending()}var first=tLocked();S.pp+=pn;S.ppt+=pn;S.prs++;S.prsAt=Date.now();S.gb=tfx(S).start;T.forEach(function(t){S.own[t.id]=0;S.lvl[t.id]=1});S.run=0;CK=[];disp=null;
 save();update(true);checkAch();pushStats(true);toast('Prestiged! +'+pn+' point'+(pn===1?'':'s')+(first?' · skill tree unlocked!':''),'#a855f7');
 psStats();tRefresh();tInfo();if(first)requestAnimationFrame(function(){tGo(tFitView(false))})}
 $('psgo').onclick=doPrestige;
@@ -1108,7 +1148,10 @@ var DEVCMDS=[
  run:function(v){var t=String(v).replace(/[,\s]/g,'');if(!/^\d+$/.test(t)||+t>1e12){toast('Type a whole number (0 or more)','#ef4444');return false}S.pp=+t;save();update();toast('Prestige points set to '+S.pp,'#a855f7');return true}},
 {id:'resettree',type:'action',name:'Reset skill tree',desc:'Removes every skill tree upgrade. Points are not refunded (set them above).',btn:'Reset',
  now:function(){return 'Owned: '+S.tree.length+' / '+TN.length},
- run:function(){S.tree=[];TFXC={d:null,n:-1,v:null};tsel=-1;save();update();toast('Skill tree reset','#a855f7')}}];
+ run:function(){S.tree=[];TFXC={d:null,n:-1,v:null};tsel=-1;save();update();toast('Skill tree reset','#a855f7')}},
+{id:'spawnweb',type:'action',name:'Spawn a game website',desc:'Unlocks students if needed and adds a game website around Mr McCoy right away.',btn:'Spawn',
+ now:function(){return 'Open: '+((S.web||[]).length)+' / '+webMax()},
+ run:function(){if(!S.stu.u){S.stu.u=1;update(true)}if(webSpawn())toast('🎮 A game website appeared!','#a855f7');else toast('All website spots are full','#ef4444')}}];
 var devArm=null,devArmT;
 function renderDev(){var L=$('devl');L.textContent='';DEVCMDS.forEach(function(c){var on=c.type==='toggle'&&devFlag(c.id),r=document.createElement('div');r.className='arow'+(on?' trow on':'');
 var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=c.name+(on?' · ON':'');var sp=document.createElement('span');sp.textContent=c.desc+(c.now?' ('+c.now()+')':'');x.appendChild(b);x.appendChild(sp);r.appendChild(x);
@@ -1147,6 +1190,70 @@ var f=document.createElement('div');f.className='gfx';f.textContent='×'+m+' MON
 toast('✨ Golden '+t.name+'! ×'+m+' money for '+secs+' seconds','#f59e0b');CK=[];disp=null;update()}
 function goldTick(){var n=Date.now();if(goldOn||n<nextGold)return;if(document.hidden||anyOpen()){nextGold=n+3000;return}spawnGold();nextGold=n+GOLD_EVERY}
 setInterval(goldTick,1000);
+/* ===== Game websites around Mr McCoy + the Students tab ===== */
+function supLv(id){return (S.stu&&S.stu.lv&&S.stu.lv[id])||0}
+function webMax(){return Math.min(WEB_SLOTS.length,3+supLv('more'))}
+function webRet(){return 2+0.5*supLv('filter')}
+function webWin(){return 115+15*supLv('steady')}
+function webGap(){return (120+Math.random()*120)*1000*Math.pow(0.85,supLv('pop'))}
+function webDrain(){return S.stu&&S.stu.u&&S.web&&S.web.length?Math.min(0.5,S.web.length*WEB_STEAL):0}
+function webSteal(g){var dr=webDrain();if(!(dr>0)||!(g>0))return g;var tk=g*dr,per=tk/S.web.length;S.web.forEach(function(w){w.st=Math.min(1e300,w.st+per)});return g-tk}
+function webReward(w){return Math.max(w.st*webRet(),30*totalOf(S))}
+function webName(w){return (STUDENTS[w.k]||'A student')+'\u2019s website'}
+var WEL={};
+function renderWebs(){var st=$('stage'),mc=$('mc');if(!st||!mc)return;var have={};
+(S.web||[]).forEach(function(w){have[w.s]=1;var el=WEL[w.s];
+if(!el){el=document.createElement('button');el.className='web in';el.innerHTML='<span class="wtb"><i></i><i></i><i></i></span><span class="wic">🎮</span>';el.onclick=function(){openWeb(w.s)};st.appendChild(el);WEL[w.s]=el}
+el.setAttribute('aria-label',webName(w)+': tap to block it');
+var r=mc.offsetWidth/2,cx=mc.offsetLeft+r,cy=mc.offsetTop+mc.offsetHeight/2,a=WEB_SLOTS[w.s]*Math.PI/180;
+el.style.left=Math.round(cx+Math.cos(a)*r*0.9-23)+'px';el.style.top=Math.round(cy+Math.sin(a)*r*0.9-21)+'px'});
+Object.keys(WEL).forEach(function(k){if(!have[k]){WEL[k].remove();delete WEL[k]}})}
+window.addEventListener('resize',renderWebs);
+function webSpawn(){if(!S.stu||!S.stu.u)return false;var used={},free=[];S.web.forEach(function(w){used[w.s]=1});for(var i=0;i<webMax();i++)if(!used[i])free.push(i);if(!free.length)return false;
+var sl=free[Math.floor(Math.random()*free.length)];S.web.push({s:sl,k:Math.floor(Math.random()*STUDENTS.length),st:0,b:Date.now()});S.stu.nx=Date.now()+webGap();renderWebs();save();return true}
+function webTick(){if(!S.stu)return;var n=Date.now();
+if(!S.stu.u&&S.gb>=WEB_AT){S.stu.u=1;S.stu.nx=n+20000;save();update(true);toast('🎮 Students unlocked! Their game websites will pop up around Mr McCoy. Tap one to block it.','#3b82f6')}
+if(!S.stu.u)return;if(!S.stu.nx||S.stu.nx>n+3600000)S.stu.nx=n+webGap();
+if(n>=S.stu.nx&&!tabDead&&!document.hidden&&!anyOpen()){if(!webSpawn())S.stu.nx=n+webGap()}
+if(shopTab==='s')stuInfo()}
+setInterval(webTick,1000);
+/* blocking a website: tap BLOCK on the beat 4 times in a row (a ring shrinks onto the button on each beat) */
+var WB=null;
+function webDots(){var D=$('wdots');D.textContent='';for(var i=0;i<4;i++){var x=document.createElement('i');if(WB&&i<WB.streak)x.className='on';D.appendChild(x)}}
+function webJudge(t,c){var j=$('wjudge');j.textContent=t;j.style.color=c||''}
+function webInfo(){var w=WB&&S.web.filter(function(x){return x.s===WB.s})[0];if(!w)return;$('wst').textContent='Stolen so far: '+fmt(w.st)+' · block it to get back '+fmt(webReward(w))}
+function openWeb(sl){var w=S.web.filter(function(x){return x.s===sl})[0];if(!w)return;$('webn').textContent='🎮 '+webName(w);
+WB={s:sl,t0:performance.now()+900,iv:720,win:webWin(),streak:0,last:-1,done:false,it:-1};webDots();webJudge('Get ready…','var(--muted)');webInfo();$('webv').hidden=false;requestAnimationFrame(webFrame)}
+function closeWeb(){WB=null;$('webv').hidden=true;$('wbtn').classList.remove('pulse')}
+function webBeat(k){return WB.t0+k*WB.iv}
+function webFrame(now){if(!WB||WB.done||$('webv').hidden)return;
+var k=Math.max(0,Math.ceil((now-WB.t0)/WB.iv)),rem=webBeat(k)-now,sc=1+0.8*Math.max(0,Math.min(1,rem/WB.iv));$('wring').style.transform='scale('+sc.toFixed(3)+')';
+var kn=Math.max(0,Math.round((now-WB.t0)/WB.iv));$('wbtn').classList.toggle('pulse',Math.abs(now-webBeat(kn))<60);
+if(WB.streak>0&&now>webBeat(WB.last+1)+WB.win){WB.streak=0;WB.last=-1;webDots();webJudge('Too slow · start over','#ef4444')}
+var it=Math.floor(now/500);if(it!==WB.it){WB.it=it;webInfo()}requestAnimationFrame(webFrame)}
+$('wbtn').onpointerdown=function(e){e.preventDefault();if(!WB||WB.done)return;var now=performance.now(),k=Math.round((now-WB.t0)/WB.iv),dt=now-webBeat(k);
+if(k>=0&&Math.abs(dt)<=WB.win&&k>WB.last){WB.last=k;WB.streak++;webDots();webJudge(Math.abs(dt)<=45?'Perfect!':'Good','#22a35a');if(WB.streak>=4)webDone();return}
+var why=(WB.last>=0&&k<=WB.last)||dt<0?'Too early':'Too late';WB.streak=0;WB.last=-1;webDots();webJudge(why+' · start over','#ef4444')};
+function webDone(){var sl=WB.s;WB.done=true;$('wbtn').classList.remove('pulse');var w=S.web.filter(function(x){return x.s===sl})[0];if(!w){closeWeb();return}
+var amt=webReward(w);S.gb=Math.min(1e300,S.gb+amt);S.run=Math.min(1e300,S.run+amt);S.st.earned+=amt;S.stu.n++;S.web=S.web.filter(function(x){return x.s!==sl});
+webJudge('Blocked! +'+fmt(amt),'#22a35a');save();update();renderWebs();toast('🚫 Blocked '+webName(w)+'! +'+fmt(amt)+' Games Blocked','#22a35a');
+setTimeout(function(){if(WB&&WB.done&&WB.s===sl)closeWeb()},800)}
+$('webx').onclick=closeWeb;$('webv').onclick=function(e){if(e.target===$('webv'))closeWeb()};
+/* prestiging blocks any open websites first (their Games Blocked count for this run) */
+function webCashAll(){var sum=0;(S.web||[]).forEach(function(w){sum+=webReward(w)});if(sum>0){S.gb=Math.min(1e300,S.gb+sum);S.run=Math.min(1e300,S.run+sum);S.st.earned+=sum}S.web=[];renderWebs()}
+/* the Teachers / Students tabs above the shop */
+var shopTab='t',SREFS=[];
+function setTab(t){shopTab=t;[].forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':''});$('bar').hidden=t!=='t';$('shop').hidden=t!=='t';$('stushop').hidden=t!=='s';if(t==='s')renderStu()}
+$('tabs').onclick=function(e){var b=e.target.closest&&e.target.closest('[data-t]');if(b)setTab(b.getAttribute('data-t'))};
+function supCost(u){return u.c*Math.pow(u.m,supLv(u.id))}
+function renderStu(){var L=$('stushop');L.textContent='';SREFS=[];var h=document.createElement('div');h.className='stuinfo';h.id='stuinfo';L.appendChild(h);
+SUP.forEach(function(u){var d=document.createElement('div');d.className='card';d.innerHTML='<div class="sui"></div><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button></div>';
+d.querySelector('.sui').textContent=u.ic;d.querySelector('.nm').textContent=u.n;d.querySelector('.in').textContent=u.d;var b=d.querySelector('.b');b.onclick=function(){buySup(u)};
+SREFS.push({u:u,b:b,mk:d.querySelector('.mk')});L.appendChild(d)});stuUpd();stuInfo()}
+function stuUpd(){SREFS.forEach(function(o){var lv=supLv(o.u.id),mx=lv>=o.u.max,c=supCost(o.u);o.mk.textContent='Level '+lv+' / '+o.u.max;var h=mx?'Maxed':'Buy<small>'+fmt(c)+'</small>';if(o.b._h!==h){o.b.innerHTML=h;o.b._h=h}var dis=mx||S.gb<c;if(o.b.disabled!==dis)o.b.disabled=dis})}
+function stuInfo(){var el=$('stuinfo');if(!el)return;var n=Date.now(),open=(S.web||[]).length,mx=webMax();
+el.textContent='🚫 Websites blocked: '+((S.stu&&S.stu.n)||0)+' · Open now: '+open+' / '+mx+(open<mx&&S.stu&&S.stu.nx>n?' · next one in about '+mmss(S.stu.nx-n):'')+'. Each open website steals 5% of your income until you block it.'}
+function buySup(u){var lv=supLv(u.id),c=supCost(u);if(lv>=u.max||S.gb<c)return;S.gb-=c;S.stu.lv[u.id]=lv+1;save();stuUpd();stuInfo();update();toast(u.ic+' '+u.n+' is now level '+(lv+1)+'!','#3b82f6')}
 /* ===== Update log: shows UPDATES (newest first, scroll for older ones). The button shows NEW until the latest is read. ===== */
 function logSeen(){try{return LS.getItem('deemackClicker2.logSeen')||''}catch(e){return ''}}
 function logUnread(){return UPDATES.length>0&&logSeen()!==String(UPDATES[0].id)}
@@ -1286,7 +1393,7 @@ setInterval(function(){if(!document.hidden)checkUpdate(false)},180000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate(true)});
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
-var PSTATS=[['Rank score (best per second ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
+var PSTATS=[['Rank score (best per second ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
 function showProfile(doc,rank){var d=doc.data()||{};pvId=doc.id;$('pvn').textContent=String(d.name||'Player').slice(0,16);
 $('pvr').textContent='Rank #'+rank+(lbOwner&&doc.id===lbOwner?' · 👑 Owner':'')+(doc.id===uid?' · you':'');
 var box=$('pvs');box.textContent='';PSTATS.forEach(function(p){var r=document.createElement('div');r.className='pst';var a=document.createElement('span');a.textContent=p[0];var b=document.createElement('span');b.textContent=p[1](d);r.appendChild(a);r.appendChild(b);box.appendChild(r)});
@@ -1411,6 +1518,6 @@ function lbTick(){if($('lv').hidden||document.hidden)return;lbMe();var n=Date.no
 setInterval(lbTick,1000);
 if(NAME)pushStats(true);
 if(!LS_OK)$('nosave').hidden=false;
-applyTheme(S.theme);checkAch();update(true);ready=true;
+applyTheme(S.theme);checkAch();update(true);ready=true;renderWebs();
 })();
 </script></body></html>
