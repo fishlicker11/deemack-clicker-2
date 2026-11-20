@@ -49,6 +49,7 @@ button:disabled{opacity:.35;cursor:default}
 .lb{margin-top:18px}.lb h2{font-size:15px;margin:0 0 6px}
 .lb .row{display:flex;gap:8px;align-items:baseline;padding:6px 10px;border:1px solid var(--line);background:var(--card);border-radius:10px;margin-bottom:5px;font-size:14px}
 .lb .row.me{border-color:var(--accent)}
+.lbref{font-size:12px;font-weight:600;color:var(--muted);margin:-2px 0 8px}
 .devrow{display:flex;gap:6px;margin-top:6px;align-items:center}
 .ov .devin{width:110px;margin:0;padding:7px 9px;font-size:14px}
 .obadge{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;background:#f59e0b;color:#1a1300;white-space:nowrap}
@@ -270,7 +271,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="dcv" hidden><div class="box"><h1>🛠️ Dev tools</h1><p>Enter the owner code.</p><input id="dcin" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off"><button id="dcok">Unlock</button><button id="dcx" class="sec">Cancel</button><p id="dcerr"></p></div></div>
 <div class="ov" id="pv" hidden><div class="box"><h1 id="pvn"></h1><p id="pvr"></p><div id="pvs"></div><button id="pvx">Close</button></div></div>
 <div class="ov" id="rv" hidden><div class="box rbox"><h1>Runes</h1><p id="rvs"></p><div id="rvl"></div><button id="rvx">Close</button></div></div>
-<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><p>Rank score = income per second, boosted by your runes and cards.</p><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
+<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Rank score = income per second, boosted by your runes and cards.</p><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
 <div class="ov" id="rl" hidden><div class="box"><h1>Daily Roller</h1><p>Roll once every 22 hours for an income boost.</p><div id="rls"></div><p id="rlt"></p><button id="rlr">Roll</button><button id="rlx">Close</button></div></div>
 <div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvx">Close</button></div></div>
 <div class="ov" id="cv" hidden><div class="box rbox"><h1>Cards</h1><p id="cvs"></p><div class="binder" id="cvb"></div><button id="cvx">Close</button></div></div>
@@ -496,7 +497,7 @@ sbtn(armed?'Sure?':'Delete',function(){if(delArm===r.id){S.st.deleted++;S.runes=
 $('rb').onclick=function(){delArm=null;renderRunes();$('rv').hidden=false};
 function closeRunes(){$('rv').hidden=true}
 $('rvx').onclick=closeRunes;$('rv').onclick=function(e){if(e.target===$('rv'))closeRunes()};
-$('lbb').onclick=function(){$('lv').hidden=false;loadLB()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
+$('lbb').onclick=function(){$('lv').hidden=false;lbNext=Date.now()+LB_EVERY*1000;loadLB();lbTick()};$('lvn').onclick=function(){$('lv').hidden=true;askName('',true)};function closeLB(){$('lv').hidden=true}$('lvx').onclick=closeLB;$('lv').onclick=function(e){if(e.target===$('lv'))closeLB()};
 var RLK='deemackClicker2.roller',RLD=22*3600*1000,DWT=[38,28,15,9,5,2.5,1.5,0.7,0.2,0.1],RL=S.rl,spinning=false;
 function rlSave(){save()}
 /* ===== Boss rewards: beating a boss gives % income for some minutes. Rewards grow about x1.26 per boss
@@ -1149,7 +1150,7 @@ function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true
 claimName(n).then(function(r){claiming=false;if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(){claiming=false})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
-function pushStats(force){if(tabDead||!FB||!uid||!NAME||busy)return;if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<10000)return;
+function pushStats(force){if(tabDead||!FB||!uid||!NAME||busy)return;if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').catch(function(){}).then(function(){busy=false})}
 function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
 $('nmsg').textContent=change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change;$('nimp').hidden=!!change;btn.textContent=change?'Save name':'Play';
@@ -1186,7 +1187,10 @@ fetch(FB+'/players.json'+(lbAll?'':'?orderBy=%22score%22&limitToLast=30')).then(
 if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll=true;loadLB();throw 'skip'}if(r.status===401||r.status===403||/permission/i.test(m))throw 'The leaderboard server blocked the game. Check the database rules.';if(r.status===404)throw 'Leaderboard server not found. Check the FB_URL address.';throw 'Leaderboard server error: '+(m||r.status)})}).then(function(o){return ownP.then(function(ow){lbOwner=typeof ow==='string'?ow:null;return o})}).then(function(o){o=o||{};
 var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)&&!(ownerLike(o[k].name)&&k!==lbOwner)}).map(function(k){return{id:k,data:function(){return o[k]}}}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,20);
 renderLB(docs);if(FB_KEY&&authErr){var an=document.createElement('div');an.className='note';an.textContent='You can\u2019t be added to the leaderboard right now: '+authMsg();$('lb').insertBefore(an,$('lb').firstChild)}}).catch(function(e){if(e==='skip')return;note(typeof e==='string'?e:'Could not reach the leaderboard server.')})}
-loadLB();setInterval(loadLB,5000);
+/* the leaderboard refreshes every 15 seconds while it's open, with a countdown at the top */
+var LB_EVERY=15,lbNext=0;
+function lbTick(){if($('lv').hidden||document.hidden)return;var n=Date.now();if(n>=lbNext){lbNext=n+LB_EVERY*1000;loadLB()}$('lbref').textContent='🔄 Refreshes every '+LB_EVERY+' seconds · next in '+Math.max(1,Math.ceil((lbNext-n)/1000))+'s'}
+setInterval(lbTick,1000);
 if(NAME)pushStats(true);
 if(!LS_OK)$('nosave').hidden=false;
 applyTheme(S.theme);checkAch();update(true);ready=true;updateSlots();
