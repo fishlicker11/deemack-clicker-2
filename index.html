@@ -59,6 +59,11 @@ button:disabled{opacity:.35;cursor:default}
 .runebtn.logbtn small{font-size:12px;font-weight:700;color:var(--text)}
 .ldot{position:absolute;top:-7px;right:-7px;background:var(--accent);color:var(--btntext);font-size:9px;font-weight:800;line-height:1;padding:3px 5px;border-radius:999px;letter-spacing:.03em}
 .ldot[hidden]{display:none}
+.mgdiff{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:6px}
+.ov .mgdiff button{width:auto;margin:0;padding:6px 10px;font-size:12px;font-weight:700;border-radius:999px;background:transparent;color:var(--text);border:2px solid var(--dc)}
+.ov .mgdiff button.on{background:var(--dc);color:#fff}
+.mgrow .mgi{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--card);border:1px solid var(--line);flex:none}
+#bf.mini .hpl,#bf.mini .hp{display:none}
 .qhd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:12px 0 6px;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.qhd span{text-transform:none;letter-spacing:0;font-weight:600}
 .qrow{border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-bottom:7px;background:var(--bg);display:flex;gap:10px;align-items:center;text-align:left}
 .qrow.done{border-color:#22a35a}.qrow.claimed{opacity:.55}
@@ -269,7 +274,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="warn" id="nosave" hidden>⚠️ This page can't save your progress, so it will be lost when you close it. Open the game in its own browser tab (not inside another website or app) to keep your progress.</div>
 <div class="slots" id="slots"></div>
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
-<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
+<div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="mgb">🎮<small>Minigames</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
 <button class="rs" id="rs">Erase this slot</button>
@@ -299,6 +304,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="ov" id="crv" hidden><div class="box rbox"><div class="phd"><h1>🎬 Credits</h1><button class="xbtn" id="crx" aria-label="Close">✕</button></div><div id="crl"></div></div></div>
 <div id="tabv" hidden><div class="tabbox"><div class="tabi">⏸️</div><h1>Game paused</h1><p id="tabmsg"></p><button id="tabgo">Continue here</button></div></div>
 <div class="ov" id="qv" hidden><div class="box rbox"><div class="phd"><h1>📋 Quests</h1><button class="xbtn" id="qvx" aria-label="Close">✕</button></div><div id="ql"></div></div></div>
+<div class="ov" id="mgv" hidden><div class="box rbox"><div class="phd"><h1>🎮 Minigames</h1><button class="xbtn" id="mgvx" aria-label="Close">✕</button></div><p>Play any boss-fight minigame just for fun. No rewards, nothing to lose.</p><div class="rsec">Difficulty</div><div class="mgdiff" id="mgd"></div><div class="rsec">Pick a minigame</div><div id="mgl"></div></div></div>
 <div id="goldl"></div>
 <div class="toast" id="tst" hidden></div>
 </div>
@@ -746,23 +752,23 @@ function fStatus(t){$('bfs').textContent=t}
 function arena(){var A=$('bfa');A.textContent='';A.classList.remove('hurt');return A}
 function fRender(){if(!BF)return;$('bfhb').style.width=(100*BF.hp/BF.max)+'%';$('bfht').textContent=BF.hp+' / '+BF.max;$('bfpb').style.width=BF.php+'%';$('bfpt').textContent=BF.php+' / 100'}
 function fFloat(txt,cls,x,y){var A=$('bfa'),f=document.createElement('div');f.className='dmgf'+(cls?' '+cls:'');f.textContent=txt;f.style.left=(x==null?A.clientWidth/2-14:x)+'px';f.style.top=(y==null?A.clientHeight/2-40:y)+'px';A.appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800)}
-function hurtBoss(n,x,y){if(!BF||BF.ph==='over')return;BF.hp=Math.max(0,BF.hp-n);fFloat('-'+n,'',x,y);fRender();if(BF.hp<=0)fEnd(true)}
-function hurtMe(n){if(!BF||BF.ph==='over')return;BF.php=Math.max(0,BF.php-n);fFloat('-'+n+' HP','me',12,12);var A=$('bfa');A.classList.remove('hurt');void A.offsetWidth;A.classList.add('hurt');fRender();if(BF.php<=0)fEnd(false)}
+function hurtBoss(n,x,y){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.dealt+=n;BF.hp=Math.max(0,BF.hp-n);fFloat('-'+n,'',x,y);fRender();if(BF.hp<=0)fEnd(true)}
+function hurtMe(n){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.taken+=n;BF.php=Math.max(0,BF.php-n);fFloat('-'+n+' HP','me',12,12);var A=$('bfa');A.classList.remove('hurt');void A.offsetWidth;A.classList.add('hurt');fRender();if(BF.php<=0)fEnd(false)}
 function startFight(i){closeBO();var t=T[i],d=fdiff(i),tr=bossTier(i);FCK=[];
 BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:3*Math.round(40+d*260),php:100,attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
-$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=t.name;var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
+$('bf').classList.remove('mini');$('bfi').style.display='';$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=t.name;var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
 $('bf').hidden=false;fRender();fIdle()}
-function closeFight(){BF=null;$('bf').hidden=true;$('bw').hidden=true;$('bfa').textContent=''}
+function closeFight(){BF=null;$('bf').hidden=true;$('bw').hidden=true;$('bfa').textContent='';$('bf').classList.remove('mini');$('bfi').style.display=''}
 function fIdle(){if(!BF||BF.ph==='over')return;BF.ph='idle';var id=BF.id,A=arena(),b=document.createElement('button');b.className='bfboss';b.setAttribute('aria-label','Hit '+BF.t.name);
 var im=document.createElement('img');im.alt='';im.src=PHOTOS[BF.t.ph||BF.t.id]||'';b.appendChild(im);A.appendChild(b);
 b.onpointerdown=function(e){e.preventDefault();if(!fAlive(id)||BF.ph!=='idle'||!fOk())return;var r=A.getBoundingClientRect();hurtBoss(1,e.clientX-r.left-8,e.clientY-r.top-30)};
 fStatus('Click '+BF.t.name+'!');fl(nextAttack,Math.round((4.5-BF.d*2)*1000))}
 var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;if(t.name==='Mr Holmgren')SIMON9=i}); /* Simon squares: 4 before Mr Reiman, 6 for Mr Reiman and Mr Scott, 9 from Mr Holmgren on */
 var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace'};
-function nextAttack(){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace'],k=BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)];BF.attacks++;BF.ph='atk';var id=BF.id;
+function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
-function atkDone(){if(BF&&BF.ph!=='over')fIdle()}
+function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
 var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;rew=giveBossReward(i,t);save()}
 var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=win?'Victory!':'Defeated';
@@ -1166,6 +1172,30 @@ if(made){save();if(!$('qv').hidden)renderQuests()}updQuests()}
 $('qb').onclick=function(){qTick();$('qv').hidden=false;renderQuests();$('ql').parentNode.scrollTop=0};
 function closeQV(){$('qv').hidden=true}$('qvx').onclick=closeQV;$('qv').onclick=function(e){if(e.target===$('qv'))closeQV()};
 setInterval(qTick,1000);
+/* ===== Minigames: play any boss-fight minigame on its own, at any difficulty, just for fun (no rewards, nothing to lose) ===== */
+var MG=[['circles','🔴','Red circles','Tap every red circle before time runs out.'],['mash','👆','Tap race','Tap as fast as you can before time runs out.'],
+['dodge','🟦','Dodge','Drag the blue dot to dodge the falling blocks.'],['react','🟢','Reaction test','Tap the moment the button turns green.'],
+['simon','🎨','Simon says','Watch the pattern, then repeat it.'],['power','💥','Power strike','Stop the moving line as high as you can.'],
+['rhythm','🎵','Rhythm battle','Tap each lane as its circle reaches the bottom.'],['trace','✏️','Path trace','Drag the circle along the path to the flag.']];
+var MG_BOSS=[0,2,4,6,7,9,11,13]; /* one boss per difficulty level: Easy … Impossible */
+var mgTier=0;try{mgTier=Math.max(0,Math.min(7,+LS.getItem('deemackClicker2.mgdiff')||0))}catch(e){}
+function renderMG(){var D=$('mgd');D.textContent='';BTIER.forEach(function(tr,ti){var b=document.createElement('button');b.textContent=tr[0];b.style.setProperty('--dc',tr[1]);b.className=ti===mgTier?'on':'';
+b.onclick=function(){mgTier=ti;try{LS.setItem('deemackClicker2.mgdiff',String(ti))}catch(e){}renderMG()};D.appendChild(b)});
+var L=$('mgl');L.textContent='';MG.forEach(function(g){var r=document.createElement('div');r.className='arow mgrow';var ic=document.createElement('div');ic.className='mgi';ic.textContent=g[1];
+var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=g[2];var sp=document.createElement('span');sp.textContent=g[3];x.appendChild(b);x.appendChild(sp);
+var f=document.createElement('button');f.className='bfight';f.textContent='Play';f.onclick=function(){miniStart(g[0],mgTier)};r.appendChild(ic);r.appendChild(x);r.appendChild(f);L.appendChild(r)})}
+function miniStart(k,ti){$('mgv').hidden=true;var i=MG_BOSS[ti],t=T[i],d=fdiff(i),tr=BTIER[ti],g=MG.filter(function(x){return x[0]===k})[0];FCK=[];
+BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'atk',base:Math.round(40+d*260),hp:1e12,max:1e12,php:1e12,attacks:0,dmg:Math.round(8+d*19),t0:Date.now(),mini:{k:k,ti:ti,dealt:0,taken:0}};
+$('bw').hidden=true;$('bf').classList.add('mini');$('bfi').style.display='none';$('bfn').textContent=g[1]+' '+g[2];var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
+$('bf').hidden=false;nextAttack(k)}
+function miniEnd(){var m=BF.mini;BF.ph='over';var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=m.taken?'Done!':'Flawless!';
+var pp=document.createElement('p');pp.textContent='Damage dealt: '+m.dealt+' · Damage taken: '+m.taken;
+var a=document.createElement('button');a.textContent='Play again';a.onclick=function(){miniStart(m.k,m.ti)};
+var c=document.createElement('button');c.className='sec';c.textContent='Pick another';c.onclick=function(){closeFight();renderMG();$('mgv').hidden=false};
+var x=document.createElement('button');x.className='sec';x.textContent='Close';x.onclick=closeFight;
+w.appendChild(h);w.appendChild(pp);w.appendChild(a);w.appendChild(c);w.appendChild(x);A.appendChild(w)}
+$('mgb').onclick=function(){renderMG();$('mgv').hidden=false};
+function closeMGV(){$('mgv').hidden=true}$('mgvx').onclick=closeMGV;$('mgv').onclick=function(e){if(e.target===$('mgv'))closeMGV()};
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
 var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second',function(d){return fmt(+d.cps||0)+'/s'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Card rank bonus',function(d){return '+'+(+d.cp||0)+'%'}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Rune rank bonus',function(d){return '+'+(+d.rp||0)+'%'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
