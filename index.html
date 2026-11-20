@@ -19,6 +19,11 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .f{position:absolute;pointer-events:none;font-weight:700;color:var(--accent);animation:up .8s ease-out forwards}
 @keyframes up{to{transform:translateY(-70px);opacity:0}}
 .bar{display:flex;gap:6px;justify-content:center;margin:14px 0 10px}
+.slots{display:flex;gap:6px;margin:8px 0 2px}
+.slots[hidden]{display:none}
+.slots button{flex:1;padding:6px 4px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:13px;font-weight:700;line-height:1.2;cursor:pointer}
+.slots button small{display:block;font-weight:500;color:var(--muted);font-size:11px;pointer-events:none}
+.slots button.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .tabs{display:flex;gap:6px;margin:14px 0 0}
 .tabs[hidden],.bar[hidden]{display:none}
 .tabs button{flex:1;padding:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
@@ -304,7 +309,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block}
 <div class="by">made by trenton dent</div>
 <div class="warn" id="nosave" hidden>⚠️ This page can't save your progress, so it will be lost when you close it. Open the game in its own browser tab (not inside another website or app) to keep your progress.</div>
 
-<div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div>
+<div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div><div class="slots" id="slots" hidden></div>
 <div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="mgb">🎮<small>Minigames</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰</button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="tabs" id="tabs" hidden><button data-t="t" class="on">👩‍🏫 Teachers</button><button data-t="s">🎮 Students</button></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
@@ -353,7 +358,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=59;
+var BUILD=60;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -450,7 +455,10 @@ var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
 function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0},web:[]};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(BASE+n));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
+/* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
+function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
+function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}}}catch(e){}return d}
 /* ===== One save: older versions had 3 save slots. On start (and after loading a code) the slot with the most
@@ -466,16 +474,16 @@ if(best>1){if(raws[1]!=null)LS.setItem(BASE+'1.bak',raws[1]);var w=objs[best];w.
 [2,3].forEach(function(n){if(raws[n]!=null){LS.setItem(BASE+n+'.bak',raws[n]);LS.removeItem(BASE+n)}});
 LS.setItem(ACT,'1')}catch(e){}}
 oneSave();
-var slot=1;
+var slot=1;try{if(LS.getItem('deemackClicker2.oactive')==='2'&&ownerAtLoad())slot=2}catch(e){}
 var S=load(slot),mult=1,ready=false,last=Date.now();
 /* ===== Safe saving: only one copy of the game saves at a time. Each save gets a number (rev) that goes up;
    a copy that finds a newer save than its own (e.g. an old tab left open) never overwrites it. It pauses and
    offers "Continue here" instead. Opening the game in a new tab also pauses older tabs. ===== */
 var TAB_ID=Math.random().toString(36).slice(2)+Date.now().toString(36),tabDead=false;
-function storedRev(){try{var o=JSON.parse(LS.getItem(BASE+slot));return o&&+o.rev>0?+o.rev:0}catch(e){return 0}}
+function storedRev(){try{var o=JSON.parse(LS.getItem(slotKey(slot)));return o&&+o.rev>0?+o.rev:0}catch(e){return 0}}
 function killTab(why){if(tabDead)return;tabDead=true;$('tabmsg').textContent=why;$('tabv').hidden=false}
 var STALE_MSG='Your game was played in another tab or window since this one was open. This copy has paused so it can’t overwrite your newer progress.';
-function save(){if(tabDead)return;try{var cur=storedRev();if(cur>(S.rev||0)){killTab(STALE_MSG);return}S.rev=cur+1;LS.setItem(BASE+slot,JSON.stringify(S));LS.setItem(ACT,String(slot))}catch(e){}}
+function save(){if(tabDead)return;try{var cur=storedRev();if(cur>(S.rev||0)){killTab(STALE_MSG);return}S.rev=cur+1;LS.setItem(slotKey(slot),JSON.stringify(S));if(slot===1)LS.setItem(ACT,'1')}catch(e){}}
 function geo(b,r,k){return Math.ceil(b*(Math.pow(r,k)-1)/(r-1))}
 function maxK(b,r,m){var k=Math.max(0,Math.floor(Math.log(m*(r-1)/b+1)/Math.log(r)));while(geo(b,r,k+1)<=m)k++;while(k>0&&geo(b,r,k)>m)k--;return k}
 function fmt(x){x=+x;if(!isFinite(x))return x>0?"∞":"0";if(x<0)x=0;if(x<1000)return String(x<100?Math.floor(x*100+1e-6)/100:Math.floor(x+1e-9));if(x>=1e66){var ex=Math.floor(Math.log10(x)),mt=x/Math.pow(10,ex);if(mt>=9.995){mt/=10;ex++}return mt.toFixed(2)+"e"+ex}var u=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod","Vg"],e=Math.min(Math.floor(Math.log10(x)/3+1e-12),u.length-1),v=x/Math.pow(1000,e);if(v>=1000&&e<u.length-1){e++;v/=1000}var d=v<10?100:v<100?10:1,f=Math.floor(v*d+1e-6)/d;if(f>=1000&&e<u.length-1){e++;f=Math.floor(f/1000*100+1e-6)/100}return f.toFixed(f<10?2:f<100?1:0)+u[e]}
@@ -508,7 +516,7 @@ refs[t.id]=r;$("shop").appendChild(d)});
 /* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
 function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
-var base=total()*(1-webDrain()),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);if(disp>bestMem&&isFinite(disp))bestMem=disp;
+var base=total()*(1-webDrain()),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);if(slot===1&&disp>bestMem&&isFinite(disp))bestMem=disp;
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
 function update(noAnim){var anim=ready&&!noAnim;var su=!!(S.stu&&S.stu.u);$('tabs').hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
@@ -541,14 +549,14 @@ document.addEventListener("visibilitychange",function(){if(document.hidden)save(
 var armed=false,rt;
 $("rs").onclick=function(){var d=S,bits=[fmt(d.gb)+' Games Blocked'],own=0,pl=function(n,w){return n+' '+w+(n===1?'':'s')};T.forEach(function(t){own+=d.own[t.id]});
 if(own)bits.push(pl(own,'teacher'));if(d.prs)bits.push(pl(d.prs,'prestige'));if(d.tree.length)bits.push(pl(d.tree.length,'skill tree upgrade'));if(d.pp)bits.push(pl(d.pp,'unspent prestige point'));
-if(d.runes.length)bits.push(pl(d.runes.length,'rune'));var nc=Object.keys(d.cards).length;if(nc)bits.push(pl(nc,'card'));var na=achCount(d);if(na)bits.push(pl(na,'achievement'));var bst=0;try{bst=+LS.getItem('deemackClicker2.best')||0}catch(e){}if(bst>=1)bits.push('your leaderboard best of '+fmt(bst));
-$('evs').textContent='This deletes all your progress and can’t be undone: '+bits.join(', ')+'. Type ERASE to confirm.';$('evi').value='';$('evgo').disabled=true;$('ev').hidden=false;$('evi').focus()};
+if(d.runes.length)bits.push(pl(d.runes.length,'rune'));var nc=Object.keys(d.cards).length;if(nc)bits.push(pl(nc,'card'));var na=achCount(d);if(na)bits.push(pl(na,'achievement'));var bst=0;try{bst=+LS.getItem('deemackClicker2.best')||0}catch(e){}if(slot===1&&bst>=1)bits.push('your leaderboard best of '+fmt(bst));
+$('evs').textContent='This deletes all your progress'+(slot===2?' in save slot 2':'')+' and can’t be undone: '+bits.join(', ')+'. Type ERASE to confirm.';$('evi').value='';$('evgo').disabled=true;$('ev').hidden=false;$('evi').focus()};
 function evOk(){return $('evi').value.trim().toUpperCase()==='ERASE'}
 function closeEV(){$('ev').hidden=true;$('evi').value=''}
 $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=function(e){if(e.key==='Enter'&&evOk())$('evgo').click()};
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
 $('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();renderWebs();
-try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;pushStats(true);toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
+if(slot===1){try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
 var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
 function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
@@ -802,7 +810,7 @@ if(typeof k['deemackClicker2.active']==='string')LS.setItem('deemackClicker2.act
 if(typeof k['deemackClicker2.name']==='string'&&k['deemackClicker2.name'].length>=2)LS.setItem('deemackClicker2.name',k['deemackClicker2.name'].slice(0,16));var kb=+k['deemackClicker2.best'];if(kb>0&&isFinite(kb)&&kb>(+LS.getItem('deemackClicker2.best')||0))LS.setItem('deemackClicker2.best',String(kb));
 if(typeof FB!=='undefined'&&typeof k['deemackClicker2.uid']==='string'&&/^[a-z0-9]{6,40}$/.test(k['deemackClicker2.uid']))LS.setItem('deemackClicker2.uid',k['deemackClicker2.uid']);
 if(typeof k['deemackClicker2.auth']==='string'){try{var aa=JSON.parse(k['deemackClicker2.auth']);if(aa&&typeof aa.refreshToken==='string'&&typeof aa.uid==='string'&&/^[A-Za-z0-9]{6,64}$/.test(aa.uid))LS.setItem('deemackClicker2.auth',JSON.stringify({refreshToken:aa.refreshToken,uid:aa.uid,idToken:'',exp:0}))}catch(e2){}}}catch(e){xMsg('This browser would not save the data. Try again in a normal browser tab.',true);return}
-oneSave();slot=1;
+oneSave();slot=1;try{LS.setItem('deemackClicker2.oactive','1')}catch(e){}slotOther=null;bestMem=0;
 S=load(slot);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;last=Date.now();
 try{NAME=LS.getItem('deemackClicker2.name')||NAME}catch(e){}if(NAME)$('ov').hidden=true;
 if(FB_KEY){authLoad();if(AUTH)uid=AUTH.uid;var lg=null;try{lg=LS.getItem('deemackClicker2.uid')}catch(e){}LEGACY=lg&&/^p[a-z0-9]+$/.test(lg)?lg:'';legacyGone=false;if(LEGACY)authToken().then(migrate,function(){})}
@@ -1190,6 +1198,18 @@ var f=document.createElement('div');f.className='gfx';f.textContent='×'+m+' MON
 toast('✨ Golden '+t.name+'! ×'+m+' money for '+secs+' seconds','#f59e0b');CK=[];disp=null;update()}
 function goldTick(){var n=Date.now();if(goldOn||n<nextGold)return;if(document.hidden||anyOpen()){nextGold=n+3000;return}spawnGold();nextGold=n+GOLD_EVERY}
 setInterval(goldTick,1000);
+/* ===== Owner only: two save slots. Slot 2 is a practice save: it never sends scores or changes your leaderboard record. ===== */
+var SLB=null,slotOther=null;
+function ownerSlots(){return isOwnerName(NAME)&&devOk()}
+function slotSum(n){var raw=null;try{raw=LS.getItem(slotKey(n))}catch(e){}if(!raw)return 'Empty';return fmt(load(n).gb)+' Games Blocked'}
+function switchSlot(n,force){if(n===slot||tabDead||(!force&&!ownerSlots()))return;save();slot=n;try{LS.setItem('deemackClicker2.oactive',String(n))}catch(e){}
+S=load(n);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;bestMem=0;last=Date.now();closeWeb();renderWebs();update(true);slotOther=null;renderSlots();
+toast(n===2?'🧪 Save slot 2: practice save, it doesn\u2019t count for the leaderboard':'💾 Save slot 1','#a855f7');if(n===1){lastSent=0;pushStats(true)}}
+function renderSlots(){var el=$('slots'),on=ownerSlots();if(!on&&slot===2){switchSlot(1,true);return}el.hidden=!on;if(!on)return;
+if(!SLB){SLB=[1,2].map(function(n){var b=document.createElement('button');b.onclick=function(){switchSlot(n)};el.appendChild(b);return b})}
+SLB.forEach(function(b,i){var n=i+1,act=n===slot,sum=act?fmt(S.gb)+' Games Blocked':(slotOther||(slotOther=slotSum(n)));
+var h=(n===1?'💾 Slot 1':'🧪 Slot 2 · not on leaderboard')+'<small>'+sum+'</small>';if(b._h!==h){b.innerHTML=h;b._h=h}var cl=act?'on':'';if(b.className!==cl)b.className=cl})}
+setInterval(renderSlots,1000);
 /* ===== Game websites around Mr McCoy + the Students tab ===== */
 function supLv(id){return (S.stu&&S.stu.lv&&S.stu.lv[id])||0}
 function webMax(){return Math.min(WEB_SLOTS.length,3+supLv('more'))}
@@ -1457,7 +1477,7 @@ function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true
 claimName(n).then(function(r){claiming=false;nameErr='';if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(e){claiming=false;nameErr=/refused|denied/.test(String(e&&e.message))?'the server refused it':'the server didn\u2019t answer'})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
-function pushStats(force){if(tabDead||!FB||!NAME||busy)return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
+function pushStats(force){if(tabDead||!FB||!NAME||busy||slot!==1)return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').then(function(r){if(r&&r.ok){lastOk=Date.now();pushErr='';if(lbAfterPush&&!$('lv').hidden){lbAfterPush=false;loadLB()}}else pushErr=(r&&(r.status===401||r.status===403))?'the server refused it':'server error '+(r&&r.status)},
 function(){pushErr=FB_KEY&&authErr?'can\u2019t sign in':'the server didn\u2019t answer'}).then(function(){busy=false;lbMe()})}
 function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
@@ -1502,7 +1522,7 @@ if(el.querySelector('.row')){var w=el.querySelector('.lberr');if(!w){w=document.
 /* ===== The "you" box at the top of the leaderboard: your rank and rank score, and whether your score is being sent
    (or exactly why not), so problems are easy to spot. ===== */
 function ago(t){t=+t||0;if(!t)return 'Unknown';var s=Math.max(0,(Date.now()-t)/1000);return s<60?'Just now':s<3600?Math.floor(s/60)+' min ago':s<86400?Math.floor(s/3600)+' h ago':Math.floor(s/86400)+' day'+(s<172800?'':'s')+' ago'}
-function lbStatus(){if(!NAME)return '✏️ Pick a name to join the leaderboard.';if(tabDead)return '⏸️ This tab is paused, so your score isn\u2019t being sent from here.';
+function lbStatus(){if(slot!==1)return '🧪 You\u2019re playing save slot 2, which doesn\u2019t count for the leaderboard.';if(!NAME)return '✏️ Pick a name to join the leaderboard.';if(tabDead)return '⏸️ This tab is paused, so your score isn\u2019t being sent from here.';
 if(FB_KEY&&!uid)return authErr?'⚠️ Your score isn\u2019t being sent: '+authMsg()+' The game keeps trying.':'⏳ Signing in…';
 if(!nameOk)return nameErr?'⚠️ Your score isn\u2019t being sent yet: your name couldn\u2019t be checked ('+nameErr+'). The game keeps trying.':'⏳ Checking your name…';
 if(pushErr)return '⚠️ Your last score didn\u2019t send ('+pushErr+'). The game keeps trying.';
@@ -1518,6 +1538,6 @@ function lbTick(){if($('lv').hidden||document.hidden)return;lbMe();var n=Date.no
 setInterval(lbTick,1000);
 if(NAME)pushStats(true);
 if(!LS_OK)$('nosave').hidden=false;
-applyTheme(S.theme);checkAch();update(true);ready=true;renderWebs();
+applyTheme(S.theme);checkAch();update(true);ready=true;renderWebs();renderSlots();
 })();
 </script></body></html>
