@@ -345,7 +345,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div class="ov" id="dcv" hidden><div class="box"><h1>🛠️ Dev tools</h1><p>Enter the owner code.</p><input id="dcin" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off"><button id="dcok">Unlock</button><button id="dcx" class="sec">Cancel</button><p id="dcerr"></p></div></div>
 <div class="ov" id="pv" hidden><div class="box"><h1 id="pvn"></h1><p id="pvr"></p><div id="pvs"></div><button id="pvx">Close</button></div></div>
 <div class="ov" id="rv" hidden><div class="box rbox"><h1>Runes</h1><p id="rvs"></p><div id="rvl"></div><button id="rvx">Close</button></div></div>
-<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Top 100 players. Rank score = the highest “… per second” you’ve ever reached (boosts and fast clicking count). It never goes down, even when you prestige.</p><div class="lbme" id="lbme" hidden></div><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
+<div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Top 100 players. The number is your <b>rank score</b>: the highest “… per second” you’ve ever reached (boosts and fast clicking count) × your rune bonus. It’s <b>not</b> your total Games Blocked, so it’s usually much smaller than that. It never goes down when you prestige.</p><div class="lbme" id="lbme" hidden></div><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
 <div class="ov" id="rl" hidden><div class="box"><h1>Daily Roller</h1><p>Roll once every 22 hours for an income boost.</p><div id="rls"></div><p id="rlt"></p><button id="rlr">Roll</button><button id="rlx">Close</button></div></div>
 <div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvra" class="sec">🎲 Roll all</button><button id="dvx">Close</button></div></div>
 <div class="ov" id="cv" hidden><div class="box rbox"><h1>Cards</h1><p id="cvs"></p><div class="binder" id="cvb"></div><button id="cvx">Close</button></div></div>
@@ -382,7 +382,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=78;
+var BUILD=79;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -397,7 +397,7 @@ var UPDATES=[
 (function(){
 /* Teachers, weakest first. Each spot in the list has a fixed strength (income and prices). When a teacher is added,
    everyone after it moves up one spot and takes that spot's strength (Mr Cluver took Mr Finney's old spot; Ms Winkler
-   took Mr Lawrence's; Officer Kits took Mr Holmgren's; Young Mac took Mr Mac's; Mr Myers took Young Hill's;
+   took Mr Lawrence's; Officer Kitts took Mr Holmgren's; Young Mac took Mr Mac's; Mr Myers took Young Hill's;
    Mr Philips took Mr Finney's). New top spots are added at the end. Bosses follow the same order. */
 var T=[
 {id:"davis",name:"Kid Davis",cps:2,buy:25,up:200},
@@ -416,7 +416,7 @@ var T=[
 {id:"uhlman",name:"Young Hill",ph:"hill",cps:4e11,buy:8.625e14,up:6.9e15},
 {id:"rutan",name:"Mr Reiman",ph:"reiman",cps:1.6e12,buy:4.97e15,up:3.98e16},
 {id:"scott",name:"Mr Scott",cps:6.4e12,buy:2.86e16,up:2.29e17},
-{id:"kits",name:"Officer Kits",cps:2.56e13,buy:1.65e17,up:1.32e18},
+{id:"kits",name:"Officer Kitts",cps:2.56e13,buy:1.65e17,up:1.32e18},
 {id:"holmgren",name:"Mr Holmgren",cps:1e14,buy:9.29e17,up:7.43e18},
 {id:"stokes",name:"Mr Stokes",cps:4e14,buy:5.36e18,up:4.29e19},
 {id:"linboom",name:"Mr Linboom",cps:1.6e15,buy:3.09e19,up:2.47e20}];
