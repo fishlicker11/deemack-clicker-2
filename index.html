@@ -388,7 +388,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=82;
+var BUILD=83;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -977,7 +977,7 @@ $('bwb').onclick=function(){$('bw').hidden=true;closeFight();renderBosses();$('b
 $('bw').hidden=false;$('bwr').focus()}
 $('bfx').onclick=closeFight;
 
-var DODGE_DMG=50,DODGE_PEN=10; /* dodge: damage dealt when it ends, minus this much per red block that hit you */
+var DODGE_DMG=80,DODGE_PEN=10; /* dodge: damage dealt when it ends, minus this much per red block that hit you */
 function fCounter(m){var n=Math.max(2,Math.round(BF.base*0.10*(m||1)));fStatus('Perfect! Counterattack for '+n+'!');hurtBoss(n);return fAlive(BF&&BF.id)}
 function mashNeed(){return Math.round(17+BF.d*66)}
 ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+(1+1.0*(1+n*(0.6-BF.d*0.38))).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
