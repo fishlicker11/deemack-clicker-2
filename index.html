@@ -163,6 +163,9 @@ button:disabled{opacity:.35;cursor:default}
 .card2.off img{filter:grayscale(1) brightness(.4)}
 .dres .card2{max-width:150px;margin:8px auto}
 .dnum{font-size:40px;font-weight:700;margin:6px 0}
+.dnum.dall{font-size:26px}
+.dgot{grid-template-columns:repeat(4,minmax(0,1fr));margin:4px 0 10px}
+@media (max-width:360px){.dgot{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .stage{min-height:340px;display:flex;align-items:center;justify-content:center}
 .side{top:0!important;transform:none!important;gap:5px!important}
 .mc{width:min(48vw,240px)!important}
@@ -341,7 +344,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div class="ov" id="rv" hidden><div class="box rbox"><h1>Runes</h1><p id="rvs"></p><div id="rvl"></div><button id="rvx">Close</button></div></div>
 <div class="ov" id="lv" hidden><div class="box rbox lb"><h1>Leaderboard</h1><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Top 100 players. Rank score = the highest “… per second” you’ve ever reached (boosts and fast clicking count). It never goes down, even when you prestige.</p><div class="lbme" id="lbme" hidden></div><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button><button id="lvx">Close</button></div></div>
 <div class="ov" id="rl" hidden><div class="box"><h1>Daily Roller</h1><p>Roll once every 22 hours for an income boost.</p><div id="rls"></div><p id="rlt"></p><button id="rlr">Roll</button><button id="rlx">Close</button></div></div>
-<div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvx">Close</button></div></div>
+<div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvra" class="sec">🎲 Roll all</button><button id="dvx">Close</button></div></div>
 <div class="ov" id="cv" hidden><div class="box rbox"><h1>Cards</h1><p id="cvs"></p><div class="binder" id="cvb"></div><button id="cvx">Close</button></div></div>
 <div class="ov" id="av" hidden><div class="box rbox"><div class="phd"><h1>Achievements</h1><button class="xbtn" id="avx" aria-label="Close">✕</button></div><p id="avs"></p><div id="avl"></div></div></div>
 <div class="ov" id="tv" hidden><div class="box rbox"><h1>Themes</h1><p id="tvs"></p><div id="tvl"></div><button id="tvx">Close</button></div></div>
@@ -376,7 +379,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=76;
+var BUILD=77;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -706,18 +709,27 @@ var im=document.createElement('img');im.src=PHOTOS[t.ph||t.id]||'';im.alt='';
 var n=document.createElement('div');n.className='cn';n.textContent=owned?tName(t):'???';
 var r=document.createElement('div');r.className='cr';r.textContent=owned?(rar>=0?DR[rar]:'Base')+' · +'+cardPct(rar)+'%':'Not found';
 d.appendChild(im);d.appendChild(n);d.appendChild(r);return d}
-function renderDice(res,keep){$('dvs').textContent='Rolls: '+S.rolls+' · '+T.length+'-sided die';$('dvr').disabled=S.rolls<1||rolling;
+function renderDice(res,keep){$('dvs').textContent='Rolls: '+S.rolls+' · '+T.length+'-sided die';$('dvr').disabled=S.rolls<1||rolling;var ra=$('dvra');ra.disabled=S.rolls<1||rolling;ra.textContent='🎲 Roll all'+(S.rolls>1?' ('+S.rolls+')':'');
 if(keep)return;var R=$('dres');R.textContent='';
+if(res&&res.all){var hd=document.createElement('div');hd.className='dnum dall';hd.textContent='Rolled '+res.all+' time'+(res.all===1?'':'s');R.appendChild(hd);
+var c=res.cnt,bits=[];if(c.new)bits.push(c.new+' new card'+(c.new===1?'':'s'));if(c.up)bits.push(c.up+' upgrade'+(c.up===1?'':'s'));bits.push(c.dup+' duplicate'+(c.dup===1?'':'s'));var sm=document.createElement('p');sm.textContent=bits.join(' · ');R.appendChild(sm);
+if(res.got.length){var g=document.createElement('div');g.className='bgrid dgot';res.got.forEach(function(i){g.appendChild(cardEl(T[i],S.cards[T[i].id],true))});R.appendChild(g)}
+else{var no=document.createElement('p');no.textContent='No new cards or upgrades this time.';R.appendChild(no)}return}
 if(res){var d=document.createElement('div');d.className='dnum';d.textContent='Rolled '+(res.i+1);R.appendChild(d);var w=document.createElement('div');w.className='dres';w.appendChild(cardEl(T[res.i],res.rar,true));R.appendChild(w);var m=document.createElement('p');m.textContent=res.msg;R.appendChild(m)}
 else{var h=document.createElement('p');h.textContent='Sell runes to earn dice rolls.';R.appendChild(h)}}
-function rollDie(){if(S.rolls<1||rolling)return;S.rolls--;S.st.dice++;rolling=true;
-var i=Math.floor(Math.random()*T.length),rar=-1;
+/* one roll: a random teacher's card. 30% of rolls are a special rarity (DW odds), the rest are Base */
+function rollOnce(){S.rolls--;S.st.dice++;var i=Math.floor(Math.random()*T.length),rar=-1;
 if(Math.random()<0.3){var x=Math.random()*DW.reduce(function(a,b){return a+b},0),w=0;rar=DW.length-1;for(var j=0;j<DW.length;j++){w+=DW[j];if(x<w){rar=j;break}}}
-var t=T[i],old=S.cards[t.id],msg;
-if(old===undefined){S.cards[t.id]=rar;msg='New card!'}else if(rar>old){S.cards[t.id]=rar;msg='Upgraded!'}else msg='Duplicate, no bonus';
+var t=T[i],old=S.cards[t.id],k;if(old===undefined){S.cards[t.id]=rar;k='new'}else if(rar>old){S.cards[t.id]=rar;k='up'}else k='dup';return{i:i,rar:rar,k:k}}
+/* roll every die you have at once, then show how many were new / upgrades / duplicates and the cards that changed */
+function rollAll(){var n=S.rolls;if(n<1||rolling)return;rolling=true;var cnt={new:0,up:0,dup:0},got={};
+for(var q=0;q<n;q++){var r=rollOnce();cnt[r.k]++;if(r.k!=='dup')got[r.i]=1}save();update();
+var tk=0,R=$('dres'),iv=setInterval(function(){tk++;R.textContent='';var d=document.createElement('div');d.className='dnum';d.textContent=Math.floor(Math.random()*T.length)+1;R.appendChild(d);
+if(tk>=10){clearInterval(iv);rolling=false;renderDice({all:n,cnt:cnt,got:Object.keys(got).map(Number).sort(function(a,b){return a-b})})}},70);renderDice(null,true)}
+function rollDie(){if(S.rolls<1||rolling)return;rolling=true;var r=rollOnce(),i=r.i,rar=r.rar,msg=r.k==='new'?'New card!':r.k==='up'?'Upgraded!':'Duplicate, no bonus';
 save();var n=0,R=$('dres'),iv=setInterval(function(){n++;R.textContent='';var d=document.createElement('div');d.className='dnum';d.textContent=Math.floor(Math.random()*T.length)+1;R.appendChild(d);
 if(n>=10){clearInterval(iv);rolling=false;renderDice({i:i,rar:rar,msg:msg})}},70);renderDice(null,true)}
-$('db').onclick=function(){renderDice(null);$('dv').hidden=false};$('dvr').onclick=rollDie;
+$('db').onclick=function(){renderDice(null);$('dv').hidden=false};$('dvr').onclick=rollDie;$('dvra').onclick=rollAll;
 function closeDV(){$('dv').hidden=true}$('dvx').onclick=closeDV;$('dv').onclick=function(e){if(e.target===$('dv'))closeDV()};
 function renderBinder(){var B=$('cvb');B.textContent='';var per=9,pages=Math.ceil(T.length/per);
 for(var p=0;p<pages;p++){var pg=document.createElement('div');pg.className='bpage';var h=document.createElement('div');h.className='bph';h.textContent='Page '+(p+1)+' of '+pages;pg.appendChild(h);var g=document.createElement('div');g.className='bgrid';
