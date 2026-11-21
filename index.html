@@ -278,6 +278,9 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .tlock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--muted);font-size:14px;text-align:center;padding:20px}
 .tlock b{color:var(--text);font-size:17px}.tlock span{font-size:34px}
 .tlock[hidden],.tctl[hidden]{display:none}
+.tzoom{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
+.tzoom[hidden]{display:none}
+.tzoom button{width:38px;height:38px;padding:0;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:22px;line-height:1;cursor:pointer;touch-action:manipulation}
 .tctl{position:absolute;right:8px;top:8px;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
 .tctl button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:16px;cursor:pointer}
 .tctl button.tball{width:auto;padding:0 10px;font:inherit;font-size:13px;font-weight:700;white-space:nowrap}
@@ -318,7 +321,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .tabbox button{width:100%;padding:11px;border:0;border-radius:10px;background:var(--btn);color:var(--btntext);font:inherit;font-weight:700;cursor:pointer}
 #updbar{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:45;border:0;border-radius:999px;padding:9px 16px;background:var(--btn);color:var(--btntext);font:inherit;font-size:14px;font-weight:800;box-shadow:0 4px 16px rgba(0,0,0,.3);cursor:pointer;white-space:nowrap}
 #updbar[hidden]{display:none}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;border-left:4px solid var(--rc,#999);padding:10px 14px;border-radius:10px;font-size:14px;z-index:30;animation:tst .25s ease-out;max-width:90vw}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;border-left:4px solid var(--rc,#999);padding:10px 14px;border-radius:10px;font-size:14px;z-index:30;animation:tst .25s ease-out;max-width:90vw;pointer-events:none}
 .toast[hidden]{display:none}
 @keyframes tst{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes nac{from{opacity:0;transform:translate(-50%,-40%)}to{opacity:1;transform:translate(-50%,-50%)}}
@@ -353,7 +356,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div id="ps" hidden><div class="psw">
 <div class="bfh"><div class="bft"><b>🌳 Prestige</b><span class="pss" id="pspts"></span></div><button class="xbtn2" id="psx" aria-label="Close">✕</button></div>
 <div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes, teacher ⭐s, student upgrades and the skill tree. You can prestige once every 10 minutes.</div></div>
-<div class="tarea" id="tarea"><svg id="tsvg" aria-label="Skill tree"></svg><div class="tlock" id="tlock"><span>🔒</span><b>Skill tree</b>Prestige once to unlock it.</div><div class="tctl" id="tctl"><span id="tcount"></span><button id="tball" class="tball">🛒 Buy all</button><button id="tfit" aria-label="Show the whole tree">⤢</button></div></div>
+<div class="tarea" id="tarea"><svg id="tsvg" aria-label="Skill tree"></svg><div class="tlock" id="tlock"><span>🔒</span><b>Skill tree</b>Prestige once to unlock it.</div><div class="tctl" id="tctl"><span id="tcount"></span><button id="tball" class="tball">🛒 Buy all</button><button id="tfit" aria-label="Show the whole tree">⤢</button></div><div class="tzoom" id="tzoom"><button id="tzin" aria-label="Zoom in">+</button><button id="tzout" aria-label="Zoom out">−</button></div></div>
 <div class="tinfo" id="tinfo"></div>
 </div></div>
 <div id="bf" hidden><div class="bfw"><div class="bfh"><img id="bfi" alt=""><div class="bft"><b id="bfn"></b><span class="dif" id="bfd"></span></div><button class="xbtn2" id="bfx" aria-label="Run away">✕</button></div><div class="hpl"><span>Boss</span><span id="bfht"></span></div><div class="hp"><div id="bfhb" class="hpf boss"></div></div><div class="hpl"><span>You</span><span id="bfpt"></span></div><div class="hp"><div id="bfpb" class="hpf me"></div></div><div id="bfs" class="bfs"></div><div id="bfa" class="bfa"></div></div></div>
@@ -379,7 +382,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=77;
+var BUILD=78;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1303,14 +1306,18 @@ function kMin(){var A=$('tarea'),b=tBounds(TN.map(function(n,i){return i}));retu
 function clampK(k){return Math.max(kMin(),Math.min(3,k))}
 var tAnim=0;function tGo(v,ms){if(!v)return;if(!ms){TV=v;tApply();return}var a={k:TV.k,x:TV.x,y:TV.y},t0=performance.now(),id=++tAnim;
 (function st(now){if(id!==tAnim)return;var t=Math.min(1,(now-t0)/ms),e=1-Math.pow(1-t,3);TV={k:a.k+(v.k-a.k)*e,x:a.x+(v.x-a.x)*e,y:a.y+(v.y-a.y)*e};tApply();if(t<1)requestAnimationFrame(st)})(t0)}
-function tWire(svg){var P={},D=null;
+function tWire(svg){var P={},D=null,G=null;grab(svg);
+svg.addEventListener('gesturestart',function(e){e.preventDefault();if(D&&D.pinch)return;tAnim++;var r=svg.getBoundingClientRect(),cx=isFinite(e.clientX)?e.clientX:r.left+r.width/2,cy=isFinite(e.clientY)?e.clientY:r.top+r.height/2;G={k0:TV.k,px:(cx-r.left-TV.x)/TV.k,py:(cy-r.top-TV.y)/TV.k}});
+svg.addEventListener('gesturechange',function(e){e.preventDefault();if(!G||(D&&D.pinch)||!(e.scale>0))return;var r=svg.getBoundingClientRect(),cx=isFinite(e.clientX)?e.clientX:r.left+r.width/2,cy=isFinite(e.clientY)?e.clientY:r.top+r.height/2,k=clampK(G.k0*e.scale);TV={k:k,x:cx-r.left-G.px*k,y:cy-r.top-G.py*k};tApply()});
+svg.addEventListener('gestureend',function(e){e.preventDefault();G=null});
+
 svg.addEventListener('pointerdown',function(e){tAnim++;try{svg.setPointerCapture(e.pointerId)}catch(_){}P[e.pointerId]={x:e.clientX,y:e.clientY};var ids=Object.keys(P);
 if(ids.length===1)D={x:e.clientX,y:e.clientY,tx:TV.x,ty:TV.y,mv:0,node:e.target.closest?e.target.closest('[data-i]'):null};
 else if(ids.length===2){var a=P[ids[0]],b=P[ids[1]];D={pinch:1,d0:Math.hypot(a.x-b.x,a.y-b.y)||1,k0:TV.k,mx:(a.x+b.x)/2,my:(a.y+b.y)/2,tx:TV.x,ty:TV.y,mv:99}}});
 svg.addEventListener('pointermove',function(e){if(!P[e.pointerId]||!D)return;P[e.pointerId]={x:e.clientX,y:e.clientY};var ids=Object.keys(P),r=svg.getBoundingClientRect();
 if(D.pinch&&ids.length>=2){var a=P[ids[0]],b=P[ids[1]],k=clampK(D.k0*Math.hypot(a.x-b.x,a.y-b.y)/D.d0),px=(D.mx-r.left-D.tx)/D.k0,py=(D.my-r.top-D.ty)/D.k0;
 TV={k:k,x:(a.x+b.x)/2-r.left-px*k,y:(a.y+b.y)/2-r.top-py*k};tApply()}
-else if(!D.pinch){var dx=e.clientX-D.x,dy=e.clientY-D.y;D.mv=Math.max(D.mv,Math.hypot(dx,dy));if(D.mv>6){TV.x=D.tx+dx;TV.y=D.ty+dy;tApply()}}});
+else if(!D.pinch&&!G){var dx=e.clientX-D.x,dy=e.clientY-D.y;D.mv=Math.max(D.mv,Math.hypot(dx,dy));if(D.mv>6){TV.x=D.tx+dx;TV.y=D.ty+dy;tApply()}}});
 function up(e){var tap=D&&!D.pinch&&D.mv<=6&&e.type==='pointerup'?D.node:null;delete P[e.pointerId];var ids=Object.keys(P);
 if(!ids.length)D=null;else if(D&&D.pinch)D={x:P[ids[0]].x,y:P[ids[0]].y,tx:TV.x,ty:TV.y,mv:99};if(tap)tSelect(+tap.getAttribute('data-i'))}
 svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
@@ -1352,7 +1359,7 @@ $('psnext').textContent=S.run<1e6?'Earn 1M Games Blocked in one run to get your 
 var bits=[];if(fx.inc>1)bits.push('×'+fmt(fx.inc)+' income');if(fx.clk>1)bits.push('×'+fmt(fx.clk)+' clicks');var cut=function(v){var x=(1-v)*100;return (x>99?x.toFixed(1):Math.round(x))+'%'};if(fx.tc<1)bits.push('teachers −'+cut(fx.tc));if(fx.uc<1)bits.push('upgrades −'+cut(fx.uc));if(fx.pp)bits.push('+'+Math.round(fx.pp*100)+'% points');if(fx.start)bits.push('start with '+fmt(fx.start));if(fx.crit)bits.push('+'+(fx.crit*100).toFixed(1)+'% crit chance');
 $('psfx').textContent=bits.length?'Tree bonuses: '+bits.join(' · '):'';
 var b=$('psgo'),w=prsWait();b.disabled=pn<1||w>0;b.textContent=pn<1?'Prestige (needs 1M earned this run)':w>0?'Prestige ready in '+mmss(w)+' (+'+pn+' so far)':psArm?'Tap again to prestige for +'+pn:'Prestige for +'+pn+' point'+(pn===1?'':'s');
-$('tlock').hidden=!L;$('tctl').hidden=L;$('tsvg').style.visibility=L?'hidden':'';if(!L)tBallUpd()}
+$('tlock').hidden=!L;$('tctl').hidden=L;$('tzoom').hidden=L;$('tsvg').style.visibility=L?'hidden':'';if(!L)tBallUpd()}
 function doPrestige(){var pn=ppPending();if(pn<1||prsWait()>0)return;
 if(!psArm){psArm=true;clearTimeout(psArmT);psArmT=setTimeout(function(){psArm=false;if(PSO)psStats()},3000);psStats();return}
 psArm=false;clearTimeout(psArmT);if(S.web&&S.web.length){webCashAll();pn=ppPending()}var first=tLocked();S.pp+=pn;S.ppt+=pn;S.prs++;S.prsAt=Date.now();S.gb=tfx(S).start;T.forEach(function(t){S.own[t.id]=0;S.lvl[t.id]=1});S.run=0;CK=[];disp=null;
@@ -1409,7 +1416,9 @@ $('devvx').onclick=function(){$('devv').hidden=true};$('devv').onclick=function(
 
 $('prb').onclick=function(){if(!TEl)tBuild();PSO=true;psArm=false;$('ps').hidden=false;psStats();tRefresh();tInfo();requestAnimationFrame(function(){tGo(tFitView(false))})};
 $('psx').onclick=function(){PSO=false;psArm=false;tbArm=false;clearTimeout(tbArmT);$('ps').hidden=true};
-$('tfit').onclick=function(){tGo(tFitView(true),450)};$('tball').onclick=tBuyAll;
+$('tfit').onclick=function(){tGo(tFitView(true),450)};
+function tZoom(f){var A=$('tarea'),W=A.clientWidth,H=A.clientHeight,k=clampK(TV.k*f),px=(W/2-TV.x)/TV.k,py=(H/2-TV.y)/TV.k;tAnim++;tGo({k:k,x:W/2-px*k,y:H/2-py*k},200)}
+$('tzin').onclick=function(){tZoom(1.5)};$('tzout').onclick=function(){tZoom(1/1.5)};$('tball').onclick=tBuyAll;
 setInterval(function(){if(PSO)psStats()},500);
 /* ===== Golden teachers: every 5 minutes a golden teacher floats across the screen for 10 seconds.
    Tapping it gives ×1.3–3 money (income and clicks) for 30–60 seconds. ===== */
