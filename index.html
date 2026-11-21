@@ -373,7 +373,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=72;
+var BUILD=73;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -591,7 +591,7 @@ var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
 var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmt(c);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
 $("stage").appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800);update()};
-setInterval(function(){var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0,LAUNCH.from,LAUNCH.until].concat(Object.keys(BB).map(function(k){return BB[k]})).concat((S.qb||[]).reduce(function(a,q){a.push(q.st,q.un);return a},[])).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}if(!(g>=0)||!isFinite(g))g=0;g=webSteal(g);S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
+setInterval(function(){if(nameBlocked){last=Date.now();return}var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0,LAUNCH.from,LAUNCH.until].concat(Object.keys(BB).map(function(k){return BB[k]})).concat((S.qb||[]).reduce(function(a,q){a.push(q.st,q.un);return a},[])).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}if(!(g>=0)||!isFinite(g))g=0;g=webSteal(g);S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
 var lr=Date.now();setInterval(function(){var n=Date.now();rate((n-lr)/1000);lr=n},80);
 setInterval(function(){save();bestScore();pushStats()},5000);
 window.addEventListener("pagehide",save);
@@ -607,7 +607,7 @@ $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=funct
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
 $('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();renderWebs();
 if(slot===1){try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
-var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
+var NAME='',nameBlocked=false;try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){} /* nameBlocked: the name failed the rude-name filter */
 var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
 /* leaderboard rune bonus: your 3 rarest runes (any you own, equipped or not) add RP% each to your rank score:
    Common +1, Uncommon +3, Rare +6, Epic +12, Legendary +25, Mythic +50 (at most +150% with 3 Mythics). More runes than 3 don't add anything. */
@@ -868,7 +868,7 @@ if(typeof FB!=='undefined'&&typeof k['deemackClicker2.uid']==='string'&&/^[a-z0-
 if(typeof k['deemackClicker2.auth']==='string'){try{var aa=JSON.parse(k['deemackClicker2.auth']);if(aa&&typeof aa.refreshToken==='string'&&typeof aa.uid==='string'&&/^[A-Za-z0-9]{6,64}$/.test(aa.uid))LS.setItem('deemackClicker2.auth',JSON.stringify({refreshToken:aa.refreshToken,uid:aa.uid,idToken:'',exp:0}))}catch(e2){}}}catch(e){xMsg('This browser would not save the data. Try again in a normal browser tab.',true);return}
 oneSave();slot=1;try{LS.setItem('deemackClicker2.oactive','1')}catch(e){}slotOther=null;bestMem=0;
 S=load(slot);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;last=Date.now();
-try{NAME=LS.getItem('deemackClicker2.name')||NAME}catch(e){}if(NAME)$('ov').hidden=true;
+try{NAME=LS.getItem('deemackClicker2.name')||NAME}catch(e){}if(NAME){$('ov').hidden=true;nameBlocked=false}if(NAME&&badName(NAME))setTimeout(function(){askName('',false,true)},0);
 if(FB_KEY){authLoad();if(AUTH)uid=AUTH.uid;var lg=null;try{lg=LS.getItem('deemackClicker2.uid')}catch(e){}LEGACY=lg&&/^p[a-z0-9]+$/.test(lg)?lg:'';legacyGone=false;if(LEGACY)authToken().then(migrate,function(){})}
 else{try{uid=LS.getItem('deemackClicker2.uid')||uid}catch(e){}}
 if(NAME!==oldName||uid!==oldUid){nameOk=false;if(oldOk&&(uid!==oldUid||nameKey(NAME)!==nameKey(oldName)))releaseName(oldName,oldUid)}
@@ -1673,11 +1673,19 @@ function fbw(path,opt,q){return authToken().then(function(tok){var qs=[];if(q)qs
 function clearLegacy(){LEGACY='';try{LS.removeItem('deemackClicker2.uid')}catch(e){}}
 function migrate(){if(!FB||!FB_KEY||!LEGACY||legacyGone)return;var old=LEGACY;
 fbw('/players/'+old,{method:'DELETE'},'print=silent').then(function(r){if(r.ok&&old===LEGACY){legacyGone=true;if(nameOk||!NAME)clearLegacy()}}).catch(function(){})}
-/* basic rude-name filter */
-var BAD_SUB=['fuck','fuk','shit','bitch','cunt','nigger','nigga','faggot','whore','slut','porn','penis','vagina','dildo','asshole','bastard','retard','hitler','pussy','jizz','twat'],
-BAD_WORD=['ass','dick','cock','sex','cum','rape','nazi','tits','boob','boobs','fag','fags'];
-function badName(n){var t=String(n||'').toLowerCase().replace(/[0]/g,'o').replace(/[@4]/g,'a').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[5$]/g,'s').replace(/7/g,'t'),flat=t.replace(/[^a-z]/g,'');
-if(BAD_SUB.some(function(w){return flat.indexOf(w)>=0}))return true;return t.split(/[^a-z]+/).some(function(w){return BAD_WORD.indexOf(w)>=0})}
+/* rude-name filter: names are checked when picked, and a saved name that fails it must be changed before playing.
+   BAD_SUB: blocked anywhere in the name, even run together or spaced out. BAD_WORD: blocked only as a whole word (so
+   "Class" and "Milford" are fine). BAD_PART: blocked at the start or end of a word ("dih", "dihrn", "bigdih", but not
+   "Heidi H"). Lookalikes count (d1h, b00bs, a$$) and so do stretched words (hoeee, diiih). Add more words to any list. */
+var BAD_SUB=['fuck','fuk','shit','bitch','cunt','nigger','nigga','faggot','whore','slut','porn','penis','vagina','dildo','asshole','bastard','retard','hitler','pussy','jizz','twat','sexy','titty','titties','boob','deeznut','ligma','sugma','nipple','hentai','onlyfans','pedophile','molest'],
+BAD_WORD=['ass','dick','cock','sex','cum','rape','nazi','tits','boob','boobs','fag','fags','hoe','hoes','thot','thots','pp','horny','milf','bussy','dik','dck','fk','fck','wtf','stfu','pedo','pedos','rapist','bj','tit'],
+BAD_PART=['dih','gyat','nude'];
+function badName(n){var t=String(n||'').replace(/([a-z])([A-Z])/g,'$1 $2').toLowerCase().replace(/[0]/g,'o').replace(/[@4]/g,'a').replace(/[1!|]/g,'i').replace(/3/g,'e').replace(/[5$]/g,'s').replace(/7/g,'t'),
+flat=t.replace(/[^a-z]/g,''),words=t.split(/[^a-z]+/).filter(Boolean);
+function one(x){return x.replace(/(.)\1+/g,'$1')}function two(x){return x.replace(/(.)\1{2,}/g,'$1$1')}function dbl(x){return /(.)\1/.test(x)}
+if(BAD_SUB.some(function(w){return flat.indexOf(w)>=0||two(flat).indexOf(w)>=0||(!dbl(w)&&one(flat).indexOf(w)>=0)}))return true;
+if(BAD_PART.some(function(q){return one(flat).indexOf(q)===0||words.some(function(w){var c=one(w);return c.indexOf(q)===0||c.slice(-q.length)===q})}))return true;
+return words.some(function(w){return BAD_WORD.some(function(x){return x===w||x===two(w)||(!dbl(x)&&x===one(w))})})}
 function nameKey(n){var u=new TextEncoder().encode(String(n).trim().replace(/\s+/g,' ').toLowerCase()),s='';for(var i=0;i<u.length;i++)s+=(u[i]<16?'0':'')+u[i].toString(16);return s}
 function claimName(n){var path='/names/'+nameKey(n);
 function chk(r){if(r.status===401||r.status===403){var e=new Error('denied');e.denied=1;throw e}if(!r.ok)throw 0;return r}
@@ -1690,18 +1698,18 @@ return fbw(path,{method:'PUT',body:JSON.stringify(uid)},'print=silent').then(chk
 .catch(function(e){if(!(e&&e.denied))throw e;return get().then(function(o3){if(heldByOther(o3))return 'taken';throw new Error('the server refused the name')})})})
 .catch(function(e){if(e&&e.denied&&!FB_KEY)return 'ok';throw e})}
 function releaseName(n,id){if(!FB||!n||!id)return;var path='/names/'+nameKey(n);fbw(path).then(function(r){return r.json()}).then(function(o){if(o===id)return fbw(path,{method:'DELETE'},'print=silent')}).catch(function(){})}
-function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming)return;claiming=true;var n=NAME;
+function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming||badName(NAME))return;claiming=true;var n=NAME;
 claimName(n).then(function(r){claiming=false;nameErr='';if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(e){claiming=false;nameErr=/refused|denied/.test(String(e&&e.message))?'the server refused it':'the server didn\u2019t answer'})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
-function pushStats(force){if(tabDead||!FB||!NAME||busy||slot!==1)return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
+function pushStats(force){if(tabDead||!FB||!NAME||busy||slot!==1||badName(NAME))return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').then(function(r){if(r&&r.ok){lastOk=Date.now();pushErr='';if(lbAfterPush&&!$('lv').hidden){lbAfterPush=false;loadLB()}}else pushErr=(r&&(r.status===401||r.status===403))?'the server refused it':'server error '+(r&&r.status)},
 function(){pushErr=FB_KEY&&authErr?'can\u2019t sign in':'the server didn\u2019t answer'}).then(function(){busy=false;lbMe()})}
-function askName(msg,change){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change?NAME:'';ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
-$('nmsg').textContent=change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change;$('nimp').hidden=!!change;btn.textContent=change?'Save name':'Play';
-inp.value=change?NAME:'';cd.value='';cd.hidden=!ownerLike(inp.value)||!!(change&&isOwnerName(NAME));inp.oninput=function(){cd.hidden=!ownerLike(inp.value)||(isOwnerName(NAME)&&nameOk&&isOwnerName(inp.value))};
+function askName(msg,change,force){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change||force?NAME:'';nameBlocked=!!force;ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
+$('nmsg').textContent=force?'Your name isn\u2019t allowed in DeeMack Clicker 2. Pick a new name to keep playing.':change?'Pick a new display name.':'Pick a display name for the leaderboard.';$('ncancel').hidden=!change||!!force;$('nimp').hidden=!!(change||force);btn.textContent=change||force?'Save name':'Play';
+inp.value=change&&!force?NAME:'';cd.value='';cd.hidden=!ownerLike(inp.value)||!!(change&&isOwnerName(NAME));inp.oninput=function(){cd.hidden=!ownerLike(inp.value)||(isOwnerName(NAME)&&nameOk&&isOwnerName(inp.value))};
 $('ncancel').onclick=function(){ov.hidden=true;cd.value=''};inp.focus();
-function setName(v,ok){NAME=v;nameOk=ok;try{LS.setItem('deemackClicker2.name',v)}catch(e){}ov.hidden=true;$('nerr').textContent='';if(ok)pushStats(true);else verifyName()}
+function setName(v,ok){NAME=v;nameOk=ok;nameBlocked=false;try{LS.setItem('deemackClicker2.name',v)}catch(e){}ov.hidden=true;$('nerr').textContent='';if(ok)pushStats(true);else verifyName()}
 function go(){if(btn.disabled)return;var v=inp.value.trim().replace(/\s+/g,' ');if(v.length<2){$('nerr').textContent='Use at least 2 characters.';return}
 if(badName(v)){$('nerr').textContent='Please pick a different name.';return}
 if(ownerLike(v)&&!(isOwnerName(NAME)&&nameOk&&isOwnerName(v))){if(cd.hidden){cd.hidden=false;cd.focus();$('nerr').textContent='That name needs the owner code.';return}
@@ -1711,7 +1719,7 @@ btn.disabled=true;$('nerr').textContent='Checking name...';var settled=false,slo
 claimName(v).then(function(r){if(settled)return;settled=true;clearTimeout(slow);btn.disabled=false;if(r==='taken'){$('nerr').textContent='Someone already has that name. Pick a different one.';return}if(oldName&&nameKey(oldName)!==nameKey(v))releaseName(oldName,uid);cd.value='';setName(v,true)})
 .catch(function(){if(settled)return;settled=true;clearTimeout(slow);btn.disabled=false;setName(v,false)})}
 $('nok').onclick=go;inp.onkeydown=function(e){if(e.key==='Enter')go()}}
-if(!NAME)askName();
+if(!NAME)askName();else if(badName(NAME))askName('',false,true);
 var FB=(FB_URL||'').replace(/\/+$/,'');
 (function(){var id=null;try{id=LS.getItem('deemackClicker2.uid')}catch(e){}
 if(FB&&FB_KEY){authLoad();LEGACY=id&&/^p[a-z0-9]+$/.test(id)?id:'';uid=AUTH?AUTH.uid:null;
