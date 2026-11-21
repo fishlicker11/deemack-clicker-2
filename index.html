@@ -373,7 +373,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=69;
+var BUILD=70;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton']},
@@ -605,12 +605,15 @@ $('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh
 if(slot===1){try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='';try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){}
 var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
-function runePower(d){var p=0;d.runes.forEach(function(r){p+=RP[r.r]});return p}
+/* leaderboard rune bonus: your 3 rarest runes (any you own, equipped or not) add RP% each to your rank score:
+   Common +1, Uncommon +3, Rare +6, Epic +12, Legendary +25, Mythic +50 (at most +150% with 3 Mythics). More runes than 3 don't add anything. */
+function runeBonus(d){var v=((d&&d.runes)||[]).map(function(r){return RP[r.r]||0}).sort(function(a,b){return b-a});return (v[0]||0)+(v[1]||0)+(v[2]||0)}
 function myStats(n){var rc=[0,0,0,0,0,0],eqs=[];S.runes.forEach(function(r){rc[r.r]++});
 S.eq.forEach(function(id){S.runes.forEach(function(r){if(r.id===id)eqs.push(RT[r.k].n+' ('+RN[r.r]+')')})});
-var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore();return{name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,ts:totalStars(S),now:isFinite(disp)?+disp||0:0,score:best}}
-/* rank score = the highest "… per second" the game has ever shown you (boosts and fast clicking count). Kept on this
-   device, so prestiging never lowers your leaderboard score. Erasing your save resets it. */
+var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore(),rb=runeBonus(S);return{bps:best,rb:rb,name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,ts:totalStars(S),now:isFinite(disp)?+disp||0:0,score:best*(1+rb/100)}}
+/* rank score = your best "… per second" ever x your rune bonus (see runeBonus). The best per second is the highest
+   "… per second" the game has ever shown you (boosts and fast clicking count), kept on this device, so prestiging never
+   lowers it. Erasing your save resets it. The rune bonus uses the runes you own right now. */
 function bestScore(){var b=0;try{b=+LS.getItem('deemackClicker2.best')||0}catch(e){}if(isFinite(bestMem)&&bestMem>b){b=bestMem;try{LS.setItem('deemackClicker2.best',String(b))}catch(e){}}return b}
 function cardStats(d){var o={n:0,p:0,best:-2,byR:[0,0,0,0,0,0,0,0,0,0,0]};Object.keys(d.cards||{}).forEach(function(id){var r=d.cards[id];o.n++;o.p+=5+3*(r+1);o.byR[r+1]++;if(r>o.best)o.best=r});return o}
 function rbOf(d){var b=[0,0,0,0,0,0,0];(d.eq||[]).forEach(function(id){for(var i=0;i<d.runes.length;i++){var r=d.runes[i];if(r.id===id){b[r.k]+=RT[r.k].v[r.r]/100;break}}});return b}
@@ -630,7 +633,7 @@ var s=document.createElement('span'),q=document.createElement('i');q.className='
 t.appendChild(b);t.appendChild(s);d.appendChild(t);var w=document.createElement('div');w.className='rbt';bs.forEach(function(x){w.appendChild(x)});d.appendChild(w);return d}
 var delArm=null,delT,sellArm=null,sellT;
 function renderRunes(){var L=$('rvl');L.textContent='';
-$('rvs').textContent='Equipped '+S.eq.length+'/3 · Inventory '+S.runes.length+'/100';
+$('rvs').textContent='Equipped '+S.eq.length+'/3 · Inventory '+S.runes.length+'/100 · 🏆 Leaderboard bonus +'+runeBonus(S)+'% (your 3 rarest runes)';
 function sec(t){var h=document.createElement('div');h.className='rsec';h.textContent=t;L.appendChild(h)}
 function empty(t){var e=document.createElement('div');e.className='rempty';e.textContent=t;L.appendChild(e)}
 function byId(id){for(var i=0;i<S.runes.length;i++)if(S.runes[i].id===id)return S.runes[i]}
@@ -1620,7 +1623,7 @@ setInterval(function(){if(!document.hidden)checkUpdate(false)},180000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate(true)});
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
-var PSTATS=[['Rank score (best per second ever)',function(d){return fmt(+d.score||+d.cps||0)}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Teacher stars',function(d){return +d.ts||0}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
+var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Best per second ever',function(d){return fmt(d.bps!=null?+d.bps||0:+d.score||+d.cps||0)}],['Rune bonus (3 rarest runes)',function(d){return '+'+(+d.rb||0)+'%'}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Teacher stars',function(d){return +d.ts||0}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
 function showProfile(doc,rank){var d=doc.data()||{};pvId=doc.id;$('pvn').textContent=String(d.name||'Player').slice(0,16);
 $('pvr').textContent='Rank #'+rank+(lbOwner&&doc.id===lbOwner?' · 👑 Owner':'')+(doc.id===uid?' · you':'');
 var box=$('pvs');box.textContent='';PSTATS.forEach(function(p){var r=document.createElement('div');r.className='pst';var a=document.createElement('span');a.textContent=p[0];var b=document.createElement('span');b.textContent=p[1](d);r.appendChild(a);r.appendChild(b);box.appendChild(r)});
@@ -1735,9 +1738,9 @@ if(!nameOk)return nameErr?'⚠️ Your score isn\u2019t being sent yet: your nam
 if(pushErr)return '⚠️ Your last score didn\u2019t send ('+pushErr+'). The game keeps trying.';
 if(!lastOk)return '⏳ Sending your score…';var s=Math.round((Date.now()-lastOk)/1000);return '✅ Your score is sent every 15 seconds. Last sent '+(s<3?'just now':s+'s ago')+'.'}
 function lbMe(){var el=$('lbme');if(!el)return;if(!FB){el.hidden=true;return}if($('lv').hidden)return;el.hidden=false;el.textContent='';
-var best=bestScore();
-var a=document.createElement('b');a.textContent=(NAME||'You')+' (you)'+(lbRank?' · #'+lbRank:'')+' · rank score '+fmt(best);
-var b=document.createElement('div');b.className='lbm2';b.textContent=(lbLoaded&&!lbRank?'Not in the top 100 yet. ':'')+'Your best per second ever. Right now: '+fmt(isFinite(disp)?+disp||0:0)+' per second.';
+var best=bestScore(),rb=runeBonus(S);
+var a=document.createElement('b');a.textContent=(NAME||'You')+' (you)'+(lbRank?' · #'+lbRank:'')+' · rank score '+fmt(best*(1+rb/100));
+var b=document.createElement('div');b.className='lbm2';b.textContent=(lbLoaded&&!lbRank?'Not in the top 100 yet. ':'')+'Best per second ever '+fmt(best)+(rb?' × rune bonus +'+rb+'% (your 3 rarest runes)':' · no rune bonus yet (your 3 rarest runes give one)')+'. Right now: '+fmt(isFinite(disp)?+disp||0:0)+' per second.';
 var c=document.createElement('div');c.className='lbm3';c.textContent=lbStatus();el.appendChild(a);el.appendChild(b);el.appendChild(c)}
 /* the leaderboard refreshes every 15 seconds while it's open, with a countdown at the top */
 var LB_EVERY=15,lbNext=0;
