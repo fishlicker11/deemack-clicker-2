@@ -388,7 +388,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=83;
+var BUILD=84;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -506,13 +506,14 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[]};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
 function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
+if(o.flaw&&typeof o.flaw==='object')T.forEach(function(t){var v=+o.flaw[t.id];if(v>0&&isFinite(v))d.flaw[t.id]=Math.floor(v)});
 if(Array.isArray(o.as))o.as.forEach(function(r){r=+r;if(r>=0&&r<6&&r===Math.floor(r)&&d.as.indexOf(r)<0)d.as.push(r)});
 if(o.evo&&typeof o.evo==='object')T.forEach(function(t){var v=+o.evo[t.id];if(v>0&&v===Math.floor(v))d.evo[t.id]=Math.min(EVO_MAX,v)})}}catch(e){}return d}
 /* ===== One save: older versions had 3 save slots. On start (and after loading a code) the slot with the most
@@ -793,7 +794,7 @@ var THEMES=[
 {n:'Void',bg:'#000000',card:'#0f0b17',text:'#eee6ff',muted:'#9a88c4',accent:'#a45bff',line:'#2a1f40',btn:'#a45bff',btntext:'#0b0412',dark:1},
 {n:'Dusk',bg:'#1b1022',card:'#281833',text:'#fdeee4',muted:'#c09ab0',accent:'#fdba74',line:'#422a50',btn:'#fdba74',btntext:'#2a1206',dark:1},
 {n:'Royal',bg:'#0b1030',card:'#141b4d',text:'#eef0ff',muted:'#9aa3e0',accent:'#ffd24a',line:'#2a3380',btn:'#ffd24a',btntext:'#14163a',dark:1}];
-var ACH=[],ACHV={},ACH_POOL=100;
+var ACH=[],ACHV={},ACH_POOL=150; /* all achievements together: +150% income (older ones +100%, flawless boss ones +50%) */
 function A(id,cat,name,desc,w,t){ACH.push({id:id,cat:cat,name:name,desc:desc,w:w,t:t})}
 (function(){
 var cl=[10,100,500,1000,5000,10000],cn=['First Taps','Warming Up','Getting Serious','Finger Workout','Click Machine','Tap Master'];
@@ -832,9 +833,13 @@ DR.forEach(function(r,i){A('crar'+i,'Cards','Pull a '+r+' card','Own a '+r+' car
 A('treeall','Prestige','Fully Grown','Own every skill tree upgrade',20,function(d){return (d.tree||[]).length>=TN.length});
 [10,100,1000].forEach(function(v,i){A('ppt'+v,'Prestige',['Point Collector','Point Hoarder','Point Legend'][i],'Earn '+v+' prestige points in total',3+i*3,function(d){return d.ppt>=v})});
 [300,600].forEach(function(v,i){A('rsec'+v,'Roller',['Long Boost','Marathon'][i],'Roll a boost lasting '+v+' seconds or more',3+i*3,function(d){return d.st.bs>=v})});
+/* beat each boss without taking any damage 1, 3 and 5 times. These share their own +50% (pool 'flaw'), so adding them
+   didn't change the % of any older achievement */
+T.forEach(function(t,i){[1,3,5].forEach(function(n,j){A('flaw'+n+t.id,'Bosses',j?'Flawless '+t.name+' ×'+n:'Flawless '+t.name,'Beat '+t.name+' without taking any damage'+(n>1?' '+n+' times':''),(1+0.25*i)*[1,2,3][j],function(d){return ((d.flaw&&d.flaw[t.id])||0)>=n});ACH[ACH.length-1].pool='flaw'})});
 })();
-var ACHW=0;ACH.forEach(function(a){ACHW+=a.w});
-ACH.forEach(function(a){ACHV[a.id]=ACH_POOL*a.w/ACHW});
+/* each achievement's % = its pool x its weight / the total weight of that pool */
+var ACHP={base:100,flaw:50},ACHW={};ACH.forEach(function(a){var g=a.pool||'base';ACHW[g]=(ACHW[g]||0)+a.w});
+ACH.forEach(function(a){var g=a.pool||'base';ACHV[a.id]=ACHP[g]*a.w/ACHW[g]});
 function achVal(a){return ACHV[a.id]||0}
 function achBonus(d){var s=0;if(!ACHV||!d||!d.ach)return 0;for(var k in d.ach)if(ACHV[k])s+=ACHV[k];return s/100}
 function achCount(d){var n=0;ACH.forEach(function(a){if(d.ach[a.id])n++});return n}
@@ -923,7 +928,7 @@ function tierOf(i){return Math.min(BTIER.length-1,Math.floor(i*BTIER.length/T.le
 function bossTier(i){return BTIER[tierOf(i)]}
 function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
 var im=document.createElement('img');im.className='bimg';im.alt='';im.src=PHOTOS[t.ph||t.id]||'';
-var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=tName(t);var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'');
+var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=tName(t);var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'')+(S.flaw&&S.flaw[t.id]?' \u00b7 Flawless \u00d7'+S.flaw[t.id]:'');
 var d=document.createElement('span');d.className='dif';d.style.setProperty('--dc',tr[1]);d.textContent=tr[0];var br=document.createElement('div');br.appendChild(d);
 var rl=document.createElement('div');rl.className='brw';x.appendChild(b);x.appendChild(s);x.appendChild(br);x.appendChild(rl);
 var f=document.createElement('button');f.className='bfight';f.onclick=function(){startFight(i)};BREFS.push({t:t,i:i,rl:rl,f:f});
@@ -961,7 +966,7 @@ var A=arena(),w=document.createElement('div');w.className='acol';w.style.animati
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
-var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;rew=giveBossReward(i,t);save()}
+var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(BF.php>=100){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
 var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=win?'Victory!':'Defeated';
 var p=document.createElement('p');p.textContent=win?('You beat '+t.name+(first?' for the first time!':'!')):(t.name+' was too strong this time.');
 var a=document.createElement('button');a.textContent='Fight again';a.onclick=function(){startFight(i)};
@@ -969,7 +974,7 @@ var bk=document.createElement('button');bk.className='sec';bk.textContent='Back 
 w.appendChild(h);w.appendChild(p);w.appendChild(a);w.appendChild(bk);A.appendChild(w);fStatus(win?'You won':'You lost');if(win)showWin(i,t,first,rew)}
 function showWin(i,t,first,rew){var tr=bossTier(i),secs=Math.max(0,Math.round((Date.now()-BF.t0)/1000));
 $('bwi').src=PHOTOS[t.ph||t.id]||'';$('bwi').style.borderColor=tr[1];$('bwn').textContent='You beat '+t.name+'!';
-$('bwp').textContent=(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
+$('bwp').textContent=(BF.php>=100?'No damage taken! ':'')+(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
 var rw=$('bwrw');rw.className='bwrw'+(rew&&rew.given?'':' prac');rw.textContent=!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!':rew.blocked?'⏳ No new reward: your +'+rew.blocked.pct+'% from '+T[rew.blocked.i].name+' still has '+mmss(rew.blocked.until-Date.now())+' left. '+t.name+' has no cooldown, so you can win its reward later.':'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
 var st=$('bws');st.textContent='';[[BF.php+'/100','HP left'],[Math.floor(secs/60)+':'+(secs%60<10?'0':'')+secs%60,'Time'],[BF.attacks,'Attacks']].forEach(function(x){var d=document.createElement('div'),b=document.createElement('b');b.textContent=x[0];d.appendChild(b);d.appendChild(document.createTextNode(x[1]));st.appendChild(d)});
 $('bwr').onclick=function(){$('bw').hidden=true;startFight(i)};
