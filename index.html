@@ -426,7 +426,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=101;
+var BUILD=102;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1066,7 +1066,7 @@ b.onpointerdown=function(e){e.preventDefault();if(!fAlive(id)||BF.ph!=='idle'||!
 fStatus('Click '+BF.t.name+'!');fl(nextAttack,Math.round((4.5-BF.d*2)*1000))}
 var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;if(t.name==='Mr Scott')SIMON9=i+1}); /* Simon squares: 4 before Mr Reiman, 6 for Mr Reiman and Mr Scott, 9 for everyone above Mr Scott */
 var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace',draw:'Memory draw',sort:'Block or Allow',cups:'Cup shuffle',nums:'Number rush',odd:'Odd one out',count:'Count it',shield:'Shield block'};
-var INTRO={sort:'Swipe left to block games, right to allow school stuff',cups:'Watch the cup that hides the phone',nums:'Tap the numbers in order',odd:'Find the one that\u2019s different',count:'Count the dots before they vanish',shield:'Tap or swipe toward each attack to block it'};
+var INTRO={sort:'Swipe left to block games, right to allow school stuff',cups:'Watch the cup that hides the phone',nums:'Tap the numbers in order',odd:'Find the one that\u2019s different',count:'Count the dots before they vanish',shield:'Tap or swipe toward each flying teacher to block it'};
 function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace','draw','sort','cups','nums','odd','count','shield'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(10*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else if(INTRO[k]){s.textContent=INTRO[k];fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
@@ -1821,8 +1821,8 @@ requestAnimationFrame(frame)}
 show();requestAnimationFrame(frame)};
 
 /* Cup shuffle: a phone is hidden under one cup, the cups swap places, then you tap the cup with the phone.
-   Harder: more cups (3, 4, 5), more swaps and faster swaps. */
-ATK.cups=function(){var id=BF.id,A=arena(),d=BF.d,n=d<0.35?3:d<0.7?4:5,sw=3+Math.round(d*9),dur=Math.round((560-300*d)*mgTime()),W=A.clientWidth,H=A.clientHeight,phase='show',to=null;
+   Harder: more cups (3, 4 from Insane, 5 from Nightmare), more swaps (3 up to 9) and faster swaps. */
+ATK.cups=function(){var id=BF.id,A=arena(),d=BF.d,n=d<0.45?3:d<0.75?4:5,sw=3+Math.round(d*6),dur=Math.round((640-260*d)*mgTime()),W=A.clientWidth,H=A.clientHeight,phase='show',to=null;
 fStatus('Watch the cup with the phone!');
 var cw=Math.min(72,Math.floor((W-24)/n)-12),ch=Math.round(cw*1.1),gx=(W-n*cw)/(n+1),cy=Math.round(H*0.55-ch/2);
 function sx(s){return Math.round(gx+s*(cw+gx))}
@@ -1834,7 +1834,7 @@ c.onpointerdown=function(e){e.preventDefault();choose(k)};A.appendChild(c);cups.
 function phoneAt(k){var s=cups[k].s;ph.style.left=Math.round(sx(s)+cw/2-15)+'px';ph.style.top=(cy+ch-38)+'px'}
 function lift(k,on,ms){var c=cups[k].el;c.style.transitionDuration=(ms||250)+'ms';c.classList.toggle('up',on)}
 phoneAt(has);ph.style.opacity='1';
-var look=Math.round(1300*mgTime());
+var look=Math.round(1500*mgTime());
 fl(function(){lift(has,true)},350);
 fl(function(){lift(has,false)},350+look);
 fl(function(){ph.style.opacity='0';swap(0)},350+look+300);
@@ -1850,9 +1850,9 @@ if(k===has){lift(has,true);fStatus('Found it!');tm.textContent='';hurtBoss(Math.
 else{if(k>=0)lift(k,true);lift(has,true);fStatus(k<0?'Too slow! The phone was here.':'Wrong cup! The phone was here.');tm.textContent='';hurtMe(BF.dmg);if(!fAlive(id))return}
 fl(atkDone,1200)}};
 
-/* Number rush: tap 1, 2, 3 … in order before time runs out. Harder: more numbers, smaller circles, and from Hard (0.5) up
-   the numbers that are left jump to new spots after every tap. A wrong number hurts a little. */
-ATK.nums=function(){var id=BF.id,A=arena(),d=BF.d,n=5+Math.round(d*7),secs=+((3+n*(1-0.45*d))*mgTime()).toFixed(1),mix=d>=0.5,nx=1,over=false,W=A.clientWidth,H=A.clientHeight,sz=Math.round(52-12*d),miss=Math.max(2,Math.round(BF.dmg/4)),bs=[];
+/* Number rush: tap 1, 2, 3 … in order before time runs out. Harder: more numbers (5 up to 10), smaller circles, and from
+   Extreme (0.65) up the numbers that are left jump to new spots after every tap. A wrong number hurts a little. */
+ATK.nums=function(){var id=BF.id,A=arena(),d=BF.d,n=5+Math.round(d*5),secs=+((3.5+n*(1.1-0.4*d))*mgTime()).toFixed(1),mix=d>=0.65,nx=1,over=false,W=A.clientWidth,H=A.clientHeight,sz=Math.round(54-10*d),miss=Math.max(2,Math.round(BF.dmg/5)),bs=[];
 fStatus('Tap 1 to '+n+' in order!'+(mix?' They move after each tap!':''));
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var end=Date.now()+secs*1000;
 function place(list){var pts=[];list.forEach(function(b){var x,y,t=0;do{x=8+Math.random()*Math.max(1,W-sz-16);y=34+Math.random()*Math.max(1,H-sz-42);t++}while(t<120&&pts.some(function(p){return (p.x-x)*(p.x-x)+(p.y-y)*(p.y-y)<(sz+8)*(sz+8)}));pts.push({x:x,y:y});b.style.left=x.toFixed(1)+'px';b.style.top=y.toFixed(1)+'px'})}
@@ -1868,11 +1868,11 @@ var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}dra
 fStatus('Out of time! You got to '+(nx-1)+' of '+n+'.');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,900)}},100);draw()};
 
 /* Odd one out: a grid of the same emoji with one that's slightly different. 3 rounds; each find hits the boss.
-   Harder: bigger grid (3x3, 4x4, 5x5), emojis that look more alike, less time. */
+   Harder: bigger grid (3x3, 4x4 from Insane, 5x5 from Nightmare), emojis that look more alike, less time (6.5s down to 4s). */
 var ODD=[[['🍎','🍊'],['🐶','🐸'],['⭐','❤️'],['⚽','🏀'],['🌞','🌧️'],['🍩','🍕'],['🚗','🚲'],['🌲','🌵']],
 [['🍎','🍅'],['😀','😃'],['🚗','🚙'],['🐱','🐯'],['🌕','🌝'],['🍊','🍑'],['❤️','🧡'],['🔵','🟣']],
-[['😀','😁'],['😃','😄'],['🕐','🕑'],['🙂','🙃'],['😐','😑'],['🌒','🌘'],['🟥','🟧'],['💙','💜'],['🕒','🕓'],['😊','🙂']]];
-ATK.odd=function(){var id=BF.id,A=arena(),d=BF.d,g=d<0.3?3:d<0.65?4:5,R=3,r=0,ok=0,per=(5.5-2.5*d)*mgTime(),tier=d<0.35?0:d<0.7?1:2,hit=Math.max(2,Math.round(BF.dmg/2)),busy=true,over=false,end=0,lastP=-1,oddEl=null;
+[['😀','😁'],['😃','😄'],['🙂','🙃'],['😐','😑'],['🟥','🟧'],['💙','💜'],['😊','🙂'],['😮','😯']]];
+ATK.odd=function(){var id=BF.id,A=arena(),d=BF.d,g=d<0.45?3:d<0.75?4:5,R=3,r=0,ok=0,per=(6.5-2.5*d)*mgTime(),tier=d<0.45?0:d<0.75?1:2,hit=Math.max(2,Math.round(BF.dmg/2)),busy=true,over=false,end=0,lastP=-1,oddEl=null;
 var cs=Math.min(64,Math.floor((Math.min(A.clientWidth-16,A.clientHeight-50)-(g-1)*6)/g));
 fStatus('Find the odd one out!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var grid=document.createElement('div');grid.className='ogrid';grid.style.gridTemplateColumns='repeat('+g+','+cs+'px)';A.appendChild(grid);
@@ -1890,9 +1890,9 @@ function nextR(){if(r>=R){over=true;clearInterval(iv);fStatus('Found '+ok+' of '
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}if(busy)return;draw();if(Date.now()>=end){busy=true;if(oddEl)oddEl.classList.add('ogood');fStatus('Too slow! It was this one.');hurtMe(hit);if(!fAlive(id))return;fl(nextR,800)}},100);
 round()};
 
-/* Count it: dots flash for a moment, then you pick how many there were. 2 rounds.
-   Harder: more dots, a shorter flash, and (from Hard up) dots of different sizes and colors. */
-ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(1.7-0.9*d)*mgTime(),lo=3+Math.round(4*d),hi=6+Math.round(10*d),ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
+/* Count it: dots flash for a moment, then you pick how many there were. 2 rounds. Never more than 8 dots.
+   Harder: more dots (3-5 on Easy, 6-8 on Impossible), a shorter flash, and (from Hard up) dots of different sizes and colors. */
+ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(1.7-0.9*d)*mgTime(),lo=3+Math.round(3*d),hi=Math.min(8,5+Math.round(3*d)),ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
 var COLS=['#3b82f6','#ef4444','#22a35a','#f59e0b','#a855f7','#ec4899'];
 fStatus('Count the dots!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var field=document.createElement('div');field.className='cfield';A.appendChild(field);var opts=document.createElement('div');opts.className='copts';A.appendChild(opts);
@@ -1901,7 +1901,7 @@ for(var k=0;k<ans;k++){var s=mixed?14+Math.round(Math.random()*16):22,x,y,t=0;do
 pts.push({x:x,y:y,s:s});var dot=document.createElement('i');dot.className='cdot';dot.style.left=x.toFixed(1)+'px';dot.style.top=y.toFixed(1)+'px';dot.style.width=dot.style.height=s+'px';dot.style.background=mixed?COLS[Math.floor(Math.random()*COLS.length)]:COLS[0];field.appendChild(dot)}
 tm.textContent='Round '+r+' of '+R+' · Look!';fStatus('Count the dots!');
 fl(function(){field.textContent='';ask()},Math.round(flash*1000))}
-function ask(){var c=mgShuffle([-2,-1,1,2,3].map(function(o){return ans+o}).filter(function(v){return v>=1})).slice(0,3);c.push(ans);c.sort(function(a,b){return a-b});
+function ask(){var c=mgShuffle([-3,-2,-1,1,2,3].map(function(o){return ans+o}).filter(function(v){return v>=1&&v<=8})).slice(0,3);c.push(ans);c.sort(function(a,b){return a-b});
 bs=c.map(function(v){var b=mgBtn(String(v),'cbtn');b.onpointerdown=function(e){e.preventDefault();pick(v,b)};opts.appendChild(b);return b});
 fStatus('How many dots were there?');end=Date.now()+Math.round(6000*mgTime());busy=false;draw()}
 function draw(){tm.textContent='Round '+r+' of '+R+' · '+Math.max(0,(end-Date.now())/1000).toFixed(1)+'s'}
@@ -1913,14 +1913,19 @@ function nextR(){if(r>=R){over=true;clearInterval(iv);fStatus('Counted '+ok+' of
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}if(busy)return;draw();if(Date.now()>=end){busy=true;mark();fStatus('Too slow! There were '+ans+'.');hurtMe(hit);if(!fAlive(id))return;fl(nextR,900)}},100);
 round()};
 
-/* Shield block: attacks fly at you from the sides. Tap or swipe toward one (or use the arrow keys) to turn your shield that way.
+/* Shield block: teachers' faces fly at you from the sides. Tap or swipe toward one (or use the arrow keys) to turn your shield that way.
    A shot that reaches you while your shield faces it is blocked; otherwise it hits you. Harder: attacks from all 4 sides
    (from Hard up), more of them, faster. Blocks add up to the hit you deal at the end. */
-ATK.shield=function(){var id=BF.id,A=arena(),d=BF.d;fStatus('Tap or swipe toward each attack to block it!');
+/* teacher photos as round faces for Shield block (cached; a photo that hasn't loaded yet shows as a red ball) */
+var FACEC={};function faceImg(t){var k=t.ph||t.id;if(!FACEC[k]){var im=new Image();im.src=PHOTOS[k];FACEC[k]=im}return FACEC[k]}
+function drawFace(g,im,x,y,r){if(im&&im.complete&&im.naturalWidth){var w=im.naturalWidth,h=im.naturalHeight,s=Math.min(w,h);g.save();g.beginPath();g.arc(x,y,r,0,6.2832);g.clip();g.drawImage(im,(w-s)/2,(h-s)*0.3,s,s,x-r,y-r,2*r,2*r);g.restore()}
+else{g.fillStyle='#ef4444';g.beginPath();g.arc(x,y,r,0,6.2832);g.fill()}g.lineWidth=3;g.strokeStyle='#ef4444';g.beginPath();g.arc(x,y,r,0,6.2832);g.stroke()}
+ATK.shield=function(){var id=BF.id,A=arena(),d=BF.d;fStatus('Tap or swipe toward each teacher to block them!');
 var cv=grab(document.createElement('canvas'));cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
 var cx=W/2,cy=H/2+10,PR=18,SR=34,DIRS=d>=0.4?[0,1,2,3]:[0,2],n=6+Math.round(d*8),every=(1.25-0.7*d)*1000*mgTime(),travel=(1.7-0.85*d)*1000*mgTime(),
-dir=0,shots=[],made=0,blocked=0,hits=0,gt=0,last=performance.now(),nextS=600,hit=Math.max(2,Math.round(BF.dmg/3)),fx=[],down=false,done=false,DX=[1,0,-1,0],DY=[0,1,0,-1];
+dir=0,shots=[],made=0,blocked=0,hits=0,gt=0,last=performance.now(),nextS=600,hit=Math.max(2,Math.round(BF.dmg/3)),fx=[],down=false,done=false,DX=[1,0,-1,0],DY=[0,1,0,-1],FR=20,
+faces=T.filter(function(t){return PHOTOS[t.ph||t.id]}).map(function(t){return faceImg(t)});
 var mut=(getComputedStyle(document.documentElement).getPropertyValue('--muted')||'').trim()||'#888';
 function aim(e){var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*(r.width?W/r.width:1)-cx,y=(e.clientY-r.top)*(r.height?H/r.height:1)-cy;if(x*x+y*y<100)return;
 var k=Math.abs(x)>=Math.abs(y)?(x>0?0:2):(y>0?1:3);if(DIRS.indexOf(k)<0)k=x>0?0:2;dir=k}
@@ -1929,16 +1934,16 @@ cv.onpointermove=function(e){if(down)aim(e)};cv.onpointerup=cv.onpointercancel=f
 function key(e){if(!fAlive(id)||done){document.removeEventListener('keydown',key);return}var m={ArrowRight:0,ArrowDown:1,ArrowLeft:2,ArrowUp:3}[e.key];if(m==null||DIRS.indexOf(m)<0)return;e.preventDefault();dir=m}
 document.addEventListener('keydown',key);
 function frame(now){if(!fAlive(id)){document.removeEventListener('keydown',key);return}var dt=Math.min(0.05,Math.max(0,(now-last)/1000));last=now;gt+=dt*1000;
-if(made<n&&gt>=nextS){var k=DIRS[Math.floor(Math.random()*DIRS.length)],dist=(k%2?H/2-6:W/2-6);shots.push({k:k,p:dist,v:dist/travel});made++;nextS=gt+every*(0.75+Math.random()*0.5)}
+if(made<n&&gt>=nextS){var k=DIRS[Math.floor(Math.random()*DIRS.length)],dist=(k%2?H/2-6:W/2-6);shots.push({k:k,p:dist,v:dist/travel,f:faces.length?faces[Math.floor(Math.random()*faces.length)]:null});made++;nextS=gt+every*(0.75+Math.random()*0.5)}
 for(var j=shots.length-1;j>=0;j--){var s=shots[j];s.p-=s.v*dt*1000;if(s.p<=SR+4){shots.splice(j,1);
 if(s.k===dir){blocked++;fx.push({k:s.k,t:gt,c:'#3b82f6'})}else{hits++;fx.push({k:s.k,t:gt,c:'#ef4444'});hurtMe(hit);if(!fAlive(id)){document.removeEventListener('keydown',key);return}}}}
 g.clearRect(0,0,W,H);g.lineWidth=2;g.setLineDash([6,8]);g.strokeStyle=mut;g.globalAlpha=.35;
 DIRS.forEach(function(k){g.beginPath();g.moveTo(cx+DX[k]*(SR+8),cy+DY[k]*(SR+8));g.lineTo(cx+DX[k]*(k%2?H/2:W/2),cy+DY[k]*(k%2?H/2:W/2));g.stroke()});g.setLineDash([]);g.globalAlpha=1;
 fx=fx.filter(function(f){return gt-f.t<350});fx.forEach(function(f){g.globalAlpha=1-(gt-f.t)/350;g.fillStyle=f.c;g.beginPath();g.arc(cx+DX[f.k]*SR,cy+DY[f.k]*SR,14,0,6.2832);g.fill()});g.globalAlpha=1;
-shots.forEach(function(s){g.fillStyle='#ef4444';g.beginPath();g.arc(cx+DX[s.k]*s.p,cy+DY[s.k]*s.p,9,0,6.2832);g.fill()});
+shots.forEach(function(s){drawFace(g,s.f,cx+DX[s.k]*s.p,cy+DY[s.k]*s.p,FR)});
 g.fillStyle='#3b82f6';g.beginPath();g.arc(cx,cy,PR,0,6.2832);g.fill();g.lineWidth=2;g.strokeStyle='#fff';g.stroke();
 var a=dir*Math.PI/2;g.lineWidth=8;g.lineCap='round';g.strokeStyle='#facc15';g.beginPath();g.arc(cx,cy,SR,a-0.8,a+0.8);g.stroke();g.lineCap='butt';
-g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText('Attacks: '+Math.max(0,n-made)+' left',12,20);g.textAlign='right';g.fillStyle=hits?'#ef4444':'#22a35a';g.fillText('Blocked '+blocked+' / '+n,W-12,20);g.textAlign='left';
+g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText('Teachers: '+Math.max(0,n-made)+' left',12,20);g.textAlign='right';g.fillStyle=hits?'#ef4444':'#22a35a';g.fillText('Blocked '+blocked+' / '+n,W-12,20);g.textAlign='left';
 if(made>=n&&!shots.length){done=true;document.removeEventListener('keydown',key);var dmg=Math.max(1,Math.round(BF.base*0.4*blocked/n));
 if(blocked>0){hurtBoss(dmg);if(!fAlive(id))return}fStatus((hits?'Blocked '+blocked+' of '+n:'Perfect block!')+(blocked?' · You hit for '+dmg+'!':''));fl(atkDone,900);return}
 requestAnimationFrame(frame)}
@@ -1950,7 +1955,7 @@ var MG=[['circles','🔴','Red circles','Tap every red circle before time runs o
 ['rhythm','🎵','Rhythm battle','Tap each lane as its circle reaches the bottom.'],['trace','✏️','Path trace','Drag the circle along the path to the flag.'],['draw','🖍️','Memory draw','Memorize the shape, then draw it from memory.'],
 ['sort','🚫','Block or Allow','Swipe left to block game sites, right to allow school sites.'],['cups','🥤','Cup shuffle','Keep your eye on the cup hiding the phone.'],
 ['nums','🔢','Number rush','Tap the numbers in order as fast as you can.'],['odd','🔍','Odd one out','Find the one emoji that\u2019s different.'],
-['count','👀','Count it','Count the dots before they disappear.'],['shield','🛡️','Shield block','Turn your shield toward each attack to block it.']];
+['count','👀','Count it','Count the dots before they disappear.'],['shield','🛡️','Shield block','Turn your shield toward each flying teacher face to block it.']];
 var MG_BOSS=BTIER.map(function(_,k){for(var i=0;i<T.length;i++)if(tierOf(i)===k)return i;return T.length-1}); /* the first boss of each difficulty level: Easy … Impossible */
 var mgTier=0;try{mgTier=Math.max(0,Math.min(7,+LS.getItem('deemackClicker2.mgdiff')||0))}catch(e){}
 function renderMG(){var D=$('mgd');D.textContent='';BTIER.forEach(function(tr,ti){var b=document.createElement('button');b.textContent=tr[0];b.style.setProperty('--dc',tr[1]);b.className=ti===mgTier?'on':'';
