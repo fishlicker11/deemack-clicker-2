@@ -64,7 +64,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .srl b{margin-left:6px;color:var(--muted);font-weight:700}
 .bar button{flex:1;max-width:90px;padding:8px 0;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-weight:600;cursor:pointer}
 .bar button.on{background:var(--btn);color:var(--btntext);border-color:var(--btn)}
-.card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
+.card{position:relative;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px}
 .ph{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none;background:var(--line)}
 .mid{flex:1;min-width:0}
 .nm{font-weight:700}
@@ -83,6 +83,10 @@ button:disabled{opacity:.35;cursor:default}
 .rs{display:block;margin:22px auto 0;background:none;border:1px solid var(--line);color:var(--muted);border-radius:9px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
 
 .card[hidden]{display:none}
+.thr{display:flex;justify-content:flex-end;margin:-6px 0 6px}.thr[hidden]{display:none}
+.thr button{border:0;background:none;color:var(--muted);font:inherit;font-size:13px;font-weight:700;cursor:pointer;padding:4px 2px}.thr button.on{color:var(--accent);font-size:14px}
+.hdb{display:none;position:absolute;left:4px;top:4px;z-index:1;border:0;border-radius:999px;padding:3px 8px;margin:0;font:inherit;font-size:12px;font-weight:800;background:rgba(0,0,0,.72);color:#fff;cursor:pointer}
+#shop.thedit .hdb{display:block}#shop.thedit .card.thid{border-style:dashed}#shop.thedit .card.thid>*:not(.hdb){opacity:.4}#shop.thedit .card.thid .hdb{background:#22a35a}
 .card{transition:border-color .3s}
 .card.pop{animation:pop .35s ease-out}
 @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -378,6 +382,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="mgb">🎮<small>Minigames</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰<small>Roller</small></button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
 <div class="tabs" id="tabs"><button data-t="t" class="on">👩‍🏫 Teachers</button><button data-t="s">🎮 Students</button><button data-t="p">💪 Player upgrades</button></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
+<div class="thr" id="thr"><button id="thb"></button></div>
 <div id="shop"></div>
 <div id="stushop" hidden></div><div id="pushop" hidden></div>
 <button class="rs" id="rs">Erase save</button>
@@ -423,7 +428,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=107;
+var BUILD=108;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -561,7 +566,7 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},tf:0,bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{},ctheme:{bg:'#101828',ac:'#facc15'}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},tf:0,th:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{},ctheme:{bg:'#101828',ac:'#facc15'}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
@@ -569,7 +574,7 @@ function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
 d.bhp=(+o.bhp>0&&+o.bhp<=BHP_MAX)?Math.round(+o.bhp/10)*10:0;if(o.bossMul&&typeof o.bossMul==='object')T.forEach(function(t){var v=+o.bossMul[t.id];if(v>1&&v<=1+BHP_MAX/100)d.bossMul[t.id]=v});
-if(o.gach&&typeof o.gach==='object'&&o.gach.lin)d.gach.lin=1;d.tf=(+o.tf>0&&isFinite(+o.tf))?Math.min(1e6,Math.floor(+o.tf)):0;if(o.ctheme&&typeof o.ctheme==='object')['bg','ac'].forEach(function(k){if(/^#[0-9a-f]{6}$/i.test(o.ctheme[k]))d.ctheme[k]=o.ctheme[k]});
+if(o.gach&&typeof o.gach==='object'&&o.gach.lin)d.gach.lin=1;d.tf=(+o.tf>0&&isFinite(+o.tf))?Math.min(1e6,Math.floor(+o.tf)):0;if(o.th&&typeof o.th==='object')T.forEach(function(t){if(o.th[t.id])d.th[t.id]=1});if(o.ctheme&&typeof o.ctheme==='object')['bg','ac'].forEach(function(k){if(/^#[0-9a-f]{6}$/i.test(o.ctheme[k]))d.ctheme[k]=o.ctheme[k]});
 if(o.pu&&typeof o.pu==='object'){PUP.forEach(function(u){var v=o.pu.lv&&+o.pu.lv[u.id];if(v>0&&v===Math.floor(v))d.pu.lv[u.id]=Math.min(u.max,v);if(o.pu.off&&o.pu.off[u.id])d.pu.off[u.id]=1})}
 if(o.flaw&&typeof o.flaw==='object')T.forEach(function(t){var v=+o.flaw[t.id];if(v>0&&isFinite(v))d.flaw[t.id]=Math.floor(v)});
 if(Array.isArray(o.as))o.as.forEach(function(r){r=+r;if(r>=0&&r<6&&r===Math.floor(r)&&d.as.indexOf(r)<0)d.as.push(r)});
@@ -619,11 +624,12 @@ $("mcimg").src=PHOTOS.mccoy||"";
 var refs={};
 T.forEach(function(t){
 var d=document.createElement("div");d.className="card";d.hidden=true;
-d.innerHTML='<img class="ph" alt=""><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button><button class="u"></button><button class="e" hidden></button></div>';
+d.innerHTML='<button class="hdb"></button><img class="ph" alt=""><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button><button class="u"></button><button class="e" hidden></button></div>';
 d.querySelector("img").src=PHOTOS[t.ph||t.id]||"";
 d.querySelector(".nm").textContent=t.name;
 d.onanimationend=function(){d.classList.remove("pop")};
-var r={card:d,in:d.querySelector(".in"),mk:d.querySelector(".mk"),b:d.querySelector(".b"),u:d.querySelector(".u"),e:d.querySelector(".e"),nm:d.querySelector(".nm"),ev:-1};
+var r={card:d,in:d.querySelector(".in"),mk:d.querySelector(".mk"),b:d.querySelector(".b"),u:d.querySelector(".u"),e:d.querySelector(".e"),nm:d.querySelector(".nm"),h:d.querySelector(".hdb"),ev:-1};
+r.h.onclick=function(e){e.stopPropagation();if(!S.th)S.th={};if(S.th[t.id])delete S.th[t.id];else S.th[t.id]=1;save();update(true)};
 r.b.onclick=function(){act("b",t)};r.u.onclick=function(){act("u",t)};r.e.onclick=function(){evolve(t)};
 refs[t.id]=r;$("shop").appendChild(d)});
 /* evolve: tap twice (it resets the teacher); the button shows once the teacher reaches level EVO_LV */
@@ -648,12 +654,19 @@ function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>"
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
 var base=total()*(1-webDrain()),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);var nb=totalOf(S);if(slot===1&&nb>bestMem&&isFinite(nb))bestMem=nb;
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
-function update(noAnim){var anim=ready&&!noAnim;var su=!!(S.stu&&S.stu.u),stb=$('tabs').querySelector('[data-t="s"]');if(stb.hidden===su)stb.hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}if(shopTab==='p')pupUpd();
+/* show / hide teachers: the button under the ×1 ×5 ×20 Max bar turns on hide mode, where every teacher gets a Hide / Show
+   button (hidden ones look faded). Hidden teachers still make money; they just aren't listed. Kept in the save (S.th). */
+var thEdit=false,thTxt='';
+function thUI(){var n=0;T.forEach(function(t){if(S.th&&S.th[t.id])n++});var x=thEdit?'✅ Done':'👁 Show / hide teachers'+(n?' · '+n+' hidden':'');
+if(x!==thTxt){thTxt=x;$('thb').textContent=x;$('thb').className=thEdit?'on':''}$('shop').classList.toggle('thedit',thEdit)}
+$('thb').onclick=function(){thEdit=!thEdit;update(true)};
+function update(noAnim){var anim=ready&&!noAnim;thUI();var su=!!(S.stu&&S.stu.u),stb=$('tabs').querySelector('[data-t="s"]');if(stb.hidden===su)stb.hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}if(shopTab==='p')pupUpd();
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt>=LAUNCH.from&&nt<LAUNCH.until)bp.push("🎉 Release party: +"+LAUNCH.pct+"% income · "+hms(LAUNCH.until-nt)+" left");if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 var rb=rbOf(S),am=allMul(),allT=allTeachers();
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0||((S.evo&&S.evo[t.id])>0);
 if(!vis){r.card.hidden=true;return}
+var hid=!!(S.th&&S.th[t.id]);if(r.hid!==hid){r.hid=hid;r.card.classList.toggle('thid',hid);r.h.textContent=hid?'👁 Show':'🙈 Hide'}if(hid&&!thEdit){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
 var each=eachOf(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];r.in.textContent=fmt(each)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?(starsOf(t.id)<5?" · ⭐":" · 🌟")+" at Lv "+en:"");
 r.mk.textContent="Making "+fmt(each*S.own[t.id])+"/s";
@@ -1679,7 +1692,7 @@ $('webx').onclick=closeWeb;$('webv').onclick=function(e){if(e.target===$('webv')
 function webCashAll(){var sum=0;(S.web||[]).forEach(function(w){sum+=webReward(w)});if(sum>0){S.gb=Math.min(1e300,S.gb+sum);S.run=Math.min(1e300,S.run+sum);S.st.earned+=sum}S.web=[];renderWebs()}
 /* the Teachers / Students tabs above the shop */
 var shopTab='t',SREFS=[];
-function setTab(t){shopTab=t;[].forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':''});$('bar').hidden=t!=='t';$('shop').hidden=t!=='t';$('stushop').hidden=t!=='s';$('pushop').hidden=t!=='p';if(t==='s')renderStu();if(t==='p')renderPup()}
+function setTab(t){shopTab=t;[].forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':''});$('bar').hidden=t!=='t';$('thr').hidden=t!=='t';$('shop').hidden=t!=='t';$('stushop').hidden=t!=='s';$('pushop').hidden=t!=='p';if(t==='s')renderStu();if(t==='p')renderPup()}
 $('tabs').onclick=function(e){var b=e.target.closest&&e.target.closest('[data-t]');if(b)setTab(b.getAttribute('data-t'))};
 function supCost(u){return u.c*Math.pow(u.m,supLv(u.id))}
 function renderStu(){var L=$('stushop');L.textContent='';SREFS=[];var h=document.createElement('div');h.className='stuinfo';h.id='stuinfo';L.appendChild(h);
