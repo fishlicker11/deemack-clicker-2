@@ -250,6 +250,10 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .bwst b{display:block;color:var(--text);font-size:16px}
 .bwrw{font-weight:700;font-size:15px;margin:0 0 14px;color:var(--text)}.bwrw.prac{color:var(--muted);font-weight:600}
 .brw{font-size:12px;color:var(--muted);margin-top:4px}
+.bhp{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.bhpt{flex:1;min-width:0;font-size:14px;text-align:left}
+.bhpt small{display:block;font-size:12px;color:var(--muted)}
+.ov .bhp button{width:38px;height:38px;flex:none;margin:0;padding:0;border-radius:10px;font-size:20px;line-height:1}
 .bban{border:1px solid var(--accent);border-radius:10px;padding:8px 10px;margin:0 0 10px;font-size:13px;font-weight:600;text-align:left}
 .bban[hidden]{display:none}
 .phd{position:sticky;top:-20px;margin:-20px -20px 8px;padding:14px 16px 10px 20px;background:var(--card);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:2}
@@ -360,7 +364,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div class="ov" id="av" hidden><div class="box rbox"><div class="phd"><h1>Achievements</h1><button class="xbtn" id="avx" aria-label="Close">✕</button></div><p id="avs"></p><div id="avl"></div></div></div>
 <div class="ov" id="tv" hidden><div class="box rbox"><h1>Themes</h1><p id="tvs"></p><div id="tvl"></div><button id="tvx">Close</button></div></div>
 <div class="ov" id="xv" hidden><div class="box"><h1>Transfer data</h1><p>Move your save to another device.</p><div class="xrow"><button id="xexp">Export</button><button id="ximp">Import</button></div><div id="xbody"></div><p id="xmsg"></p><button id="xvx">Close</button></div></div>
-<div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost. Only one boss boost runs at a time: while it runs, wins don't give a new one. After a boss gives you its reward, it's practice only for an hour.</p><div class="bban" id="bban" hidden></div><div id="bol"></div></div></div>
+<div class="ov" id="bov" hidden><div class="box rbox"><div class="phd"><h1>Bosses</h1><button class="xbtn" id="bovx" aria-label="Close">✕</button></div><p>Every teacher is a boss. Beat one for an income boost. Only one boss boost runs at a time: while it runs, wins don't give a new one. After a boss gives you its reward, it's practice only for an hour.</p><div class="bban" id="bban" hidden></div><div class="bhp" id="bhp"><div class="bhpt" id="bhpt"></div><button id="bhpm" aria-label="Less boss HP">−</button><button id="bhpp" aria-label="More boss HP">+</button></div><div id="bol"></div></div></div>
 <div id="ps" hidden><div class="psw">
 <div class="bfh"><div class="bft"><b>🌳 Prestige</b><span class="pss" id="pspts"></span></div><button class="xbtn2" id="psx" aria-label="Close">✕</button></div>
 <div class="pcard"><div id="psrun"></div><div class="pmut" id="psnext"></div><div class="pmut" id="psfx"></div><button id="psgo"></button><div class="pmut sm">Prestiging resets your Games Blocked and teachers. You keep runes, cards, dice, achievements, themes, teacher ⭐s, student upgrades and the skill tree. You can prestige once every 10 minutes.</div></div>
@@ -390,7 +394,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=85;
+var BUILD=86;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -446,6 +450,7 @@ var CK=[],disp=null,bestMem=0; /* bestMem: the highest "… per second" shown th
    resets that teacher to 0 owned and Lv 1, and gives a ⭐: each star doubles their money and makes them EVO_PRICE times
    pricier to buy. Stars are kept when you prestige. ===== */
 var EVO_LV=25,EVO_STEP=5,EVO_MAX=5,EVO_PRICE=3;
+var BHP_MAX=300; /* boss HP setting: up to +300% (see bhpMul) */
 /* ===== Release party: DeeMack Clicker 2 came out on Nov 20, 2026. Everyone gets +10% income (clicks too) for the first
    48 hours: 8:00 PM Central Nov 20 to 8:00 PM Central Nov 22 (times are UTC here, the same moment for every player). ===== */
 var LAUNCH={pct:10,from:Date.UTC(2026,10,21,2,0),until:Date.UTC(2026,10,23,2,0)};
@@ -514,13 +519,14 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
 function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
+d.bhp=(+o.bhp>0&&+o.bhp<=BHP_MAX)?Math.round(+o.bhp/10)*10:0;if(o.bossMul&&typeof o.bossMul==='object')T.forEach(function(t){var v=+o.bossMul[t.id];if(v>1&&v<=1+BHP_MAX/100)d.bossMul[t.id]=v});
 if(o.pu&&typeof o.pu==='object'){PUP.forEach(function(u){var v=o.pu.lv&&+o.pu.lv[u.id];if(v>0&&v===Math.floor(v))d.pu.lv[u.id]=Math.min(u.max,v);if(o.pu.off&&o.pu.off[u.id])d.pu.off[u.id]=1})}
 if(o.flaw&&typeof o.flaw==='object')T.forEach(function(t){var v=+o.flaw[t.id];if(v>0&&isFinite(v))d.flaw[t.id]=Math.floor(v)});
 if(Array.isArray(o.as))o.as.forEach(function(r){r=+r;if(r>=0&&r<6&&r===Math.floor(r)&&d.as.indexOf(r)<0)d.as.push(r)});
@@ -705,16 +711,19 @@ function bossRewI(i){var M=[5,5,6,6,7,7,8,8,9,9,10,10,12,12,15],n=T.length;if(!(
 return{pct:Math.round(5*Math.pow(20,f)),min:M[Math.round(f*(M.length-1))]}}
 function bossIdx(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return i;return -1}
 var BOSS_CD=60*60*1000;
+/* Boss HP setting (bosses screen): +10% steps up to +BHP_MAX%. Bosses get that much more HP and their reward % goes up by the
+   same share of itself (6% at +10% HP = 6.6%; Mr Linboom's 100% = 110%). A boost keeps the multiplier it was won with. */
+function bhpMul(){return 1+((S.bhp||0)/100)}function rpct(x){return Math.round(x*10)/10}
 function bossCdLeft(id){var w=S.bossCd&&S.bossCd[id];if(!w)return 0;var n=Date.now();if(w>n){S.bossCd[id]=n;w=n}return Math.max(0,w+BOSS_CD-n)}
-function bossPctAt(t){var b=0,B=S.bossBuffs||{};for(var k in B){if(t<B[k]){var i=bossIdx(k);if(i>=0){var p=bossRewI(i).pct;if(p>b)b=p}}}return b}
-function bestBossBuff(){var n=Date.now(),best=null,B=S.bossBuffs||{};for(var k in B){if(n<B[k]){var i=bossIdx(k);if(i<0)continue;var p=bossRewI(i).pct;if(!best||p>best.pct)best={id:k,i:i,pct:p,until:B[k]}}}return best}
+function bossPctAt(t){var b=0,B=S.bossBuffs||{};for(var k in B){if(t<B[k]){var i=bossIdx(k);if(i>=0){var p=rpct(bossRewI(i).pct*((S.bossMul&&S.bossMul[k])||1));if(p>b)b=p}}}return b}
+function bestBossBuff(){var n=Date.now(),best=null,B=S.bossBuffs||{};for(var k in B){if(n<B[k]){var i=bossIdx(k);if(i<0)continue;var p=rpct(bossRewI(i).pct*((S.bossMul&&S.bossMul[k])||1));if(!best||p>best.pct)best={id:k,i:i,pct:p,until:B[k]}}}return best}
 /* total boost at a moment: release party x daily roller x golden teacher x best boss reward x quest boost */
 function multAt(t){var m=1;if(t>=LAUNCH.from&&t<LAUNCH.until)m*=1+LAUNCH.pct/100;if(t<RL.until)m*=1+RL.pct/100;if(S.gold&&t<S.gold.until)m*=S.gold.m;var bp=bossPctAt(t);if(bp)m*=1+bp/100;var qa=S.qb||[];for(var i=0;i<qa.length;i++){if(t>=qa[i].st&&t<qa[i].un){m*=1+qa[i].p/100;break}}return m}
 function boostMul(){return multAt(Date.now())}
-function giveBossReward(i,t){var r=bossRewI(i),n=Date.now(),left=bossCdLeft(t.id);if(left>0)return{given:false,wait:left,pct:r.pct,min:r.min};
-if(!S.bossCd)S.bossCd={};if(!S.bossBuffs)S.bossBuffs={};Object.keys(S.bossBuffs).forEach(function(k){if(S.bossBuffs[k]<=n)delete S.bossBuffs[k]});
-var cur=bestBossBuff();if(cur)return{given:false,blocked:cur,pct:r.pct,min:r.min};
-S.bossCd[t.id]=n;S.bossBuffs[t.id]=n+r.min*60000;return{given:true,pct:r.pct,min:r.min}}
+function giveBossReward(i,t){var r=bossRewI(i),mul=(BF&&BF.bmul)||1,pc=rpct(r.pct*mul),n=Date.now(),left=bossCdLeft(t.id);if(left>0)return{given:false,wait:left,pct:pc,min:r.min};
+if(!S.bossCd)S.bossCd={};if(!S.bossBuffs)S.bossBuffs={};Object.keys(S.bossBuffs).forEach(function(k){if(S.bossBuffs[k]<=n){delete S.bossBuffs[k];if(S.bossMul)delete S.bossMul[k]}});
+var cur=bestBossBuff();if(cur)return{given:false,blocked:cur,pct:pc,min:r.min};
+S.bossCd[t.id]=n;S.bossBuffs[t.id]=n+r.min*60000;if(!S.bossMul)S.bossMul={};if(mul>1)S.bossMul[t.id]=mul;else delete S.bossMul[t.id];return{given:true,pct:pc,min:r.min}}
 function wd(){var x=Math.random()*100,w=0;for(var i=0;i<10;i++){w+=DWT[i];if(x<w)return i}return 0}
 function hms(ms){var s=Math.ceil(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);s=s%60;return h+':'+(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
 function renderRoller(){var B=$('rls');B.textContent='';
@@ -935,14 +944,17 @@ function closeXV(){$('xv').hidden=true;xArm=false;xPending=null}$('xvx').onclick
 var BTIER=[['Easy','#22a35a'],['Normal','#3b82f6'],['Hard','#f59e0b'],['Expert','#f97316'],['Insane','#ef4444'],['Extreme','#c026d3'],['Nightmare','#7c3aed'],['Impossible','#111827']];
 function tierOf(i){return Math.min(BTIER.length-1,Math.floor(i*BTIER.length/T.length))}
 function bossTier(i){return BTIER[tierOf(i)]}
-function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
+function bhpUI(){var v=S.bhp||0;$('bhpt').innerHTML='💪 <b>Boss HP +'+v+'%</b><small>'+(v?'Bosses have '+v+'% more HP · rewards are '+v+'% bigger':'Tap + to give bosses more HP for bigger rewards')+'</small>';$('bhpm').disabled=v<=0;$('bhpp').disabled=v>=BHP_MAX}
+function setBhp(d){var v=Math.max(0,Math.min(BHP_MAX,(S.bhp||0)+d));if(v===(S.bhp||0))return;S.bhp=v;save();bhpUI();updBossTimers()}
+$('bhpm').onclick=function(){setBhp(-10)};$('bhpp').onclick=function(){setBhp(10)};
+function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];bhpUI();T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
 var im=document.createElement('img');im.className='bimg';im.alt='';im.src=PHOTOS[t.ph||t.id]||'';
 var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=tName(t);var s=document.createElement('span');s.textContent='Boss '+(i+1)+' of '+T.length+(S.bossWins&&S.bossWins[t.id]?' \u00b7 Defeated \u2713':'')+(S.flaw&&S.flaw[t.id]?' \u00b7 Flawless \u00d7'+S.flaw[t.id]:'');
 var d=document.createElement('span');d.className='dif';d.style.setProperty('--dc',tr[1]);d.textContent=tr[0];var br=document.createElement('div');br.appendChild(d);
 var rl=document.createElement('div');rl.className='brw';x.appendChild(b);x.appendChild(s);x.appendChild(br);x.appendChild(rl);
 var f=document.createElement('button');f.className='bfight';f.onclick=function(){startFight(i)};BREFS.push({t:t,i:i,rl:rl,f:f});
 r.appendChild(im);r.appendChild(x);r.appendChild(f);L.appendChild(r)});updBossTimers()}
-var BREFS=[];function updBossTimers(){var cur=bestBossBuff(),bn=$('bban');bn.hidden=!cur;if(cur)bn.textContent='⚔️ Boss boost running: +'+cur.pct+'% income ('+T[cur.i].name+') · '+mmss(cur.until-Date.now())+' left. Wins won\u2019t give a new reward until it ends.';BREFS.forEach(function(o){var rw=bossRewI(o.i),cd=bossCdLeft(o.t.id);o.rl.textContent='🎁 +'+rw.pct+'% income for '+rw.min+' min'+(cd>0?' · ready in '+mmss(cd):'');o.f.textContent=cd>0?'Practice':'Fight'})}
+var BREFS=[];function updBossTimers(){var cur=bestBossBuff(),bn=$('bban');bn.hidden=!cur;if(cur)bn.textContent='⚔️ Boss boost running: +'+cur.pct+'% income ('+T[cur.i].name+') · '+mmss(cur.until-Date.now())+' left. Wins won\u2019t give a new reward until it ends.';BREFS.forEach(function(o){var rw=bossRewI(o.i),cd=bossCdLeft(o.t.id);o.rl.textContent='🎁 +'+rpct(rw.pct*bhpMul())+'% income for '+rw.min+' min'+(cd>0?' · ready in '+mmss(cd):'');o.f.textContent=cd>0?'Practice':'Fight'})}
 setInterval(function(){if(!$('bov').hidden)updBossTimers()},1000);
 $('bob').onclick=function(){renderBosses();$('bov').hidden=false};function closeBO(){$('bov').hidden=true}$('bovx').onclick=closeBO;$('bov').onclick=function(e){if(e.target===$('bov'))closeBO()};
 var BF=null,FCK=[],ATK={};
@@ -960,7 +972,7 @@ function fFloat(txt,cls,x,y){var A=$('bfa'),f=document.createElement('div');f.cl
 function hurtBoss(n,x,y,tap){if(!BF||BF.ph==='over')return;if(!tap)n=Math.max(1,Math.round(n*mgDmgMul()));n=Math.round(n*10)/10;if(BF.mini)BF.mini.dealt+=n;BF.hp=Math.max(0,BF.hp-n);fFloat('-'+n,'',x,y);fRender();if(BF.hp<=0)fEnd(true)}
 function hurtMe(n){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.taken+=n;BF.php=Math.max(0,BF.php-n);fFloat('-'+n+' HP','me',12,12);var A=$('bfa');A.classList.remove('hurt');void A.offsetWidth;A.classList.add('hurt');fRender();if(BF.php<=0)fEnd(false)}
 function startFight(i){closeBO();var t=T[i],d=fdiff(i),tr=bossTier(i);FCK=[];
-BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:3*Math.round(40+d*260),php:pHP(),pmax:pHP(),attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
+BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:Math.round(3*Math.round(40+d*260)*bhpMul()),bmul:bhpMul(),php:pHP(),pmax:pHP(),attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
 $('bf').classList.remove('mini');$('bfi').style.display='';$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=tName(t);var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
 $('bf').hidden=false;fRender();fIdle()}
 function closeFight(){BF=null;$('bf').hidden=true;$('bw').hidden=true;$('bfa').textContent='';$('bf').classList.remove('mini');$('bfi').style.display=''}
