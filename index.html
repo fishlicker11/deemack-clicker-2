@@ -462,7 +462,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=113;
+var BUILD=114;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1714,8 +1714,32 @@ function drawBHNodes(g,now,k){var o=galOwn(S),sc=gSc();bhNodes().forEach(functio
 g.strokeStyle=own?u.col:'rgba(255,255,255,.18)';g.lineWidth=own?1.6:1;g.setLineDash(own?[]:[4,5]);g.beginPath();g.moveTo(GV.W/2,GV.H/2);g.lineTo(p.x,p.y);g.stroke();g.setLineDash([]);
 if(own){g.shadowColor=u.col;g.shadowBlur=14+6*Math.sin(now/300+i)}g.fillStyle=own?u.col:'rgba(20,20,35,.9)';g.strokeStyle=u.col;g.lineWidth=2;circ(g,p.x,p.y,15*sc);g.fill();g.stroke();g.shadowBlur=0;
 g.font=Math.round(14*sc)+'px system-ui,sans-serif';g.textAlign='center';g.textBaseline='middle';g.globalAlpha=k*(own?1:0.45);g.fillText(u.ic,p.x,p.y+1);g.textBaseline='alphabetic';g.textAlign='left';g.globalAlpha=1})}
+/* ===== Black hole upgrade animations (2.4 s each, one after another): a beam from the upgrade to the black hole, its name,
+   and a themed effect: Event Horizon purple rings sucked in, Spaghettification pink streaks stretched into it, Hawking Radiation
+   cyan particles blasting out, Singularity everything goes dark then a white flash, Wormhole a teal tunnel opening,
+   Time Dilation an orange clock that winds down. ===== */
+var BHFX_MS=2400;
+function drawBHFx(g,now){var fx=GV.bhFx,u=GAL[9].ups[fx.i],e=(now-fx.t0)/BHFX_MS,W=GV.W,H=GV.H,cx=W/2,cy=H/2,sc=gSc(),R=Math.max(W,H)*0.62,nd=bhNodes()[fx.i],col=u.col,a0=Math.sin(Math.min(1,e)*Math.PI);
+g.save();
+if(fx.i===0){for(var k=0;k<4;k++){var q=(e*1.6+k/4)%1,r=lerp(R,14*sc,ease(q));g.strokeStyle=col;g.globalAlpha=a0*(1-q)*0.9;g.lineWidth=4*sc;g.beginPath();g.ellipse(cx,cy,r,r*0.62,e*6+k,0,6.2832);g.stroke()}}
+else if(fx.i===1){if(!fx.p){fx.p=[];for(var j=0;j<26;j++)fx.p.push({a:Math.random()*6.283,d:Math.random()*0.5})}fx.p.forEach(function(s){var q=Math.max(0,Math.min(1,(e-s.d)/0.5));if(q<=0||q>=1)return;var r1=lerp(R,10,q*q),a=s.a+q*2.5,r2=r1+R*0.35*(1-q);
+g.strokeStyle=col;g.globalAlpha=a0;g.lineWidth=2.2*(1-q)+0.6;g.beginPath();g.moveTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1*0.62);g.lineTo(cx+Math.cos(a-0.25)*r2,cy+Math.sin(a-0.25)*r2*0.62);g.stroke()})}
+else if(fx.i===2){if(!fx.p){fx.p=[];for(var j2=0;j2<48;j2++)fx.p.push({a:Math.random()*6.283,v:0.4+Math.random()*0.8,d:Math.random()*0.35})}g.shadowColor=col;g.shadowBlur=10;fx.p.forEach(function(s){var q=Math.max(0,(e-s.d)/0.65);if(q<=0||q>1)return;var r=16*sc+q*s.v*R;
+g.fillStyle=col;g.globalAlpha=(1-q);circ(g,cx+Math.cos(s.a)*r,cy+Math.sin(s.a)*r,2.4);g.fill()});var gl=g.createRadialGradient(cx,cy,0,cx,cy,60*sc);gl.addColorStop(0,'rgba(34,211,238,'+(0.6*a0)+')');gl.addColorStop(1,'rgba(34,211,238,0)');g.globalAlpha=1;g.fillStyle=gl;circ(g,cx,cy,60*sc);g.fill()}
+else if(fx.i===3){var dk=e<0.45?e/0.45:e<0.6?1:Math.max(0,1-(e-0.6)/0.4);g.fillStyle='rgba(0,0,0,'+(0.9*dk)+')';g.fillRect(0,0,W,H);g.fillStyle='#fff';g.globalAlpha=1;circ(g,cx,cy,1.5+(e<0.5?e*4:0));g.fill();
+if(e>=0.5){var q2=(e-0.5)/0.5;g.strokeStyle='#fff';g.globalAlpha=1-q2;g.lineWidth=3;circ(g,cx,cy,q2*R);g.stroke();g.globalAlpha=Math.max(0,0.8-q2*2);g.fillRect(0,0,W,H)}}
+else if(fx.i===4){for(var k4=0;k4<7;k4++){var q4=(e*1.3+k4/7)%1,r4=q4*R;g.strokeStyle=col;g.globalAlpha=a0*(1-q4)*0.8;g.lineWidth=1+3*q4;g.setLineDash([10*q4+2,8]);g.beginPath();g.ellipse(cx,cy,r4,r4*0.62,-e*4+k4*0.4,0,6.2832);g.stroke()}g.setLineDash([])}
+else{var cr=Math.min(W,H)*0.3;g.globalAlpha=a0;g.strokeStyle=col;g.lineWidth=2;circ(g,cx,cy,cr);g.stroke();for(var h=0;h<12;h++){var ha=h*Math.PI/6;g.beginPath();g.moveTo(cx+Math.cos(ha)*cr*0.86,cy+Math.sin(ha)*cr*0.86);g.lineTo(cx+Math.cos(ha)*cr,cy+Math.sin(ha)*cr);g.stroke()}
+var sw=-Math.PI/2+(1-Math.pow(1-Math.min(1,e),3))*Math.PI*4;g.lineWidth=3;g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(sw)*cr*0.8,cy+Math.sin(sw)*cr*0.8);g.stroke();
+for(var k5=0;k5<3;k5++){var q5=(e*0.8+k5/3)%1;g.globalAlpha=a0*(1-q5)*0.6;circ(g,cx,cy,cr+q5*cr*0.8);g.stroke()}}
+/* the beam from the upgrade into the black hole, the upgrade bursting, and its name */
+g.globalAlpha=Math.max(0,1-e*1.5);g.strokeStyle=col;g.lineWidth=3;g.shadowColor=col;g.shadowBlur=12;var bq=Math.min(1,e*3);g.beginPath();g.moveTo(nd.x,nd.y);g.lineTo(lerp(nd.x,cx,bq),lerp(nd.y,cy,bq));g.stroke();
+g.globalAlpha=Math.max(0,1-e*2);circ(g,nd.x,nd.y,15*sc+e*60*sc);g.stroke();g.shadowBlur=0;
+g.globalAlpha=Math.min(1,a0*1.6);g.fillStyle=fx.i===3&&e<0.6?'#fff':'#f8fafc';g.font='800 '+Math.round(15*sc)+'px system-ui,sans-serif';g.textAlign='center';g.fillText(u.ic+' '+u.n,cx,22*sc);g.textAlign='left';
+g.restore()}
 function galFrame(now){GV.raf=0;if(!PSO||PTAB!=='gal'||$('garea').hidden)return;if(!galSize()){GV.raf=requestAnimationFrame(galFrame);return}
-var cv=$('gcv'),g=cv.getContext('2d'),W=GV.W,H=GV.H,sc=gSc(),t=(now-GV.t0)/1000,mode=galMode(),st=galStage(S);g.setTransform(GV.dpr,0,0,GV.dpr,0,0);
+var cv=$('gcv'),g=cv.getContext('2d'),W=GV.W,H=GV.H,sc=gSc(),t=(now-GV.t0)/1000,mode=galMode(),st=galStage(S);
+if(mode==='nova'&&(GV.bhFx||(GV.bhQ&&GV.bhQ.length)))mode='bh'; /* finish the black hole upgrade animations first */g.setTransform(GV.dpr,0,0,GV.dpr,0,0);
 g.fillStyle='#05060f';g.fillRect(0,0,W,H);var on=galOn();drawStars(g,now);if(!on){GV.raf=requestAnimationFrame(galFrame);return}
 var A=GANIM[mode],el=0;if(A){if(!GV.anim||GV.anim.m!==mode)GV.anim={m:mode,t0:now};el=now-GV.anim.t0;if(el>=A.d){if(!S.gseen)S.gseen={};S.gseen[A.f]=1;save();GV.anim=null;
 if(mode==='nova'){galEnd()}galList();GV.raf=requestAnimationFrame(galFrame);return}}else GV.anim=null;
@@ -1739,6 +1763,7 @@ GV.pos[9]={x:cx,y:cy,r:40}}
 else if(mode==='bh'||mode==='nova'){var cx2=W/2,cy2=H/2,shake=0;
 if(mode==='nova'){shake=el<1400?(el/1400)*4:0;cx2+=(Math.random()-0.5)*shake;cy2+=(Math.random()-0.5)*shake}
 if(mode==='bh'||el<1400){drawBHNodes(g,now,1);drawBH(g,cx2,cy2,14*sc*(mode==='nova'?1+el/1400*0.4:1),now*(mode==='nova'?1+el/500:1),1)}
+if(mode==='bh'){if(!GV.bhFx&&GV.bhQ&&GV.bhQ.length)GV.bhFx={i:GV.bhQ.shift(),t0:now};if(GV.bhFx){if(now-GV.bhFx.t0>=BHFX_MS)GV.bhFx=null;else drawBHFx(g,now)}}
 if(mode==='nova'&&el>=1400){var q=(el-1400)/3400,R=q*Math.max(W,H)*1.3;
 var sw=g.createRadialGradient(W/2,H/2,Math.max(0,R*0.6),W/2,H/2,R+1);sw.addColorStop(0,'rgba(255,255,255,0)');sw.addColorStop(0.7,'rgba(253,186,116,.9)');sw.addColorStop(0.85,'rgba(236,72,153,.8)');sw.addColorStop(1,'rgba(99,102,241,0)');g.fillStyle=sw;g.fillRect(0,0,W,H);
 if(!GV.parts){GV.parts=[];for(var i=0;i<90;i++)GV.parts.push({a:Math.random()*6.28,v:0.4+Math.random(),c:['#fde68a','#f472b6','#60a5fa','#a78bfa','#fb923c','#34d399'][i%6]})}
@@ -1773,6 +1798,7 @@ function galPlan(B){var o=galOwn(S),pp=S.pp,list=[];if(B.k>galStage(S))return {n
 function galBuy(u,quiet){if(!galOn())return false;var B=u.B;if(B.k>galStage(S)||galOwn(S)[u.id]||S.pp<u.c)return false;S.pp-=u.c;if(!S.gal)S.gal={};S.gal[u.id]=1;
 if(galDone(B,S)){if(!GV.patT)GV.patT={};GV.patT[B.k]=performance.now();if(B.k<7){toast('🪐 '+B.n+' complete! '+GAL[B.k+1].n+' is open.','#a855f7');GV.sel=B.k+1}else if(B.k===7){toast('⭐ Neptune’s star is complete! Look at the planets…','#a855f7');GV.sel=8}
 else if(B.k===8){toast('☀️ The Sun is complete… something is happening to it!','#60a5fa');GV.sel=9}else toast('💥 The black hole is complete…','#f97316')}
+if(B.k===9){if(!GV.bhQ)GV.bhQ=[];GV.bhQ.push(u.j);var ga=$('garea');if(ga&&ga.scrollIntoView&&PTAB==='gal')ga.scrollIntoView({behavior:'smooth',block:'nearest'})}
 if(!quiet){save();psStats();update();checkAch();galList()}return true}
 function galBuyAll(B){var pl=galPlan(B);if(!pl.n)return;var spent=0;pl.list.forEach(function(u){spent+=u.c;galBuy(u,true)});save();psStats();update();checkAch();galList();toast('🌌 Bought '+pl.n+' upgrade'+(pl.n===1?'':'s')+' for '+galPts(spent)+' points','#a855f7')}
 /* the ending: after the supernova the credits roll */
@@ -1809,7 +1835,7 @@ var DEVCMDS=[
  run:function(v){var t=String(v).replace(/[,\s]/g,'');if(!/^\d+$/.test(t)||+t>1e12){toast('Type a whole number (0 or more)','#ef4444');return false}S.pp=+t;save();update();toast('Prestige points set to '+S.pp,'#a855f7');return true}},
 {id:'resetgal',type:'action',name:'Reset galaxy',desc:'Removes every galaxy upgrade and the animations you\u2019ve already seen, so you can play the galaxy again. Points are not refunded (set them above).',btn:'Reset',
  now:function(){return 'Owned: '+galCount(S)+' / '+GAL_N},
- run:function(){S.gal={};S.gseen={};GFXC={d:null,n:-1,v:null};GV.patT={};GV.sel=-1;GV.anim=null;GV.parts=null;save();update();if(PSO){psStats();if(PTAB==='gal')galList()}toast('Galaxy reset','#a855f7')}},
+ run:function(){S.gal={};S.gseen={};GFXC={d:null,n:-1,v:null};GV.patT={};GV.sel=-1;GV.anim=null;GV.parts=null;GV.bhQ=[];GV.bhFx=null;save();update();if(PSO){psStats();if(PTAB==='gal')galList()}toast('Galaxy reset','#a855f7')}},
 {id:'resettree',type:'action',name:'Reset skill tree',desc:'Removes every skill tree upgrade. Points are not refunded (set them above).',btn:'Reset',
  now:function(){return 'Owned: '+S.tree.length+' / '+TN.length},
  run:function(){S.tree=[];TFXC={d:null,n:-1,v:null};tsel=-1;save();update();toast('Skill tree reset','#a855f7')}},
