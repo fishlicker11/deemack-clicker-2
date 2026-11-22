@@ -462,7 +462,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=114;
+var BUILD=115;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -2168,8 +2168,9 @@ var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}dra
 fStatus('Out of time! You got to '+(nx-1)+' of '+n+'.');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,900)}},100);draw()};
 
 /* Count it: dots flash for a moment, then you pick how many there were. 2 rounds. Always 8 to 12 dots.
-   Harder: more dots (8-9 on Easy, 10-12 on Impossible), a shorter flash, and (from Hard up) dots of different sizes and colors. */
-ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(1.7-0.9*d)*mgTime(),lo=8+Math.round(2*d),hi=Math.min(12,9+Math.round(3*d)),ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
+   Harder: more dots and a much shorter look (Easy 8-9 dots for 3.5s, Hard 8-10 for about 2.5s, Insane 9-11 for 1.7s,
+   Nightmare 10-11 for 1.1s), and from Insane up dots of different sizes and colors. Impossible (0.95 and up) is unchanged: 10-12 dots for 0.85s. */
+ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(d>=0.95?1.7-0.9*d:0.85+2.65*Math.pow((0.95-d)/0.95,1.3))*mgTime(),lo=d>=0.95?8+Math.round(2*d):d<0.5?8:d<0.75?9:10,hi=d>=0.95?Math.min(12,9+Math.round(3*d)):d<0.25?9:d<0.5?10:11,ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
 var COLS=['#3b82f6','#ef4444','#22a35a','#f59e0b','#a855f7','#ec4899'];
 fStatus('Count the dots!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var field=document.createElement('div');field.className='cfield';A.appendChild(field);var opts=document.createElement('div');opts.className='copts';A.appendChild(opts);
