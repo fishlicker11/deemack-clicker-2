@@ -405,7 +405,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=99;
+var BUILD=100;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -467,7 +467,7 @@ var BHP_MAX=700; /* boss HP setting: up to +700% (see bhpMul) */
    order (the Boss HP setting doesn't apply). After the last teacher the bosses go round again at full difficulty, with +10% HP
    and +5% damage to you for every floor past the last teacher. Every floor you clear gives +TOWER_PCT% income forever
    (kept through prestige). S.tf = highest floor cleared. ===== */
-var TOWER_PCT=2,TOWER_HP=0.10,TOWER_DM=0.05;
+var TOWER_PCT=0.2,TOWER_HP=0.10,TOWER_DM=0.05;
 function towerBonus(d){return ((d&&d.tf)||0)*TOWER_PCT/100}
 function towerFloor(n){var L=T.length,i=(n-1)%L,k=Math.max(0,n-L);return {n:n,i:i,t:T[i],di:n<=L?i:L-1,d:n<=L?(L>1?i/(L-1):0):1,hpm:1+TOWER_HP*k,dmm:1+TOWER_DM*k}}
 /* ===== Release party: DeeMack Clicker 2 came out on Nov 20, 2026. Everyone gets +10% income (clicks too) for the first
@@ -1007,7 +1007,7 @@ function bhpUI(){var v=S.bhp||0;$('bhpt').innerHTML='💪 <b>Boss HP +'+v+'%</b>
 function setBhp(d){var v=Math.max(0,Math.min(BHP_MAX,(S.bhp||0)+d));if(v===(S.bhp||0))return;S.bhp=v;save();bhpUI();updBossTimers()}
 $('bhpm').onclick=function(){setBhp(-10)};$('bhpp').onclick=function(){setBhp(10)};
 function towUI(){var c=S.tf||0,f=towerFloor(c+1),x=[];if(f.hpm>1)x.push('+'+Math.round((f.hpm-1)*100)+'% HP');if(f.dmm>1)x.push('hits '+Math.round((f.dmm-1)*100)+'% harder');
-$('towt').innerHTML='';var b=document.createElement('b');b.textContent='🗼 Boss tower · Floor '+(c+1);var sm=document.createElement('small');sm.textContent='Next: '+f.t.name+(x.length?' ('+x.join(', ')+')':' · '+bossTier(f.di)[0])+'. '+c+' floor'+(c===1?'':'s')+' cleared · +'+Math.round(towerBonus(S)*100)+'% income forever (+'+TOWER_PCT+'% per floor)';$('towt').appendChild(b);$('towt').appendChild(sm)}
+$('towt').innerHTML='';var b=document.createElement('b');b.textContent='🗼 Boss tower · Floor '+(c+1);var sm=document.createElement('small');sm.textContent='Next: '+f.t.name+(x.length?' ('+x.join(', ')+')':' · '+bossTier(f.di)[0])+'. '+c+' floor'+(c===1?'':'s')+' cleared · +'+rpct(towerBonus(S)*100)+'% income forever (+'+TOWER_PCT+'% per floor)';$('towt').appendChild(b);$('towt').appendChild(sm)}
 $('towgo').onclick=startTower;
 function renderBosses(){var L=$('bol');L.textContent='';BREFS=[];bhpUI();towUI();T.forEach(function(t,i){var tr=bossTier(i),r=document.createElement('div');r.className='arow brow';
 var im=document.createElement('img');im.className='bimg';im.alt='';im.src=PHOTOS[t.ph||t.id]||'';
@@ -1059,7 +1059,7 @@ w.appendChild(h);w.appendChild(p);w.appendChild(a);w.appendChild(bk);A.appendChi
 function showWin(i,t,first,rew,tw){var tr=bossTier(BF.di!=null?BF.di:i),secs=Math.max(0,Math.round((Date.now()-BF.t0)/1000));
 $('bwi').src=PHOTOS[t.ph||t.id]||'';$('bwi').style.borderColor=tr[1];$('bwn').textContent=tw?'🗼 Floor '+tw+' cleared!':'You beat '+t.name+'!';
 $('bwp').textContent=tw?'You beat '+t.name+(BF.php>=(BF.pmax||100)?' without taking damage':'')+'. Floor '+(tw+1)+' is next.':(BF.php>=(BF.pmax||100)?'No damage taken! ':'')+(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
-var rw=$('bwrw');rw.className='bwrw'+(tw?(first?'':' prac'):rew&&rew.given?'':' prac');rw.textContent=tw?(first?'🗼 +'+TOWER_PCT+'% income forever! Tower bonus is now +'+Math.round(towerBonus(S)*100)+'%.':'Already cleared floor '+tw+' before.'):!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!':rew.blocked?'⏳ No new reward: your +'+rew.blocked.pct+'% from '+T[rew.blocked.i].name+' still has '+mmss(rew.blocked.until-Date.now())+' left. '+t.name+' has no cooldown, so you can win its reward later.':'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
+var rw=$('bwrw');rw.className='bwrw'+(tw?(first?'':' prac'):rew&&rew.given?'':' prac');rw.textContent=tw?(first?'🗼 +'+TOWER_PCT+'% income forever! Tower bonus is now +'+rpct(towerBonus(S)*100)+'%.':'Already cleared floor '+tw+' before.'):!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!':rew.blocked?'⏳ No new reward: your +'+rew.blocked.pct+'% from '+T[rew.blocked.i].name+' still has '+mmss(rew.blocked.until-Date.now())+' left. '+t.name+' has no cooldown, so you can win its reward later.':'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
 var st=$('bws');st.textContent='';[[BF.php+'/'+(BF.pmax||100),'HP left'],[Math.floor(secs/60)+':'+(secs%60<10?'0':'')+secs%60,'Time'],[BF.attacks,'Attacks']].forEach(function(x){var d=document.createElement('div'),b=document.createElement('b');b.textContent=x[0];d.appendChild(b);d.appendChild(document.createTextNode(x[1]));st.appendChild(d)});
 $('bwr').textContent=tw?'Next floor':'Replay boss';$('bwr').onclick=function(){$('bw').hidden=true;if(tw)startTower();else startFight(i)};
 $('bwb').onclick=function(){$('bw').hidden=true;closeFight();renderBosses();$('bov').hidden=false};
