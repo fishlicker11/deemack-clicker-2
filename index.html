@@ -403,7 +403,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=93;
+var BUILD=94;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -823,7 +823,7 @@ var THEMES=[
 {n:'Void',bg:'#000000',card:'#0f0b17',text:'#eee6ff',muted:'#9a88c4',accent:'#a45bff',line:'#2a1f40',btn:'#a45bff',btntext:'#0b0412',dark:1},
 {n:'Dusk',bg:'#1b1022',card:'#281833',text:'#fdeee4',muted:'#c09ab0',accent:'#fdba74',line:'#422a50',btn:'#fdba74',btntext:'#2a1206',dark:1},
 {n:'Royal',bg:'#0b1030',card:'#141b4d',text:'#eef0ff',muted:'#9aa3e0',accent:'#ffd24a',line:'#2a3380',btn:'#ffd24a',btntext:'#14163a',dark:1}];
-var ACH=[],ACHV={},ACH_POOL=170; /* all achievements together: +170% income (older ones +100%, flawless boss ones +50%, golden +20%) */
+var ACH=[],ACHV={},ACH_POOL=0; /* worked out below: older ones +100%, flawless boss ones +50%, Golden Linboom +20%, 5-star golden ones fixed % each */
 /* pr (optional): how far along you are, as [now, goal] (shown as a progress bar while locked) */
 function A(id,cat,name,desc,w,t,pr){ACH.push({id:id,cat:cat,name:name,desc:desc,w:w,t:t,pr:pr})}
 function nOwn(d,k){var c=0;T.forEach(function(t){if(d.own[t.id]>=k)c++});return c}function nLv(d,k){var c=0;T.forEach(function(t){if(d.lvl[t.id]>=k)c++});return c}
@@ -869,10 +869,13 @@ A('treeall','Prestige','Fully Grown','Own every skill tree upgrade',20,function(
 T.forEach(function(t,i){[1,3,5].forEach(function(n,j){A('flaw'+n+t.id,'Bosses',j?'Flawless '+t.name+' ×'+n:'Flawless '+t.name,'Beat '+t.name+' without taking any damage'+(n>1?' '+n+' times':''),(1+0.25*i)*[1,2,3][j],function(d){return ((d.flaw&&d.flaw[t.id])||0)>=n},function(d){return [(d.flaw&&d.flaw[t.id])||0,n]});ACH[ACH.length-1].pool='flaw'})});
 /* Golden achievements: their own pool (+20%), shown last in a gold section; adding them changed no other achievement's % */
 A('goldlin','Golden achievements','Golden Linboom','Beat Mr Linboom on +'+BHP_MAX+'% boss HP with every player upgrade switched off',1,function(d){return !!(d.gach&&d.gach.lin)});ACH[ACH.length-1].pool='gold';
+/* golden: evolve each teacher to 5 stars. Each has its own fixed % (fix): +2% for the first teacher up to +10% for the top one */
+T.forEach(function(t,i){A('star5'+t.id,'Golden achievements','5-Star '+t.name,'Evolve '+t.name+' to 5 stars',1,function(d){return starsOf(t.id,d)>=5},function(d){return [starsOf(t.id,d),5]});ACH[ACH.length-1].fix=Math.round((2+8*i/Math.max(1,T.length-1))*100)/100});
 })();
 /* each achievement's % = its pool x its weight / the total weight of that pool */
-var ACHP={base:100,flaw:50,gold:20},ACHW={};ACH.forEach(function(a){var g=a.pool||'base';ACHW[g]=(ACHW[g]||0)+a.w});
-ACH.forEach(function(a){var g=a.pool||'base';ACHV[a.id]=ACHP[g]*a.w/ACHW[g]});
+var ACHP={base:100,flaw:50,gold:20},ACHW={};ACH.forEach(function(a){if(a.fix!=null)return;var g=a.pool||'base';ACHW[g]=(ACHW[g]||0)+a.w});
+ACH.forEach(function(a){var g=a.pool||'base';ACHV[a.id]=a.fix!=null?a.fix:ACHP[g]*a.w/ACHW[g]});
+ACH_POOL=0;ACH.forEach(function(a){ACH_POOL+=ACHV[a.id]});ACH_POOL=Math.round(ACH_POOL*100)/100; /* the total all achievements give */
 function achVal(a){return ACHV[a.id]||0}
 function achBonus(d){var s=0;if(!ACHV||!d||!d.ach)return 0;for(var k in d.ach)if(ACHV[k])s+=ACHV[k];return s/100}
 function achCount(d){var n=0;ACH.forEach(function(a){if(d.ach[a.id])n++});return n}
