@@ -165,6 +165,9 @@ button:disabled{opacity:.35;cursor:default}
 .card2.off{border-color:var(--line);opacity:.7}
 .card2.off img{filter:grayscale(1) brightness(.4)}
 .dres .card2{max-width:150px;margin:8px auto}
+.abar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:5px 0 2px}
+.abar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.abt{display:block;font-size:11px;color:var(--muted)}
 .dnum{font-size:40px;font-weight:700;margin:6px 0}
 .ashint{font-size:12px;color:var(--muted);margin:2px 0 0}
 .ov .asr{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 10px}
@@ -394,7 +397,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=86;
+var BUILD=87;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -642,9 +645,9 @@ function closeEV(){$('ev').hidden=true;$('evi').value=''}
 $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=function(e){if(e.key==='Enter'&&evOk())$('evgo').click()};
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
 $('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();renderWebs();
-if(slot===1){try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
+if(slot===1){try{LS.setItem('deemackClicker2.best','0')}catch(e){}bestMem=0;lastSent=0;srvChecked=true;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='',nameBlocked=false;try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){} /* nameBlocked: the name failed the rude-name filter */
-var db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
+var srvChecked=false,db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
 /* leaderboard rune bonus: your 3 rarest runes (any you own, equipped or not) add RP% each to your rank score:
    Common +1, Uncommon +3, Rare +6, Epic +12, Legendary +25, Mythic +50 (at most +150% with 3 Mythics). More runes than 3 don't add anything. */
 function runeBonus(d){var v=((d&&d.runes)||[]).map(function(r){return RP[r.r]||0}).sort(function(a,b){return b-a});return (v[0]||0)+(v[1]||0)+(v[2]||0)}
@@ -813,47 +816,49 @@ var THEMES=[
 {n:'Dusk',bg:'#1b1022',card:'#281833',text:'#fdeee4',muted:'#c09ab0',accent:'#fdba74',line:'#422a50',btn:'#fdba74',btntext:'#2a1206',dark:1},
 {n:'Royal',bg:'#0b1030',card:'#141b4d',text:'#eef0ff',muted:'#9aa3e0',accent:'#ffd24a',line:'#2a3380',btn:'#ffd24a',btntext:'#14163a',dark:1}];
 var ACH=[],ACHV={},ACH_POOL=150; /* all achievements together: +150% income (older ones +100%, flawless boss ones +50%) */
-function A(id,cat,name,desc,w,t){ACH.push({id:id,cat:cat,name:name,desc:desc,w:w,t:t})}
+/* pr (optional): how far along you are, as [now, goal] (shown as a progress bar while locked) */
+function A(id,cat,name,desc,w,t,pr){ACH.push({id:id,cat:cat,name:name,desc:desc,w:w,t:t,pr:pr})}
+function nOwn(d,k){var c=0;T.forEach(function(t){if(d.own[t.id]>=k)c++});return c}function nLv(d,k){var c=0;T.forEach(function(t){if(d.lvl[t.id]>=k)c++});return c}
 (function(){
 var cl=[10,100,500,1000,5000,10000],cn=['First Taps','Warming Up','Getting Serious','Finger Workout','Click Machine','Tap Master'];
-cl.forEach(function(v,i){A('clk'+v,'Clicking',cn[i],'Click Mr McCoy '+fmt(v)+' times',1+i*0.8,function(d){return d.st.clicks>=v})});
-[1,10,50,100,250,500].forEach(function(v,i){A('crit'+v,'Clicking',['Lucky Hit','Critical Thinker','Sharp Shooter','Crit Fiend','Crit Machine','Crit Lord'][i],'Land '+fmt(v)+' critical hit'+(v>1?'s':''),1.5+i*1.2,function(d){return d.st.crit>=v})});
-[8,12,16].forEach(function(v,i){A('spd'+v,'Clicking',['Quick Fingers','Speed Demon','Lightning Hands'][i],'Click '+v+' times in one second',3+i*3,function(d){return d.st.maxcps>=v})});
-[1e3,1e5,1e7,1e9,1e11,1e13,1e15,1e17,1e20,1e23,1e26,1e29,1e32,1e35,1e38,1e40].forEach(function(v,i){A('earn'+i,'Money',['Pocket Change','Paycheck','Savings','Fortune','Tycoon','Mogul','Empire','Economy','Galaxy','Universe','Multiverse','Infinity','Beyond','Omega','Eternity','Absolute'][i],'Earn '+fmt(v)+' Games Blocked in total',1.5+i*1.1,function(d){return d.st.earned>=v})});
-[10,1e3,1e5,1e7,1e9,1e11,1e13,1e15,1e17].forEach(function(v,i){A('inc'+i,'Money',['Steady Flow','Trickle','Stream','River','Flood','Torrent','Tsunami','Ocean','Cosmos'][i],'Reach '+fmt(v)+' income per second',1.5+i*1.6,function(d,inc){return inc>=v})});
+cl.forEach(function(v,i){A('clk'+v,'Clicking',cn[i],'Click Mr McCoy '+fmt(v)+' times',1+i*0.8,function(d){return d.st.clicks>=v},function(d){return [d.st.clicks,v]})});
+[1,10,50,100,250,500].forEach(function(v,i){A('crit'+v,'Clicking',['Lucky Hit','Critical Thinker','Sharp Shooter','Crit Fiend','Crit Machine','Crit Lord'][i],'Land '+fmt(v)+' critical hit'+(v>1?'s':''),1.5+i*1.2,function(d){return d.st.crit>=v},function(d){return [d.st.crit,v]})});
+[8,12,16].forEach(function(v,i){A('spd'+v,'Clicking',['Quick Fingers','Speed Demon','Lightning Hands'][i],'Click '+v+' times in one second',3+i*3,function(d){return d.st.maxcps>=v},function(d){return [d.st.maxcps,v]})});
+[1e3,1e5,1e7,1e9,1e11,1e13,1e15,1e17,1e20,1e23,1e26,1e29,1e32,1e35,1e38,1e40].forEach(function(v,i){A('earn'+i,'Money',['Pocket Change','Paycheck','Savings','Fortune','Tycoon','Mogul','Empire','Economy','Galaxy','Universe','Multiverse','Infinity','Beyond','Omega','Eternity','Absolute'][i],'Earn '+fmt(v)+' Games Blocked in total',1.5+i*1.1,function(d){return d.st.earned>=v},function(d){return [d.st.earned,v]})});
+[10,1e3,1e5,1e7,1e9,1e11,1e13,1e15,1e17].forEach(function(v,i){A('inc'+i,'Money',['Steady Flow','Trickle','Stream','River','Flood','Torrent','Tsunami','Ocean','Cosmos'][i],'Reach '+fmt(v)+' income per second',1.5+i*1.6,function(d,inc){return inc>=v},function(d,inc){return [inc,v]})});
 T.forEach(function(t,i){
 A('own1'+t.id,'Teachers','Hire '+t.name,'Buy '+t.name,1+i*0.5,function(d){return d.own[t.id]>=1});
-A('own10'+t.id,'Teachers',t.name+' x10','Own 10 of '+t.name,2+i*0.7,function(d){return d.own[t.id]>=10});
-A('lv5'+t.id,'Teachers',t.name+' Level 5','Upgrade '+t.name+' to level 5',3+i*0.8,function(d){return d.lvl[t.id]>=5})});
-A('all1','Teachers','Full Staff','Own every teacher',8,function(d){return T.every(function(t){return d.own[t.id]>=1})});
-A('all10','Teachers','Fully Staffed','Own 10 of every teacher',14,function(d){return T.every(function(t){return d.own[t.id]>=10})});
-A('alllv','Teachers','Top Marks','Get every teacher to level 5',16,function(d){return T.every(function(t){return d.lvl[t.id]>=5})});
+A('own10'+t.id,'Teachers',t.name+' x10','Own 10 of '+t.name,2+i*0.7,function(d){return d.own[t.id]>=10},function(d){return [d.own[t.id],10]});
+A('lv5'+t.id,'Teachers',t.name+' Level 5','Upgrade '+t.name+' to level 5',3+i*0.8,function(d){return d.lvl[t.id]>=5},function(d){return [d.lvl[t.id],5]})});
+A('all1','Teachers','Full Staff','Own every teacher',8,function(d){return T.every(function(t){return d.own[t.id]>=1})},function(d){return [nOwn(d,1),T.length]});
+A('all10','Teachers','Fully Staffed','Own 10 of every teacher',14,function(d){return T.every(function(t){return d.own[t.id]>=10})},function(d){return [nOwn(d,10),T.length]});
+A('alllv','Teachers','Top Marks','Get every teacher to level 5',16,function(d){return T.every(function(t){return d.lvl[t.id]>=5})},function(d){return [nLv(d,5),T.length]});
 A('evo1','Teachers','Evolution','Evolve a teacher',4,function(d){return totalStars(d)>=1});
-A('evo5','Teachers','Five-Star Teacher','Get a teacher to 5 stars',10,function(d){return T.some(function(t){return starsOf(t.id,d)>=5})});
-A('evo25','Teachers','Star Collector','Get 25 teacher stars in total',14,function(d){return totalStars(d)>=25});
-[10,100,1000].forEach(function(v,i){A('buys'+v,'Teachers',['Hiring Spree','Staff Meeting','Mass Hiring'][i],'Buy '+fmt(v)+' teachers',2+i*2.5,function(d){return d.st.buys>=v})});
-[10,50,200].forEach(function(v,i){A('ups'+v,'Teachers',['Training Day','Professional Development','Masterclass'][i],'Buy '+v+' upgrades',2+i*2.5,function(d){return d.st.ups>=v})});
-[1,10,50,100,250,500,1000].forEach(function(v,i){A('rune'+v,'Runes',['Rune Finder','Collector','Hoarder','Rune Hunter','Rune Master','Rune Lord','Rune God'][i],'Find '+fmt(v)+' rune'+(v>1?'s':''),1+i*1.5,function(d){return d.st.found>=v})});
+A('evo5','Teachers','Five-Star Teacher','Get a teacher to 5 stars',10,function(d){return T.some(function(t){return starsOf(t.id,d)>=5})},function(d){var m=0;T.forEach(function(t){m=Math.max(m,starsOf(t.id,d))});return [m,5]});
+A('evo25','Teachers','Star Collector','Get 25 teacher stars in total',14,function(d){return totalStars(d)>=25},function(d){return [totalStars(d),25]});
+[10,100,1000].forEach(function(v,i){A('buys'+v,'Teachers',['Hiring Spree','Staff Meeting','Mass Hiring'][i],'Buy '+fmt(v)+' teachers',2+i*2.5,function(d){return d.st.buys>=v},function(d){return [d.st.buys,v]})});
+[10,50,200].forEach(function(v,i){A('ups'+v,'Teachers',['Training Day','Professional Development','Masterclass'][i],'Buy '+v+' upgrades',2+i*2.5,function(d){return d.st.ups>=v},function(d){return [d.st.ups,v]})});
+[1,10,50,100,250,500,1000].forEach(function(v,i){A('rune'+v,'Runes',['Rune Finder','Collector','Hoarder','Rune Hunter','Rune Master','Rune Lord','Rune God'][i],'Find '+fmt(v)+' rune'+(v>1?'s':''),1+i*1.5,function(d){return d.st.found>=v},function(d){return [d.st.found,v]})});
 RN.forEach(function(r,i){A('rar'+i,'Runes','Find a '+r+' rune','Find a '+r+' rune',[1,2,3,5,8,14][i],function(d){return d.st.rf[i]>0})});
 RT.forEach(function(k,i){A('kind'+i,'Runes','Rune of '+k.n,'Find a Rune of '+k.n,2,function(d){return (d.st.kf[i]||0)>0})});
-A('equip3','Runes','Armed','Equip 3 runes at once',2,function(d){return d.eq.length>=3});
-[1,10,50,200].forEach(function(v,i){A('sold'+v,'Runes',['Garage Sale','Rune Dealer','Rune Merchant','Rune Tycoon'][i],'Sell '+v+' rune'+(v>1?'s':''),1+i*1.6,function(d){return d.st.sold>=v})});
+A('equip3','Runes','Armed','Equip 3 runes at once',2,function(d){return d.eq.length>=3},function(d){return [d.eq.length,3]});
+[1,10,50,200].forEach(function(v,i){A('sold'+v,'Runes',['Garage Sale','Rune Dealer','Rune Merchant','Rune Tycoon'][i],'Sell '+v+' rune'+(v>1?'s':''),1+i*1.6,function(d){return d.st.sold>=v},function(d){return [d.st.sold,v]})});
 A('del1','Runes','Trash Day','Delete a rune',1,function(d){return d.st.deleted>0});
-A('full','Runes','Packed','Hold 100 runes at once',3,function(d){return d.runes.length>=100});
-[1,10,50,100,250].forEach(function(v,i){A('dice'+v,'Dice',['Roll the Dice','Gambler','High Roller','Lucky Seven','Casino King'][i],'Roll the die '+v+' time'+(v>1?'s':''),1+i*1.5,function(d){return d.st.dice>=v})});
-[1,3,5,8,10,12].forEach(function(v,i){if(v<=T.length)A('cards'+v,'Cards','Card Collector '+(i+1),'Collect '+v+' different card'+(v>1?'s':''),1+i*1.2,function(d){return Object.keys(d.cards).length>=v})});
-A('cardsall','Cards','Complete Set','Collect a card of every teacher',12,function(d){return Object.keys(d.cards).length>=T.length});
+A('full','Runes','Packed','Hold 100 runes at once',3,function(d){return d.runes.length>=100},function(d){return [d.runes.length,100]});
+[1,10,50,100,250].forEach(function(v,i){A('dice'+v,'Dice',['Roll the Dice','Gambler','High Roller','Lucky Seven','Casino King'][i],'Roll the die '+v+' time'+(v>1?'s':''),1+i*1.5,function(d){return d.st.dice>=v},function(d){return [d.st.dice,v]})});
+[1,3,5,8,10,12].forEach(function(v,i){if(v<=T.length)A('cards'+v,'Cards','Card Collector '+(i+1),'Collect '+v+' different card'+(v>1?'s':''),1+i*1.2,function(d){return Object.keys(d.cards).length>=v},function(d){return [Object.keys(d.cards).length,v]})});
+A('cardsall','Cards','Complete Set','Collect a card of every teacher',12,function(d){return Object.keys(d.cards).length>=T.length},function(d){return [Object.keys(d.cards).length,T.length]});
 DR.forEach(function(r,i){A('crar'+i,'Cards','Pull a '+r+' card','Own a '+r+' card or better',1.5+i*1.5,function(d){return Object.keys(d.cards).some(function(id){return d.cards[id]>=i})})});
-[1,5,10,25].forEach(function(v,i){A('roll'+v,'Roller',['Feeling Lucky','Regular','Slot Addict','Jackpot Junkie'][i],'Use the Daily Roller '+v+' time'+(v>1?'s':''),1+i*1.5,function(d){return d.st.rolled>=v})});
-[300,500,900].forEach(function(v,i){A('rpct'+v,'Roller',['Nice Roll','Big Win','Jackpot'][i],'Roll a '+v+'% or higher bonus',3+i*4,function(d){return d.st.bp>=v})});
-[1,5,25,100].forEach(function(v,i){A('prs'+v,'Prestige',['Fresh Start','Born Again','Cycle Master','Eternal'][i],'Prestige '+v+' time'+(v>1?'s':''),3+i*3,function(d){return d.prs>=v})});
-[1,25,75,150,250].forEach(function(v,i){A('tree'+v,'Prestige',['Seedling','Sapling','Young Tree','Old Oak','Ancient Tree'][i],'Own '+v+' skill tree upgrade'+(v>1?'s':''),2+i*3,function(d){return (d.tree||[]).length>=v})});
-A('treeall','Prestige','Fully Grown','Own every skill tree upgrade',20,function(d){return (d.tree||[]).length>=TN.length});
-[10,100,1000].forEach(function(v,i){A('ppt'+v,'Prestige',['Point Collector','Point Hoarder','Point Legend'][i],'Earn '+v+' prestige points in total',3+i*3,function(d){return d.ppt>=v})});
-[300,600].forEach(function(v,i){A('rsec'+v,'Roller',['Long Boost','Marathon'][i],'Roll a boost lasting '+v+' seconds or more',3+i*3,function(d){return d.st.bs>=v})});
+[1,5,10,25].forEach(function(v,i){A('roll'+v,'Roller',['Feeling Lucky','Regular','Slot Addict','Jackpot Junkie'][i],'Use the Daily Roller '+v+' time'+(v>1?'s':''),1+i*1.5,function(d){return d.st.rolled>=v},function(d){return [d.st.rolled,v]})});
+[300,500,900].forEach(function(v,i){A('rpct'+v,'Roller',['Nice Roll','Big Win','Jackpot'][i],'Roll a '+v+'% or higher bonus',3+i*4,function(d){return d.st.bp>=v},function(d){return [d.st.bp,v]})});
+[1,5,25,100].forEach(function(v,i){A('prs'+v,'Prestige',['Fresh Start','Born Again','Cycle Master','Eternal'][i],'Prestige '+v+' time'+(v>1?'s':''),3+i*3,function(d){return d.prs>=v},function(d){return [d.prs,v]})});
+[1,25,75,150,250].forEach(function(v,i){A('tree'+v,'Prestige',['Seedling','Sapling','Young Tree','Old Oak','Ancient Tree'][i],'Own '+v+' skill tree upgrade'+(v>1?'s':''),2+i*3,function(d){return (d.tree||[]).length>=v},function(d){return [(d.tree||[]).length,v]})});
+A('treeall','Prestige','Fully Grown','Own every skill tree upgrade',20,function(d){return (d.tree||[]).length>=TN.length},function(d){return [(d.tree||[]).length,TN.length]});
+[10,100,1000].forEach(function(v,i){A('ppt'+v,'Prestige',['Point Collector','Point Hoarder','Point Legend'][i],'Earn '+v+' prestige points in total',3+i*3,function(d){return d.ppt>=v},function(d){return [d.ppt,v]})});
+[300,600].forEach(function(v,i){A('rsec'+v,'Roller',['Long Boost','Marathon'][i],'Roll a boost lasting '+v+' seconds or more',3+i*3,function(d){return d.st.bs>=v},function(d){return [d.st.bs,v]})});
 /* beat each boss without taking any damage 1, 3 and 5 times. These share their own +50% (pool 'flaw'), so adding them
    didn't change the % of any older achievement */
-T.forEach(function(t,i){[1,3,5].forEach(function(n,j){A('flaw'+n+t.id,'Bosses',j?'Flawless '+t.name+' ×'+n:'Flawless '+t.name,'Beat '+t.name+' without taking any damage'+(n>1?' '+n+' times':''),(1+0.25*i)*[1,2,3][j],function(d){return ((d.flaw&&d.flaw[t.id])||0)>=n});ACH[ACH.length-1].pool='flaw'})});
+T.forEach(function(t,i){[1,3,5].forEach(function(n,j){A('flaw'+n+t.id,'Bosses',j?'Flawless '+t.name+' ×'+n:'Flawless '+t.name,'Beat '+t.name+' without taking any damage'+(n>1?' '+n+' times':''),(1+0.25*i)*[1,2,3][j],function(d){return ((d.flaw&&d.flaw[t.id])||0)>=n},function(d){return [(d.flaw&&d.flaw[t.id])||0,n]});ACH[ACH.length-1].pool='flaw'})});
 })();
 /* each achievement's % = its pool x its weight / the total weight of that pool */
 var ACHP={base:100,flaw:50},ACHW={};ACH.forEach(function(a){var g=a.pool||'base';ACHW[g]=(ACHW[g]||0)+a.w});
@@ -867,14 +872,22 @@ if(!got.length)return;
 var after=achCount(S),th=Math.floor(after/5)>Math.floor(before/5)&&Math.floor(after/5)<=THEMES.length;
 toast((got.length===1?'Achievement: '+got[0].name+' (+'+achVal(got[0]).toFixed(2)+'%)':got.length+' achievements unlocked')+(th?' · new theme!':''),'#f59e0b');
 save();if(!$('av').hidden)renderAch();if(!$('tv').hidden)renderThemes()}
-function renderAch(){var L=$('avl');L.textContent='';
+/* progress for one achievement: [fraction 0-1, text]. Big money/income goals use a log scale so the bar moves visibly */
+function achProg(a,inc){if(!a.pr)return null;var q;try{q=a.pr(S,inc)}catch(e){return null}var c=Math.max(0,+q[0]||0),n=+q[1]||1,f=n>=1e6?Math.log10(Math.max(1,c))/Math.log10(n):c/n;
+return [Math.max(0,Math.min(1,f)),(n>=1e4?fmt(Math.min(c,n)):Math.min(Math.floor(c),n))+' / '+(n>=1e4?fmt(n):n)]}
+var ABARS=[];
+function renderAch(){var L=$('avl');L.textContent='';ABARS=[];var inc=totalOf(S);
 $('avs').textContent=achCount(S)+'/'+ACH.length+' unlocked · +'+(achBonus(S)*100).toFixed(2)+'% income (all of them give +'+ACH_POOL+'%)';
-var cat=null;ACH.forEach(function(a){if(a.cat!==cat){cat=a.cat;var h=document.createElement('div');h.className='rsec';h.textContent=cat;L.appendChild(h)}
+var cats=[];ACH.forEach(function(a){if(cats.indexOf(a.cat)<0)cats.push(a.cat)});
+cats.forEach(function(cat){var h=document.createElement('div');h.className='rsec';h.textContent=cat;L.appendChild(h);
+ACH.forEach(function(a){if(a.cat!==cat)return;
 var on=!!S.ach[a.id],r=document.createElement('div');r.className='arow'+(on?'':' off');
 var c=document.createElement('div');c.className='ck';c.textContent=on?'✅':'🔒';
 var t=document.createElement('div');t.className='at';var b=document.createElement('b');b.textContent=a.name;var s=document.createElement('span');s.textContent=a.desc;t.appendChild(b);t.appendChild(s);
+var pg=on?null:achProg(a,inc);if(pg){var w=document.createElement('div');w.className='abar';var fi=document.createElement('i');fi.style.width=(pg[0]*100).toFixed(1)+'%';w.appendChild(fi);var tx=document.createElement('small');tx.className='abt';tx.textContent=pg[1];t.appendChild(w);t.appendChild(tx);ABARS.push({a:a,fi:fi,tx:tx})}
 var v=document.createElement('div');v.className='ab';v.textContent='+'+achVal(a).toFixed(2)+'%';
-r.appendChild(c);r.appendChild(t);r.appendChild(v);L.appendChild(r)})}
+r.appendChild(c);r.appendChild(t);r.appendChild(v);L.appendChild(r)})})}
+function achBars(){if(!ABARS.length)return;var inc=totalOf(S);ABARS.forEach(function(o){var pg=achProg(o.a,inc);if(!pg)return;var w=(pg[0]*100).toFixed(1)+'%';if(o.fi.style.width!==w)o.fi.style.width=w;if(o.tx.textContent!==pg[1])o.tx.textContent=pg[1]})}
 function applyTheme(i){var el=document.documentElement;if(!el||!el.style)return;var keys=['bg','card','text','muted','accent','line','btn','btntext'];
 if(i>=0&&THEMES[i]){var t=THEMES[i];keys.forEach(function(k){el.style.setProperty('--'+k,t[k])});el.style.colorScheme=t.dark?'dark':'light'}
 else{keys.forEach(function(k){el.style.removeProperty('--'+k)});el.style.colorScheme=''}}
@@ -889,7 +902,7 @@ r.appendChild(sw);r.appendChild(x);r.onclick=function(){if(!ok)return;S.theme=i;
 trow(-1,'Default',null,0);THEMES.forEach(function(t,i){trow(i,t.n,t,5*(i+1))})}
 $('ab').onclick=function(){renderAch();$('av').hidden=false};function closeAV(){$('av').hidden=true}$('avx').onclick=closeAV;$('av').onclick=function(e){if(e.target===$('av'))closeAV()};
 $('tb').onclick=function(){renderThemes();$('tv').hidden=false};function closeTV(){$('tv').hidden=true}$('tvx').onclick=closeTV;$('tv').onclick=function(e){if(e.target===$('tv'))closeTV()};
-setInterval(checkAch,1000);
+setInterval(function(){checkAch();if(!$('av').hidden)achBars()},1000);
 var XK=['deemackClicker2.slot1','deemackClicker2.name','deemackClicker2.uid','deemackClicker2.auth','deemackClicker2.best'],XA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',xArm=false,xPending=null;
 function xFB(){return (typeof FB!=='undefined'&&FB)?FB:''}
 function b64e(u8){var s='';for(var i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
@@ -930,7 +943,7 @@ if(typeof k['deemackClicker2.active']==='string')LS.setItem('deemackClicker2.act
 if(typeof k['deemackClicker2.name']==='string'&&k['deemackClicker2.name'].length>=2)LS.setItem('deemackClicker2.name',k['deemackClicker2.name'].slice(0,16));var kb=+k['deemackClicker2.best'];if(kb>0&&isFinite(kb)&&kb>(+LS.getItem('deemackClicker2.best')||0))LS.setItem('deemackClicker2.best',String(kb));
 if(typeof FB!=='undefined'&&typeof k['deemackClicker2.uid']==='string'&&/^[a-z0-9]{6,40}$/.test(k['deemackClicker2.uid']))LS.setItem('deemackClicker2.uid',k['deemackClicker2.uid']);
 if(typeof k['deemackClicker2.auth']==='string'){try{var aa=JSON.parse(k['deemackClicker2.auth']);if(aa&&typeof aa.refreshToken==='string'&&typeof aa.uid==='string'&&/^[A-Za-z0-9]{6,64}$/.test(aa.uid))LS.setItem('deemackClicker2.auth',JSON.stringify({refreshToken:aa.refreshToken,uid:aa.uid,idToken:'',exp:0}))}catch(e2){}}}catch(e){xMsg('This browser would not save the data. Try again in a normal browser tab.',true);return}
-oneSave();slot=1;try{LS.setItem('deemackClicker2.oactive','1')}catch(e){}slotOther=null;bestMem=0;
+oneSave();slot=1;try{LS.setItem('deemackClicker2.oactive','1')}catch(e){}slotOther=null;bestMem=0;srvChecked=false;
 S=load(slot);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;last=Date.now();
 try{NAME=LS.getItem('deemackClicker2.name')||NAME}catch(e){}if(NAME){$('ov').hidden=true;nameBlocked=false}if(NAME&&badName(NAME))setTimeout(function(){askName('',false,true)},0);
 if(FB_KEY){authLoad();if(AUTH)uid=AUTH.uid;var lg=null;try{lg=LS.getItem('deemackClicker2.uid')}catch(e){}LEGACY=lg&&/^p[a-z0-9]+$/.test(lg)?lg:'';legacyGone=false;if(LEGACY)authToken().then(migrate,function(){})}
@@ -1795,7 +1808,11 @@ function verifyName(){if(!FB||!uid||!NAME||nameOk||claiming||badName(NAME))retur
 claimName(n).then(function(r){claiming=false;nameErr='';if(n!==NAME)return;if(r==='ok'){nameOk=true;if(legacyGone)clearLegacy();pushStats(true)}else nameTaken()}).catch(function(e){claiming=false;nameErr=/refused|denied/.test(String(e&&e.message))?'the server refused it':'the server didn\u2019t answer'})}
 function nameTaken(){var bad=NAME;NAME='';nameOk=false;try{LS.removeItem('deemackClicker2.name')}catch(e){}
 fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askName('Someone already has the name "'+bad+'". Pick a different one.')}
-function pushStats(force){if(tabDead||!FB||!NAME||busy||slot!==1||badName(NAME))return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}var n=Date.now();if(!force&&n-lastSent<15000)return;
+function pushStats(force){if(tabDead||!FB||!NAME||busy||slot!==1||badName(NAME))return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}
+/* once per session, before the first send: read your entry on the server and keep its best per second if it's higher than this
+   device's (a phone that lost its saved best can't lower your leaderboard score) */
+if(!srvChecked){srvChecked=true;busy=true;fbw('/players/'+uid).then(function(r){return r.ok?r.json():null}).then(function(o){var sb=o&&typeof o==='object'?+o.bps:0;if(sb>0&&isFinite(sb)&&sb>bestScore()){bestMem=sb;bestScore()}},function(){}).then(function(){busy=false;pushStats(true)});return}
+var n=Date.now();if(!force&&n-lastSent<15000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').then(function(r){if(r&&r.ok){lastOk=Date.now();pushErr='';if(lbAfterPush&&!$('lv').hidden){lbAfterPush=false;loadLB()}}else pushErr=(r&&(r.status===401||r.status===403))?'the server refused it':'server error '+(r&&r.status)},
 function(){pushErr=FB_KEY&&authErr?'can\u2019t sign in':'the server didn\u2019t answer'}).then(function(){busy=false;lbMe()})}
 function askName(msg,change,force){var ov=$('ov'),inp=$('nin'),btn=$('nok'),cd=$('ncode'),oldName=change||force?NAME:'';nameBlocked=!!force;ov.hidden=false;$('nerr').textContent=msg||'';btn.disabled=false;
