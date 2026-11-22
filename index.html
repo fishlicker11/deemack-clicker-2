@@ -403,7 +403,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=92;
+var BUILD=93;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1026,7 +1026,7 @@ var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;i
 var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace',draw:'Memory draw'};
 function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace','draw'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
-if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(8*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
+if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(10*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
 var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(t.id==='linboom'&&BF.bmul>=1+BHP_MAX/100-1e-9&&BF.noPup&&PUP.every(function(u){return !pupEff(u.id)})){if(!S.gach)S.gach={};S.gach.lin=1}if(BF.php>=(BF.pmax||100)){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
@@ -1047,7 +1047,7 @@ $('bfx').onclick=closeFight;
 
 var DODGE_DMG=80,DODGE_PEN=10; /* dodge: damage dealt when it ends, minus this much per red block that hit you */
 function fCounter(m){var n=Math.max(2,Math.round(BF.base*0.10*(m||1)));fStatus('Perfect! Counterattack for '+n+'!');hurtBoss(n);return fAlive(BF&&BF.id)}
-function mashNeed(){return Math.round(17+BF.d*66)}
+function mashNeed(){return Math.round((17+BF.d*66)*1.25)} /* taps needed in 10 seconds (25% more than before) */
 ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+((1+1.0*(1+n*(0.6-BF.d*0.38)))*mgTime()).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
 fStatus(n>1?'Tap all '+n+' red circles!':'Tap the red circle!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var W=A.clientWidth,H=A.clientHeight,pts=[],cs=[];
@@ -1062,7 +1062,7 @@ requestAnimationFrame(mv)}if(spd>0)requestAnimationFrame(mv);
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}draw();if(Date.now()>=end){over=true;clearInterval(iv);[].slice.call(A.querySelectorAll('.rc')).forEach(function(c){c.remove()});
 fStatus(left+' circle'+(left>1?'s':'')+' hit you!');hurtMe(left*hit);if(fAlive(id))fl(atkDone,800)}},100);draw()};
 
-ATK.mash=function(){var id=BF.id,A=arena(),secs=+(8*mgTime()).toFixed(1),need=mashNeed(),got=0,end=Date.now()+secs*1000,over=false;
+ATK.mash=function(){var id=BF.id,A=arena(),secs=+(10*mgTime()).toFixed(1),need=mashNeed(),got=0,end=Date.now()+secs*1000,over=false;
 fStatus('Tap '+need+' times in '+secs+' seconds!');
 var w=document.createElement('div');w.className='acol';var cnt=document.createElement('div');cnt.className='big';var b=document.createElement('button');b.className='mash tapbig';b.textContent='TAP!';var tm=document.createElement('div');
 w.appendChild(cnt);w.appendChild(b);w.appendChild(tm);A.appendChild(w);
