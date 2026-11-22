@@ -189,6 +189,9 @@ button:disabled{opacity:.35;cursor:default}
 .arow .ab{font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap}
 .arow .ck{width:20px;text-align:center}
 .trow{cursor:pointer}.trow.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}.trow.off{cursor:not-allowed}
+.ctpick{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.ctpick label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text);cursor:pointer}
+.ctpick input[type=color]{width:36px;height:30px;padding:0;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer}
 .lside{left:0;right:auto!important}
 .xcode{width:100%;box-sizing:border-box;min-height:80px;max-height:180px;font:12px/1.35 ui-monospace,Menlo,Consolas,monospace;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);resize:vertical;word-break:break-all;margin:0 0 8px}
 .xrow{display:flex;gap:8px;margin-bottom:8px}.ov .xrow button{margin-top:0;flex:1}
@@ -400,7 +403,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=89;
+var BUILD=90;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -526,7 +529,7 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{},ctheme:{bg:'#101828',ac:'#facc15'}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
@@ -534,7 +537,7 @@ function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
 d.bhp=(+o.bhp>0&&+o.bhp<=BHP_MAX)?Math.round(+o.bhp/10)*10:0;if(o.bossMul&&typeof o.bossMul==='object')T.forEach(function(t){var v=+o.bossMul[t.id];if(v>1&&v<=1+BHP_MAX/100)d.bossMul[t.id]=v});
-if(o.gach&&typeof o.gach==='object'&&o.gach.lin)d.gach.lin=1;
+if(o.gach&&typeof o.gach==='object'&&o.gach.lin)d.gach.lin=1;if(o.ctheme&&typeof o.ctheme==='object')['bg','ac'].forEach(function(k){if(/^#[0-9a-f]{6}$/i.test(o.ctheme[k]))d.ctheme[k]=o.ctheme[k]});
 if(o.pu&&typeof o.pu==='object'){PUP.forEach(function(u){var v=o.pu.lv&&+o.pu.lv[u.id];if(v>0&&v===Math.floor(v))d.pu.lv[u.id]=Math.min(u.max,v);if(o.pu.off&&o.pu.off[u.id])d.pu.off[u.id]=1})}
 if(o.flaw&&typeof o.flaw==='object')T.forEach(function(t){var v=+o.flaw[t.id];if(v>0&&isFinite(v))d.flaw[t.id]=Math.floor(v)});
 if(Array.isArray(o.as))o.as.forEach(function(r){r=+r;if(r>=0&&r<6&&r===Math.floor(r)&&d.as.indexOf(r)<0)d.as.push(r)});
@@ -877,7 +880,7 @@ function checkAch(){var inc=totalOf(S),got=[],before=achCount(S);
 ACH.forEach(function(a){if(!S.ach[a.id]){var ok=false;try{ok=a.t(S,inc)}catch(e){}if(ok){S.ach[a.id]=1;got.push(a)}}});
 if(!got.length)return;
 var after=achCount(S),th=Math.floor(after/5)>Math.floor(before/5)&&Math.floor(after/5)<=THEMES.length;
-toast((got.length===1?'Achievement: '+got[0].name+' (+'+achVal(got[0]).toFixed(2)+'%)':got.length+' achievements unlocked')+(th?' · new theme!':''),'#f59e0b');
+toast((got.length===1?'Achievement: '+got[0].name+' (+'+achVal(got[0]).toFixed(2)+'%)':got.length+' achievements unlocked')+(th?' · new theme!':''),'#f59e0b');if(got.some(function(a){return a.id==='goldlin'}))setTimeout(function(){toast('🎨 You can now make your own theme! Open 🎨 Themes to pick your 2 colors.','#d4a017')},2800);
 save();if(!$('av').hidden)renderAch();if(!$('tv').hidden)renderThemes()}
 /* progress for one achievement: [fraction 0-1, text]. Big money/income goals use a log scale so the bar moves visibly */
 function achProg(a,inc){if(!a.pr)return null;var q;try{q=a.pr(S,inc)}catch(e){return null}var c=Math.max(0,+q[0]||0),n=+q[1]||1,f=n>=1e6?Math.log10(Math.max(1,c))/Math.log10(n):c/n;
@@ -895,18 +898,37 @@ var pg=on?null:achProg(a,inc);if(pg){var w=document.createElement('div');w.class
 var v=document.createElement('div');v.className='ab';v.textContent='+'+achVal(a).toFixed(2)+'%';
 r.appendChild(c);r.appendChild(t);r.appendChild(v);L.appendChild(r)})})}
 function achBars(){if(!ABARS.length)return;var inc=totalOf(S);ABARS.forEach(function(o){var pg=achProg(o.a,inc);if(!pg)return;var w=(pg[0]*100).toFixed(1)+'%';if(o.fi.style.width!==w)o.fi.style.width=w;if(o.tx.textContent!==pg[1])o.tx.textContent=pg[1]})}
+/* ===== Your own theme (S.theme === CT): unlocked by the Golden Linboom achievement. You pick 2 colors (background and main
+   color) and the rest is worked out so text stays readable: light text on dark backgrounds, dark text on light ones. ===== */
+var CT=99;
+function ctOk(){return !!(S.ach&&S.ach.goldlin)||allThemes()}
+function hexRgb(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+function rgbHex(c){return '#'+c.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?'0':'')+v.toString(16)}).join('')}
+function mixC(a,b,t){return a.map(function(v,i){return v+(b[i]-v)*t})}
+function lumC(c){var x=c.map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return 0.2126*x[0]+0.7152*x[1]+0.0722*x[2]}
+function ctTheme(){var c=S.ctheme||{},bh=/^#[0-9a-f]{6}$/i.test(c.bg)?c.bg:'#101828',ah=/^#[0-9a-f]{6}$/i.test(c.ac)?c.ac:'#facc15',bg=hexRgb(bh),dark=lumC(bg)<0.3,tx=dark?[241,241,241]:[22,22,22];
+return {bg:bh,card:rgbHex(dark?mixC(bg,[255,255,255],0.08):mixC(bg,[255,255,255],0.65)),text:rgbHex(tx),muted:rgbHex(mixC(bg,tx,0.62)),accent:ah,line:rgbHex(mixC(bg,tx,dark?0.2:0.16)),btn:ah,btntext:lumC(hexRgb(ah))>0.4?'#141414':'#ffffff',dark:dark?1:0}}
 function applyTheme(i){var el=document.documentElement;if(!el||!el.style)return;var keys=['bg','card','text','muted','accent','line','btn','btntext'];
-if(i>=0&&THEMES[i]){var t=THEMES[i];keys.forEach(function(k){el.style.setProperty('--'+k,t[k])});el.style.colorScheme=t.dark?'dark':'light'}
+if(i===CT&&!ctOk())i=-1;
+if(i>=0&&(i===CT||THEMES[i])){var t=i===CT?ctTheme():THEMES[i];keys.forEach(function(k){el.style.setProperty('--'+k,t[k])});el.style.colorScheme=t.dark?'dark':'light'}
 else{keys.forEach(function(k){el.style.removeProperty('--'+k)});el.style.colorScheme=''}}
 function renderThemes(){var L=$('tvl'),n=achCount(S);L.textContent='';
-if(S.theme>=0&&n<5*(S.theme+1)&&!allThemes()){S.theme=-1;applyTheme(-1)}
+if(S.theme===CT?!ctOk():(S.theme>=0&&n<5*(S.theme+1)&&!allThemes())){S.theme=-1;applyTheme(-1)}
 $('tvs').textContent=n+' achievements · a new theme every 5'+(allThemes()?' · all unlocked (dev)':'');
 function trow(i,name,t,need){var ok=n>=need||allThemes(),r=document.createElement('div');r.className='arow trow'+(S.theme===i?' on':'')+(ok?'':' off');
 var sw=document.createElement('div');sw.className='sw';sw.style.background='linear-gradient(135deg,'+(t?t.bg:'var(--bg)')+' 50%,'+(t?t.accent:'var(--accent)')+' 50%)';
 var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent=name;var s=document.createElement('span');
 s.textContent=ok?(S.theme===i?'In use':'Tap to use'):'Unlocks at '+need+' achievements ('+(need-n)+' to go)';x.appendChild(b);x.appendChild(s);
 r.appendChild(sw);r.appendChild(x);r.onclick=function(){if(!ok)return;S.theme=i;applyTheme(i);save();renderThemes()};L.appendChild(r)}
-trow(-1,'Default',null,0);THEMES.forEach(function(t,i){trow(i,t.n,t,5*(i+1))})}
+ctRow(L);trow(-1,'Default',null,0);THEMES.forEach(function(t,i){trow(i,t.n,t,5*(i+1))})}
+function ctRow(L){var ok=ctOk(),on=S.theme===CT,t=ctTheme(),r=document.createElement('div');r.className='arow trow ctrow'+(on?' on':'')+(ok?'':' off');
+var sw=document.createElement('div');sw.className='sw';sw.style.background='linear-gradient(135deg,'+t.bg+' 50%,'+t.accent+' 50%)';
+var x=document.createElement('div');x.className='at';var b=document.createElement('b');b.textContent='🎨 Your own theme';var sp=document.createElement('span');
+sp.textContent=!ok?'Unlocks with the 🏆 Golden Linboom achievement':on?'In use · change your 2 colors below':'Pick your 2 colors, then tap here to use it';x.appendChild(b);x.appendChild(sp);
+if(ok){var pk=document.createElement('div');pk.className='ctpick';[['bg','Background'],['ac','Main color']].forEach(function(q){var lb=document.createElement('label'),inp=document.createElement('input');inp.type='color';inp.value=t[q[0]==='bg'?'bg':'accent'];
+ inp.onclick=function(e){e.stopPropagation()};inp.oninput=inp.onchange=function(){if(!S.ctheme)S.ctheme={};S.ctheme[q[0]]=inp.value;var n=ctTheme();sw.style.background='linear-gradient(135deg,'+n.bg+' 50%,'+n.accent+' 50%)';if(S.theme===CT)applyTheme(CT);save()};
+ lb.onclick=function(e){e.stopPropagation()};lb.appendChild(inp);lb.appendChild(document.createTextNode(q[1]));pk.appendChild(lb)});x.appendChild(pk)}
+r.appendChild(sw);r.appendChild(x);r.onclick=function(){if(!ok)return;S.theme=CT;applyTheme(CT);save();renderThemes()};L.appendChild(r)}
 $('ab').onclick=function(){renderAch();$('av').hidden=false};function closeAV(){$('av').hidden=true}$('avx').onclick=closeAV;$('av').onclick=function(e){if(e.target===$('av'))closeAV()};
 $('tb').onclick=function(){renderThemes();$('tv').hidden=false};function closeTV(){$('tv').hidden=true}$('tvx').onclick=closeTV;$('tv').onclick=function(e){if(e.target===$('tv'))closeTV()};
 setInterval(function(){checkAch();if(!$('av').hidden)achBars()},1000);
