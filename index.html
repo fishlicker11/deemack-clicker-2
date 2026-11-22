@@ -262,9 +262,6 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .nbub{position:absolute;border-radius:50%;border:0;padding:0;margin:0;background:#3b82f6;color:#fff;font-family:inherit;font-weight:800;cursor:pointer;transition:left .15s,top .15s;-webkit-tap-highlight-color:transparent;box-shadow:0 3px 8px rgba(0,0,0,.2)}
 .nbub.nbad{animation:nbad .35s}
 @keyframes nbad{0%,100%{transform:none}20%{transform:translateX(-6px);background:#ef4444}60%{transform:translateX(6px);background:#ef4444}}
-.ogrid{display:grid;gap:6px;margin-top:22px}
-.ocell{border:2px solid var(--line);border-radius:12px;background:var(--bg);padding:0;margin:0;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
-.ocell.ogood{border-color:#22a35a;background:rgba(34,163,90,.22)}.ocell.obad{border-color:#ef4444;background:rgba(239,68,68,.22)}
 .cfield{position:absolute;inset:0;pointer-events:none}.cdot{position:absolute;border-radius:50%}
 .copts{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);display:flex;justify-content:center;gap:10px}
 .copts .cbtn{min-width:62px;font-size:22px;padding:12px 0}.copts .cbtn.cok{background:#22a35a;color:#fff}.copts .cbtn.cno{background:#ef4444;color:#fff;opacity:.8}
@@ -426,7 +423,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=102;
+var BUILD=103;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1065,9 +1062,9 @@ var im=document.createElement('img');im.alt='';im.src=PHOTOS[BF.t.ph||BF.t.id]||
 b.onpointerdown=function(e){e.preventDefault();if(!fAlive(id)||BF.ph!=='idle'||!fOk())return;var r=A.getBoundingClientRect();hurtBoss(tapDmg(),e.clientX-r.left-8,e.clientY-r.top-30,true)};
 fStatus('Click '+BF.t.name+'!');fl(nextAttack,Math.round((4.5-BF.d*2)*1000))}
 var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;if(t.name==='Mr Scott')SIMON9=i+1}); /* Simon squares: 4 before Mr Reiman, 6 for Mr Reiman and Mr Scott, 9 for everyone above Mr Scott */
-var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace',draw:'Memory draw',sort:'Block or Allow',cups:'Cup shuffle',nums:'Number rush',odd:'Odd one out',count:'Count it',shield:'Shield block'};
-var INTRO={sort:'Swipe left to block games, right to allow school stuff',cups:'Watch the cup that hides the phone',nums:'Tap the numbers in order',odd:'Find the one that\u2019s different',count:'Count the dots before they vanish',shield:'Tap or swipe toward each flying teacher to block it'};
-function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace','draw','sort','cups','nums','odd','count','shield'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
+var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace',draw:'Memory draw',sort:'Block or Allow',cups:'Cup shuffle',nums:'Number rush',count:'Count it',shield:'Shield block'};
+var INTRO={sort:'Swipe left to block games, right to allow school stuff',cups:'Watch the cup that hides the phone',nums:'Tap the numbers in order',count:'Count the dots before they vanish',shield:'Tap or swipe toward each flying teacher to block it'};
+function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace','draw','sort','cups','nums','count','shield'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(10*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else if(INTRO[k]){s.textContent=INTRO[k];fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
@@ -1780,7 +1777,7 @@ if(made){save();if(!$('qv').hidden)renderQuests()}updQuests()}
 $('qb').onclick=function(){qTick();$('qv').hidden=false;renderQuests();$('ql').parentNode.scrollTop=0};
 function closeQV(){$('qv').hidden=true}$('qvx').onclick=closeQV;$('qv').onclick=function(e){if(e.target===$('qv'))closeQV()};
 setInterval(qTick,1000);
-/* ===== 6 more minigames (also boss attacks): Block or Allow, Cup shuffle, Number rush, Odd one out, Count it, Shield block.
+/* ===== 5 more minigames (also boss attacks): Block or Allow, Cup shuffle, Number rush, Count it, Shield block.
    Like the others they get harder with the boss's difficulty (BF.d, 0 = Easy … 1 = Impossible), the Minigame Time upgrade
    gives more time, and hits on you go through hurtMe (so tower floors scale them). ===== */
 function mgShuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
@@ -1867,29 +1864,6 @@ if(nx>n){over=true;clearInterval(iv);if(!fCounter(3.2))return;fl(atkDone,800);re
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}draw();if(Date.now()>=end){over=true;clearInterval(iv);bs.forEach(function(b){b.remove()});
 fStatus('Out of time! You got to '+(nx-1)+' of '+n+'.');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,900)}},100);draw()};
 
-/* Odd one out: a grid of the same emoji with one that's slightly different. 3 rounds; each find hits the boss.
-   Harder: bigger grid (3x3, 4x4 from Insane, 5x5 from Nightmare), emojis that look more alike, less time (6.5s down to 4s). */
-var ODD=[[['🍎','🍊'],['🐶','🐸'],['⭐','❤️'],['⚽','🏀'],['🌞','🌧️'],['🍩','🍕'],['🚗','🚲'],['🌲','🌵']],
-[['🍎','🍅'],['😀','😃'],['🚗','🚙'],['🐱','🐯'],['🌕','🌝'],['🍊','🍑'],['❤️','🧡'],['🔵','🟣']],
-[['😀','😁'],['😃','😄'],['🙂','🙃'],['😐','😑'],['🟥','🟧'],['💙','💜'],['😊','🙂'],['😮','😯']]];
-ATK.odd=function(){var id=BF.id,A=arena(),d=BF.d,g=d<0.45?3:d<0.75?4:5,R=3,r=0,ok=0,per=(6.5-2.5*d)*mgTime(),tier=d<0.45?0:d<0.75?1:2,hit=Math.max(2,Math.round(BF.dmg/2)),busy=true,over=false,end=0,lastP=-1,oddEl=null;
-var cs=Math.min(64,Math.floor((Math.min(A.clientWidth-16,A.clientHeight-50)-(g-1)*6)/g));
-fStatus('Find the odd one out!');
-var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var grid=document.createElement('div');grid.className='ogrid';grid.style.gridTemplateColumns='repeat('+g+','+cs+'px)';A.appendChild(grid);
-function round(){r++;grid.textContent='';var P=ODD[tier],pi;do{pi=Math.floor(Math.random()*P.length)}while(P.length>1&&pi===lastP);lastP=pi;
-var pr=P[pi].slice();if(Math.random()<0.5)pr.reverse();var odd=Math.floor(Math.random()*g*g);
-for(var k=0;k<g*g;k++)(function(k){var b=document.createElement('button');b.className='ocell';b.style.width=b.style.height=cs+'px';b.style.fontSize=Math.round(cs*0.6)+'px';b.textContent=k===odd?pr[1]:pr[0];if(k===odd)oddEl=b;
-b.onpointerdown=function(e){e.preventDefault();pick(k===odd,b)};grid.appendChild(b)})(k);
-end=Date.now()+per*1000;busy=false;draw()}
-function draw(){tm.textContent='Round '+r+' of '+R+' · '+Math.max(0,(end-Date.now())/1000).toFixed(1)+'s'}
-function pick(right,b){if(busy||over||!fAlive(id))return;busy=true;
-if(right){ok++;b.classList.add('ogood');fStatus('Found it!');hurtBoss(Math.max(1,Math.round(BF.base*0.13)));if(!fAlive(id))return}
-else{b.classList.add('obad');if(oddEl)oddEl.classList.add('ogood');fStatus('Not that one! It was this one.');hurtMe(hit);if(!fAlive(id))return}
-fl(nextR,700)}
-function nextR(){if(r>=R){over=true;clearInterval(iv);fStatus('Found '+ok+' of '+R+(ok===R?' · Perfect!':''));fl(atkDone,900);return}round()}
-var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}if(busy)return;draw();if(Date.now()>=end){busy=true;if(oddEl)oddEl.classList.add('ogood');fStatus('Too slow! It was this one.');hurtMe(hit);if(!fAlive(id))return;fl(nextR,800)}},100);
-round()};
-
 /* Count it: dots flash for a moment, then you pick how many there were. 2 rounds. Never more than 8 dots.
    Harder: more dots (3-5 on Easy, 6-8 on Impossible), a shorter flash, and (from Hard up) dots of different sizes and colors. */
 ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(1.7-0.9*d)*mgTime(),lo=3+Math.round(3*d),hi=Math.min(8,5+Math.round(3*d)),ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
@@ -1954,7 +1928,7 @@ var MG=[['circles','🔴','Red circles','Tap every red circle before time runs o
 ['simon','🎨','Simon says','Watch the pattern, then repeat it.'],['power','💥','Power strike','Stop the moving line as high as you can.'],
 ['rhythm','🎵','Rhythm battle','Tap each lane as its circle reaches the bottom.'],['trace','✏️','Path trace','Drag the circle along the path to the flag.'],['draw','🖍️','Memory draw','Memorize the shape, then draw it from memory.'],
 ['sort','🚫','Block or Allow','Swipe left to block game sites, right to allow school sites.'],['cups','🥤','Cup shuffle','Keep your eye on the cup hiding the phone.'],
-['nums','🔢','Number rush','Tap the numbers in order as fast as you can.'],['odd','🔍','Odd one out','Find the one emoji that\u2019s different.'],
+['nums','🔢','Number rush','Tap the numbers in order as fast as you can.'],
 ['count','👀','Count it','Count the dots before they disappear.'],['shield','🛡️','Shield block','Turn your shield toward each flying teacher face to block it.']];
 var MG_BOSS=BTIER.map(function(_,k){for(var i=0;i<T.length;i++)if(tierOf(i)===k)return i;return T.length-1}); /* the first boss of each difficulty level: Easy … Impossible */
 var mgTier=0;try{mgTier=Math.max(0,Math.min(7,+LS.getItem('deemackClicker2.mgdiff')||0))}catch(e){}
