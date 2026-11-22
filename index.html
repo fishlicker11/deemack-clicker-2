@@ -165,6 +165,9 @@ button:disabled{opacity:.35;cursor:default}
 .card2.off{border-color:var(--line);opacity:.7}
 .card2.off img{filter:grayscale(1) brightness(.4)}
 .dres .card2{max-width:150px;margin:8px auto}
+.rsec.gsec{color:#d4a017;font-size:15px}
+.arow.gold{border-color:#f5b301;background:linear-gradient(135deg,rgba(250,204,21,.22),rgba(245,158,11,.08))}
+.arow.gold .ab{color:#d4a017}
 .abar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin:5px 0 2px}
 .abar i{display:block;height:100%;background:var(--accent);border-radius:3px}
 .abt{display:block;font-size:11px;color:var(--muted)}
@@ -397,7 +400,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=88;
+var BUILD=89;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -406,6 +409,7 @@ var CREDITS=[
 {role:'PLAYTESTERS',names:['Oliver J','Robbie M','Xander L','Garrett L','Kale S','Ty B','Jackson E']},
 {role:'FIRST PERSON TO BEAT DEEMACK CLICKER 1',names:['Jackson E']}];
 var UPDATES=[
+{id:5,date:'Nov 21, 2026',title:'Added new features to boss mode + player upgrades.',text:'Ps. Check the bottom of the achievements tab'},
 {id:4,date:'Nov 21, 2026',title:'There has been some issues with the leaderboard not showing the correct number that I am aware of.',text:'If you are currently having any issues with the leaderboard please tell me so I can try to fix it.'},
 {id:3,date:'Nov 20, 2026',title:'Holy crap 22 people in 3 minutes within launch tuff.',text:'Also remember there\'s always room for improvements and updates to the game. It\'s not even fully finished i still have more i wanna add so feel free to recommend anything'},
 {id:2,date:'Nov 20, 2026',title:'DEEMACK CLICKER 2 IS OUT.',text:'This game is super tuff and its way better than 1 I promise. It\'s great that I can now update the game without the link changing. In result of the game releasing, everyone will have +10% more games blocked for the first 48 hours of release.'},
@@ -453,7 +457,7 @@ var CK=[],disp=null,bestMem=0; /* bestMem: the highest "… per second" shown th
    resets that teacher to 0 owned and Lv 1, and gives a ⭐: each star doubles their money and makes them EVO_PRICE times
    pricier to buy. Stars are kept when you prestige. ===== */
 var EVO_LV=25,EVO_STEP=5,EVO_MAX=5,EVO_PRICE=3;
-var BHP_MAX=300; /* boss HP setting: up to +300% (see bhpMul) */
+var BHP_MAX=700; /* boss HP setting: up to +700% (see bhpMul) */
 /* ===== Release party: DeeMack Clicker 2 came out on Nov 20, 2026. Everyone gets +10% income (clicks too) for the first
    48 hours: 8:00 PM Central Nov 20 to 8:00 PM Central Nov 22 (times are UTC here, the same moment for every player). ===== */
 var LAUNCH={pct:10,from:Date.UTC(2026,10,21,2,0),until:Date.UTC(2026,10,23,2,0)};
@@ -522,7 +526,7 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
@@ -530,6 +534,7 @@ function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
 d.bhp=(+o.bhp>0&&+o.bhp<=BHP_MAX)?Math.round(+o.bhp/10)*10:0;if(o.bossMul&&typeof o.bossMul==='object')T.forEach(function(t){var v=+o.bossMul[t.id];if(v>1&&v<=1+BHP_MAX/100)d.bossMul[t.id]=v});
+if(o.gach&&typeof o.gach==='object'&&o.gach.lin)d.gach.lin=1;
 if(o.pu&&typeof o.pu==='object'){PUP.forEach(function(u){var v=o.pu.lv&&+o.pu.lv[u.id];if(v>0&&v===Math.floor(v))d.pu.lv[u.id]=Math.min(u.max,v);if(o.pu.off&&o.pu.off[u.id])d.pu.off[u.id]=1})}
 if(o.flaw&&typeof o.flaw==='object')T.forEach(function(t){var v=+o.flaw[t.id];if(v>0&&isFinite(v))d.flaw[t.id]=Math.floor(v)});
 if(Array.isArray(o.as))o.as.forEach(function(r){r=+r;if(r>=0&&r<6&&r===Math.floor(r)&&d.as.indexOf(r)<0)d.as.push(r)});
@@ -815,7 +820,7 @@ var THEMES=[
 {n:'Void',bg:'#000000',card:'#0f0b17',text:'#eee6ff',muted:'#9a88c4',accent:'#a45bff',line:'#2a1f40',btn:'#a45bff',btntext:'#0b0412',dark:1},
 {n:'Dusk',bg:'#1b1022',card:'#281833',text:'#fdeee4',muted:'#c09ab0',accent:'#fdba74',line:'#422a50',btn:'#fdba74',btntext:'#2a1206',dark:1},
 {n:'Royal',bg:'#0b1030',card:'#141b4d',text:'#eef0ff',muted:'#9aa3e0',accent:'#ffd24a',line:'#2a3380',btn:'#ffd24a',btntext:'#14163a',dark:1}];
-var ACH=[],ACHV={},ACH_POOL=150; /* all achievements together: +150% income (older ones +100%, flawless boss ones +50%) */
+var ACH=[],ACHV={},ACH_POOL=170; /* all achievements together: +170% income (older ones +100%, flawless boss ones +50%, golden +20%) */
 /* pr (optional): how far along you are, as [now, goal] (shown as a progress bar while locked) */
 function A(id,cat,name,desc,w,t,pr){ACH.push({id:id,cat:cat,name:name,desc:desc,w:w,t:t,pr:pr})}
 function nOwn(d,k){var c=0;T.forEach(function(t){if(d.own[t.id]>=k)c++});return c}function nLv(d,k){var c=0;T.forEach(function(t){if(d.lvl[t.id]>=k)c++});return c}
@@ -859,9 +864,11 @@ A('treeall','Prestige','Fully Grown','Own every skill tree upgrade',20,function(
 /* beat each boss without taking any damage 1, 3 and 5 times. These share their own +50% (pool 'flaw'), so adding them
    didn't change the % of any older achievement */
 T.forEach(function(t,i){[1,3,5].forEach(function(n,j){A('flaw'+n+t.id,'Bosses',j?'Flawless '+t.name+' ×'+n:'Flawless '+t.name,'Beat '+t.name+' without taking any damage'+(n>1?' '+n+' times':''),(1+0.25*i)*[1,2,3][j],function(d){return ((d.flaw&&d.flaw[t.id])||0)>=n},function(d){return [(d.flaw&&d.flaw[t.id])||0,n]});ACH[ACH.length-1].pool='flaw'})});
+/* Golden achievements: their own pool (+20%), shown last in a gold section; adding them changed no other achievement's % */
+A('goldlin','Golden achievements','Golden Linboom','Beat Mr Linboom on +'+BHP_MAX+'% boss HP with every player upgrade switched off',1,function(d){return !!(d.gach&&d.gach.lin)});ACH[ACH.length-1].pool='gold';
 })();
 /* each achievement's % = its pool x its weight / the total weight of that pool */
-var ACHP={base:100,flaw:50},ACHW={};ACH.forEach(function(a){var g=a.pool||'base';ACHW[g]=(ACHW[g]||0)+a.w});
+var ACHP={base:100,flaw:50,gold:20},ACHW={};ACH.forEach(function(a){var g=a.pool||'base';ACHW[g]=(ACHW[g]||0)+a.w});
 ACH.forEach(function(a){var g=a.pool||'base';ACHV[a.id]=ACHP[g]*a.w/ACHW[g]});
 function achVal(a){return ACHV[a.id]||0}
 function achBonus(d){var s=0;if(!ACHV||!d||!d.ach)return 0;for(var k in d.ach)if(ACHV[k])s+=ACHV[k];return s/100}
@@ -879,9 +886,9 @@ var ABARS=[];
 function renderAch(){var L=$('avl');L.textContent='';ABARS=[];var inc=totalOf(S);
 $('avs').textContent=achCount(S)+'/'+ACH.length+' unlocked · +'+(achBonus(S)*100).toFixed(2)+'% income (all of them give +'+ACH_POOL+'%)';
 var cats=[];ACH.forEach(function(a){if(cats.indexOf(a.cat)<0)cats.push(a.cat)});
-cats.forEach(function(cat){var h=document.createElement('div');h.className='rsec';h.textContent=cat;L.appendChild(h);
+cats.forEach(function(cat){var gold=cat==='Golden achievements',h=document.createElement('div');h.className='rsec'+(gold?' gsec':'');h.textContent=(gold?'🏆 ':'')+cat;L.appendChild(h);
 ACH.forEach(function(a){if(a.cat!==cat)return;
-var on=!!S.ach[a.id],r=document.createElement('div');r.className='arow'+(on?'':' off');
+var on=!!S.ach[a.id],r=document.createElement('div');r.className='arow'+(on?'':' off')+(gold?' gold':'');
 var c=document.createElement('div');c.className='ck';c.textContent=on?'✅':'🔒';
 var t=document.createElement('div');t.className='at';var b=document.createElement('b');b.textContent=a.name;var s=document.createElement('span');s.textContent=a.desc;t.appendChild(b);t.appendChild(s);
 var pg=on?null:achProg(a,inc);if(pg){var w=document.createElement('div');w.className='abar';var fi=document.createElement('i');fi.style.width=(pg[0]*100).toFixed(1)+'%';w.appendChild(fi);var tx=document.createElement('small');tx.className='abt';tx.textContent=pg[1];t.appendChild(w);t.appendChild(tx);ABARS.push({a:a,fi:fi,tx:tx})}
@@ -985,7 +992,7 @@ function fFloat(txt,cls,x,y){var A=$('bfa'),f=document.createElement('div');f.cl
 function hurtBoss(n,x,y,tap){if(!BF||BF.ph==='over')return;if(!tap)n=Math.max(1,Math.round(n*mgDmgMul()));n=Math.round(n*10)/10;if(BF.mini)BF.mini.dealt+=n;BF.hp=Math.max(0,BF.hp-n);fFloat('-'+n,'',x,y);fRender();if(BF.hp<=0)fEnd(true)}
 function hurtMe(n){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.taken+=n;BF.php=Math.max(0,BF.php-n);fFloat('-'+n+' HP','me',12,12);var A=$('bfa');A.classList.remove('hurt');void A.offsetWidth;A.classList.add('hurt');fRender();if(BF.php<=0)fEnd(false)}
 function startFight(i){closeBO();var t=T[i],d=fdiff(i),tr=bossTier(i);FCK=[];
-BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:Math.round(3*Math.round(40+d*260)*bhpMul()),bmul:bhpMul(),php:pHP(),pmax:pHP(),attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
+BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:Math.round(3*Math.round(40+d*260)*bhpMul()),bmul:bhpMul(),noPup:PUP.every(function(u){return !pupEff(u.id)}),php:pHP(),pmax:pHP(),attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
 $('bf').classList.remove('mini');$('bfi').style.display='';$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=tName(t);var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
 $('bf').hidden=false;fRender();fIdle()}
 function closeFight(){BF=null;$('bf').hidden=true;$('bw').hidden=true;$('bfa').textContent='';$('bf').classList.remove('mini');$('bfi').style.display=''}
@@ -1000,7 +1007,7 @@ var A=arena(),w=document.createElement('div');w.className='acol';w.style.animati
 if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(10*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
-var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(BF.php>=(BF.pmax||100)){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
+var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(t.id==='linboom'&&BF.bmul>=1+BHP_MAX/100-1e-9&&BF.noPup&&PUP.every(function(u){return !pupEff(u.id)})){if(!S.gach)S.gach={};S.gach.lin=1}if(BF.php>=(BF.pmax||100)){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
 var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=win?'Victory!':'Defeated';
 var p=document.createElement('p');p.textContent=win?('You beat '+t.name+(first?' for the first time!':'!')):(t.name+' was too strong this time.');
 var a=document.createElement('button');a.textContent='Fight again';a.onclick=function(){startFight(i)};
