@@ -346,7 +346,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .pstabs button.gnew{animation:gnew 1.2s ease-in-out infinite}@keyframes gnew{50%{box-shadow:0 0 0 4px rgba(168,85,247,.55),0 0 18px rgba(168,85,247,.8)}}
 .garea{position:relative;flex:none;height:min(320px,42vh);min-height:200px;border:1px solid var(--line);border-radius:14px;background:#05060f;overflow:hidden}
 .garea[hidden],.glist[hidden]{display:none}
-#ps.galtab{overflow-y:auto;-webkit-overflow-scrolling:touch}#ps.galtab .psw{flex:none;min-height:auto}#ps.galtab .glist{flex:none;overflow:visible;min-height:0}
+#ps.galtab .pcard .pmut.sm{display:none}#ps.galtab{overflow-y:auto;-webkit-overflow-scrolling:touch}#ps.galtab .psw{flex:none;min-height:auto}#ps.galtab .glist{flex:none;overflow:visible;min-height:0}
 #gcv{width:100%;height:100%;display:block;touch-action:manipulation;cursor:pointer}
 .glock{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#cbd5e1;text-align:center;padding:20px;font-size:14px}.glock b{color:#fff;font-size:18px}.glock span{font-size:34px}.glock[hidden]{display:none}
 .glist{flex:1;min-height:90px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
@@ -462,7 +462,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=112;
+var BUILD=113;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -517,10 +517,11 @@ var CK=[],disp=null,bestMem=0; /* bestMem: the highest income per second this se
    block it (tap BLOCK on the beat 4 times in a row) to get back double what it stole (always at least 30 seconds of
    income). Student upgrades are bought with Games Blocked and kept forever (even when you prestige). ===== */
 /* ===== Evolving teachers: a teacher can evolve up to EVO_MAX times: ⭐1 at level EVO_LV, then EVO_STEP more levels for each
-   next star (25, 30, 35, 40, 45, then 50, 55, 60, 65, 70 for the 🌟 super stars 6-10). Evolving costs Games Blocked (3 upgrades' worth at that level),
+   next star (25, 30, 35 … up to Lv 220 for the 40th). Evolving costs Games Blocked (3 upgrades' worth at that level),
    resets that teacher to 0 owned and Lv 1, and gives a ⭐: each star doubles their money and makes them EVO_PRICE times
-   pricier to buy. Stars are kept when you prestige. Stars 6-10 show as 🌟 replacing a ⭐ each (10 stars = 🌟🌟🌟🌟🌟). ===== */
-var EVO_LV=25,EVO_STEP=5,EVO_MAX=10,EVO_PRICE=3;
+   pricier to buy. Stars are kept when you prestige. Names always show 5 star icons: every 5 stars a new kind of star (STAR_IC) replaces the old one from the left (6 stars = 🌟⭐⭐⭐⭐, 40 = 👑👑👑👑👑). ===== */
+var EVO_LV=25,EVO_STEP=5,EVO_MAX=40,EVO_PRICE=3;
+var STAR_IC=['⭐','🌟','💫','🌠','☄️','🔥','💎','👑']; /* stars 1-5, 6-10, 11-15 … 36-40 */
 var BHP_MAX=700; /* boss HP setting: up to +700% (see bhpMul) */
 /* ===== Boss tower: endless floors, climbed one at a time from the Bosses screen. Floors 1-21 are the teachers' normal bosses in
    order (the Boss HP setting doesn't apply). After the last teacher the bosses go round again at full difficulty, with +10% HP
@@ -598,7 +599,7 @@ L.forEach(function(i){var n=TN[i];if(!n)return;var v=tval(n);if(n.t==='inc'||n.t
 o.clk=Math.round(o.clk*1e6)/1e6;o.crit=Math.round(o.crit*1e9)/1e9;o.tc=Math.round((1-Math.min(DISC_MAX,o.tcd))*1e9)/1e9;o.uc=Math.round((1-Math.min(DISC_MAX,o.ucd))*1e9)/1e9;TFXC={d:d,n:L.length,v:o};return o}
 /* ===== Galaxy: unlocked by buying the whole skill tree (a 🌌 Galaxy tab on the prestige screen). The planets Mercury to
    Neptune open one at a time: buying all of a planet's upgrades opens the next (10 each; Neptune has 5 around it that join
-   into a star). Then the planets start orbiting the Sun, which opens (20). Buying the whole Sun turns it blue and it
+   into a star). Then the planets start orbiting the Sun, which opens (10). Buying the whole Sun turns it blue and it
    collapses into a black hole that swallows the planets (6 upgrades, each with its own look). Buying the whole black hole
    sets off a supernova that destroys the galaxy and the credits roll: you beat the game.
    Upgrades cost prestige points; prices go up within each body (b × g^n, 2 significant digits). Each upgrade is
@@ -612,7 +613,7 @@ var GAL=[
 {id:'sa',n:'Saturn',ic:'♄',c:'#e9d8a6',r:10,b:2600,g:1.15,u:[['Rings','inc',1e8],['Titan','ppa',40],['Cassini Gap','cd',0.9],['Enceladus','gold',3],['Ring Shine','inc',1e8],['Hexagon Storm','ppf',40],['Ice Crits','crit',2],['Rhea','boss',1.5],['Floaty Planet','uc',0.8],['Saturn’s Crown','ppm',1.4]]},
 {id:'ur',n:'Uranus',ic:'⛢',c:'#7dd3fc',r:8,b:5000,g:1.15,u:[['Sideways Spin','cd',0.85],['Ice Giant','inc',1e10],['Methane Blue','ppa',50],['Miranda','tower',2],['Cold Storage','start',1e20],['Titania','inc',1e10],['Oberon','ppf',50],['Tilted Axis','mg',40],['Faint Rings','clk',1e10],['Ice Crown','ppm',1.5]]},
 {id:'ne',n:'Neptune',ic:'♆',c:'#3b5bdb',r:8,b:12000,g:1.3,u:[['Great Dark Spot','inc',1e12],['Triton','ppm',1.5],['Supersonic Winds','cd',0.8],['Deep Blue','ppf',100],['Trident','inc',1e12]]},
-{id:'su',n:'The Sun',ic:'☀️',c:'#fbbf24',r:22,b:10000,g:1.15,u:[['Photosphere','inc',1e5],['Sunspots','ppm',1.3],['Solar Flare','crit',3],['Corona','cd',0.85],['Nuclear Fusion','inc',1e6],['Prominence','gold',5],['Heliosphere','ppf',150],['Sunrise','start',1e30],['Daylight','boss',2],['Core Heat','inc',1e6],['Plasma','mg',50],['Sunburn','clk',1e10],['Eclipse','ppm',1.3],['Radiance','tc',0.7],['Gamma Rays','inc',1e7],['Solar Cycle','cd',0.85],['Speed of Light','mgt',1.25],['Star Power','ppm',1.5],['Hydrogen Burn','inc',1e7],['Red Giant','ppm',2]]},
+{id:'su',n:'The Sun',ic:'☀️',c:'#fbbf24',r:22,b:40000,g:1.2,u:[['Photosphere','inc',1e10],['Sunspots','ppm',1.5],['Solar Flare','crit',3],['Corona','cd',0.75],['Prominence','gold',5],['Heliosphere','ppf',150],['Sunrise','start',1e30],['Nuclear Fusion','inc',1e20],['Plasma','mg',50],['Red Giant','ppm',3]]},
 {id:'bh',n:'Black Hole',ic:'🕳️',c:'#7c3aed',r:18,b:250000,g:2.2,u:[['Event Horizon','evh',1e10,'#8b5cf6','🌀','Nothing escapes, not even money.'],['Spaghettification','tcuc',0.5,'#ec4899','🍝','Prices get stretched thin.'],['Hawking Radiation','ppm',3,'#22d3ee','☢️','The black hole glows with points.'],['Singularity','cd30',1,'#f8fafc','⚫','Time stops meaning anything.'],['Wormhole','start',1e60,'#14b8a6','🌌','A shortcut straight to the riches.'],['Time Dilation','time',1,'#f97316','⏳','Seconds stretch into minutes.']]}];
 var GAL_N=0;GAL.forEach(function(B,k){B.k=k;B.ups=B.u.map(function(u,j){GAL_N++;var c=B.b*Math.pow(B.g,j),p=Math.pow(10,Math.max(0,Math.floor(Math.log10(c))-1));
 return {id:B.id+j,B:B,j:j,n:u[0],t:u[1],v:u[2],col:u[3],ic:u[4],fl:u[5],c:Math.round(c/p)*p}})});
@@ -723,7 +724,8 @@ refs[t.id]=r;$("shop").appendChild(d)});
 /* evolve: tap twice (it resets the teacher); the button shows once the teacher reaches level EVO_LV */
 var evoArm=null,evoArmT,evoSeen={};
 function starsOf(id,d){d=d||S;return (d.evo&&d.evo[id])||0}
-function starIcons(n){return n>5?Array(n-4).join('🌟')+Array(11-n).join('⭐'):Array(n+1).join('⭐')}
+function starIc(n){return STAR_IC[Math.max(0,Math.min(STAR_IC.length-1,Math.ceil(n/5)-1))]} /* the kind of star the nth star is */
+function starIcons(n){if(n<=5)return Array(n+1).join('⭐');var t=Math.ceil(n/5),k=n-5*(t-1);return Array(k+1).join(starIc(n))+Array(6-k).join(STAR_IC[t-2])}
 function starStr(n){return n?' '+starIcons(n):''}
 function tName(t){return t.name+starStr(starsOf(t.id))}
 function totalStars(d){var n=0;T.forEach(function(t){n+=starsOf(t.id,d)});return n}
@@ -732,10 +734,10 @@ function evoCost(t){return t.up*Math.pow(3.5,evoNeed(t)-1)*3*galFx(S).evo}
 function evolve(t){var e=(S.evo&&S.evo[t.id])||0,c=evoCost(t);if(S.lvl[t.id]<evoNeed(t)||e>=EVO_MAX||S.gb<c)return;
 if(evoArm!==t.id){evoArm=t.id;clearTimeout(evoArmT);evoArmT=setTimeout(function(){evoArm=null;update()},3000);update();return}
 evoArm=null;clearTimeout(evoArmT);S.gb-=c;if(!S.evo)S.evo={};S.evo[t.id]=e+1;S.own[t.id]=0;S.lvl[t.id]=1;save();update(true);
-toast('✨ '+t.name+' evolved to '+starIcons(e+1)+(e+1>5?' ('+(e+1)+' stars)':'')+'! They make ×'+Math.pow(2,e+1)+' money now.','#f59e0b')}
+toast('✨ '+t.name+' evolved to '+starIcons(e+1)+(e+1>5?' ('+(e+1)+' stars)':'')+'! They make ×'+(e+1<=10?Math.pow(2,e+1):fmt(Math.pow(2,e+1)))+' money now.','#f59e0b')}
 function evoUI(t,r){var e=(S.evo&&S.evo[t.id])||0;if(r.ev!==e){r.ev=e;r.nm.textContent=t.name+starStr(e)}
 var can=S.lvl[t.id]>=evoNeed(t)&&e<EVO_MAX;if(r.e.hidden===can)r.e.hidden=!can;if(!can)return;var c=evoCost(t);
-var h=evoArm===t.id?'Tap again<small>resets to 0 owned</small>':'✨ Evolve '+(e+1>5?'🌟':'⭐')+(e+1)+'<small>'+fmt(c)+'</small>';if(r.e._h!==h){r.e.innerHTML=h;r.e._h=h}var dis=S.gb<c;if(r.e.disabled!==dis)r.e.disabled=dis;
+var h=evoArm===t.id?'Tap again<small>resets to 0 owned</small>':'✨ Evolve '+starIc(e+1)+(e+1)+'<small>'+fmt(c)+'</small>';if(r.e._h!==h){r.e.innerHTML=h;r.e._h=h}var dis=S.gb<c;if(r.e.disabled!==dis)r.e.disabled=dis;
 var sk=t.id+':'+e;if(ready&&!evoSeen[sk])toast('✨ '+t.name+' can evolve! Each ⭐ doubles their money.','#f59e0b');evoSeen[sk]=1}
 /* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
 function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
@@ -756,7 +758,7 @@ T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.
 if(!vis){r.card.hidden=true;return}
 var hid=!!(S.th&&S.th[t.id]);if(r.hid!==hid){r.hid=hid;r.card.classList.toggle('thid',hid);r.h.textContent=hid?'👁 Show':'🙈 Hide'}if(hid&&!thEdit){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
-var each=eachOf(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];var eL=(isFinite(each)&&each<1e300)?0:eachLog(t,i,rb,am);r.in.textContent=fmtBig(each,eL)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?(starsOf(t.id)<5?" · ⭐":" · 🌟")+" at Lv "+en:"");
+var each=eachOf(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];var eL=(isFinite(each)&&each<1e300)?0:eachLog(t,i,rb,am);r.in.textContent=fmtBig(each,eL)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?" · "+starIc(starsOf(t.id)+1)+" at Lv "+en:"");
 r.mk.textContent="Making "+(S.own[t.id]>0?fmtBig(each*S.own[t.id],eL+Math.log10(S.own[t.id])):"0")+"/s";
 label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t));evoUI(t,r)})}
 
@@ -1701,7 +1703,7 @@ g.globalAlpha=1;g.textAlign='left'}
 function drawSun(g,x,y,r,now,col,raysK){var o=galOwn(S),S8=GAL[8],sc=gSc();col=col||'#fbbf24';
 var gl=g.createRadialGradient(x,y,r*0.2,x,y,r*2.4);gl.addColorStop(0,col);gl.addColorStop(0.45,'rgba(255,200,80,.18)');gl.addColorStop(1,'rgba(0,0,0,0)');if(col!=='#fbbf24'){gl=g.createRadialGradient(x,y,r*0.2,x,y,r*2.4);gl.addColorStop(0,col);gl.addColorStop(0.45,'rgba(96,165,250,.2)');gl.addColorStop(1,'rgba(0,0,0,0)')}
 g.fillStyle=gl;circ(g,x,y,r*2.4);g.fill();
-if(raysK>0)S8.ups.forEach(function(u,j){var an=j*2*Math.PI/20+now/4000,own=!!o[u.id],r1=r+3*sc,r2=r+(own?11:5)*sc;g.strokeStyle=own?'rgba(253,224,71,'+raysK+')':'rgba(253,224,71,'+(0.22*raysK)+')';g.lineWidth=own?2.2:1.2;g.beginPath();g.moveTo(x+Math.cos(an)*r1,y+Math.sin(an)*r1);g.lineTo(x+Math.cos(an)*r2,y+Math.sin(an)*r2);g.stroke()});
+if(raysK>0)S8.ups.forEach(function(u,j){var an=j*2*Math.PI/S8.ups.length+now/4000,own=!!o[u.id],r1=r+3*sc,r2=r+(own?11:5)*sc;g.strokeStyle=own?'rgba(253,224,71,'+raysK+')':'rgba(253,224,71,'+(0.22*raysK)+')';g.lineWidth=own?2.2:1.2;g.beginPath();g.moveTo(x+Math.cos(an)*r1,y+Math.sin(an)*r1);g.lineTo(x+Math.cos(an)*r2,y+Math.sin(an)*r2);g.stroke()});
 var gr=g.createRadialGradient(x-r*0.3,y-r*0.3,r*0.1,x,y,r);gr.addColorStop(0,'#fffbe6');gr.addColorStop(0.5,col);gr.addColorStop(1,col==='#fbbf24'?'#f97316':'#1d4ed8');g.fillStyle=gr;circ(g,x,y,r);g.fill()}
 function drawBH(g,x,y,r,now,k){var sc=gSc();k=k==null?1:k;
 for(var i=5;i>=1;i--){g.strokeStyle=i%2?'rgba(249,115,22,'+(0.16*k)+')':'rgba(168,85,247,'+(0.2*k)+')';g.lineWidth=(3+i*1.6)*sc;g.beginPath();g.ellipse(x,y,r*(1.5+i*0.32),r*(0.45+i*0.1),-0.25+Math.sin(now/1400+i)*0.05,0,6.2832);g.stroke()}
@@ -1805,6 +1807,9 @@ var DEVCMDS=[
 {id:'setpp',type:'input',name:'Set prestige points',desc:'Sets how many prestige points you have to spend.',ph:'Points',
  now:function(){return 'Now: '+S.pp},
  run:function(v){var t=String(v).replace(/[,\s]/g,'');if(!/^\d+$/.test(t)||+t>1e12){toast('Type a whole number (0 or more)','#ef4444');return false}S.pp=+t;save();update();toast('Prestige points set to '+S.pp,'#a855f7');return true}},
+{id:'resetgal',type:'action',name:'Reset galaxy',desc:'Removes every galaxy upgrade and the animations you\u2019ve already seen, so you can play the galaxy again. Points are not refunded (set them above).',btn:'Reset',
+ now:function(){return 'Owned: '+galCount(S)+' / '+GAL_N},
+ run:function(){S.gal={};S.gseen={};GFXC={d:null,n:-1,v:null};GV.patT={};GV.sel=-1;GV.anim=null;GV.parts=null;save();update();if(PSO){psStats();if(PTAB==='gal')galList()}toast('Galaxy reset','#a855f7')}},
 {id:'resettree',type:'action',name:'Reset skill tree',desc:'Removes every skill tree upgrade. Points are not refunded (set them above).',btn:'Reset',
  now:function(){return 'Owned: '+S.tree.length+' / '+TN.length},
  run:function(){S.tree=[];TFXC={d:null,n:-1,v:null};tsel=-1;save();update();toast('Skill tree reset','#a855f7')}},
