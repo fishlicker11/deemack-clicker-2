@@ -403,7 +403,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=95;
+var BUILD=96;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -511,12 +511,13 @@ TN.forEach(function(n){n.f=n.root?(RD?n.rd/RD:0):n.d/TD});
 /* Hiring Discounts (cheaper teachers) and Training Budgets (cheaper upgrades) add together and each max out at 45%:
    every upgrade of those types is scaled so all of them together sum to exactly 45% */
 var DISC_MAX=0.45,DSC={};[['tc',0.006],['uc',0.004]].forEach(function(q){var c=0,sf=0;TN.forEach(function(n){if(n.t===q[0]){c++;sf+=n.d/TD}});DSC[q[0]]={a:q[1],b:sf?(DISC_MAX-c*q[1])/sf:0}});
-/* the whole tree's click upgrades (Strong Finger + Root Grip) multiply clicks by exactly 39K, and all crit upgrades
+/* the whole tree's income upgrades (Pay Raise, Golden Twig, Taproot, Golden Root) multiply income by exactly x5.38e75,
+   its click upgrades (Strong Finger + Root Grip) multiply clicks by exactly 39K, and all crit upgrades
    (Critical Strike + Critical Root) add exactly +30% crit chance: each one keeps its shape, just scaled to hit those totals */
-var CLK_ALL=39000,CRIT_ALL=0.30,TNORM=(function(){var lp=0,cs=0;TN.forEach(function(n){if(n.t==='clk')lp+=Math.log(1.1+0.25*n.f*n.f);else if(n.t==='luck')cs+=(2+0.6*n.f)/100});return {clk:lp?Math.log(CLK_ALL)/lp:1,crit:cs?CRIT_ALL/cs:1}})();
+var INC_ALL=5.38e75,CLK_ALL=39000,CRIT_ALL=0.30,TNORM=(function(){var li=0,lp=0,cs=0;TN.forEach(function(n){var f=n.f;if(n.t==='inc')li+=Math.log(1.1+2*f*f);else if(n.t==='tip')li+=Math.log(1.2+3*f*f);else if(n.t==='clk')lp+=Math.log(1.1+0.25*f*f);else if(n.t==='luck')cs+=(2+0.6*f)/100});return {inc:li?Math.log(INC_ALL)/li:1,clk:lp?Math.log(CLK_ALL)/lp:1,crit:cs?CRIT_ALL/cs:1}})();
 function roman(n){var r='';[[100,'C'],[90,'XC'],[50,'L'],[40,'XL'],[10,'X'],[9,'IX'],[5,'V'],[4,'IV'],[1,'I']].forEach(function(q){while(n>=q[0]){r+=q[1];n-=q[0]}});return r}
 (function(){var cnt={},rc={};TN.forEach(function(n,i){if(n.root){rc[n.t]=(rc[n.t]||0)+1;n.name=RNAME[n.t]+' '+roman(rc[n.t])}else{cnt[n.t]=(cnt[n.t]||0)+1;n.name=i===0?'Seed':TNAME[n.t]+' '+roman(cnt[n.t])}})})();
-function tval(n){var f=n.f;switch(n.t){case 'inc':return 1.1+2*f*f;case 'tip':return 1.2+3*f*f;case 'clk':return Math.pow(1.1+0.25*f*f,TNORM.clk);case 'tc':case 'uc':return DSC[n.t].a+DSC[n.t].b*f;case 'pp':return 0.03+0.3*f;case 'start':return Math.pow(10,4+8*f);default:return (2+0.6*f)/100*TNORM.crit}}
+function tval(n){var f=n.f;switch(n.t){case 'inc':return Math.pow(1.1+2*f*f,TNORM.inc);case 'tip':return Math.pow(1.2+3*f*f,TNORM.inc);case 'clk':return Math.pow(1.1+0.25*f*f,TNORM.clk);case 'tc':case 'uc':return DSC[n.t].a+DSC[n.t].b*f;case 'pp':return 0.03+0.3*f;case 'start':return Math.pow(10,4+8*f);default:return (2+0.6*f)/100*TNORM.crit}}
 function ttext(n){var v=tval(n),pc=function(x){return Math.round(x*100)+'%'},mul=function(x){return x<2?'+'+pc(x-1):'×'+x.toFixed(2)};
 switch(n.t){case 'inc':case 'tip':return mul(v)+' teacher income';case 'clk':return mul(v)+' click power';case 'tc':return 'Teachers '+(v*100).toFixed(1)+'% cheaper';case 'uc':return 'Upgrades '+(v*100).toFixed(1)+'% cheaper';
 case 'pp':return '+'+pc(v)+' prestige points';case 'start':return 'Start each run with '+fmt(v)+' Games Blocked';default:return '+'+(v*100).toFixed(2)+'% crit chance'}}
