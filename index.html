@@ -403,7 +403,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=90;
+var BUILD=91;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -469,7 +469,7 @@ var LAUNCH={pct:10,from:Date.UTC(2026,10,21,2,0),until:Date.UTC(2026,10,23,2,0)}
 /* ===== Player upgrades (the 💪 tab): bought with Games Blocked, kept when you prestige, and each can be switched off.
    c = first price, m = price multiplier per level. ===== */
 var PUP=[{id:'time',ic:'⏱️',n:'Minigame Time',d:'+1% more time in Red circles, Tap race, Reaction test, Path trace and Memory draw.',max:10,c:1e3,m:1000,fx:function(l){return '+'+l+'% time'}},
-{id:'hp',ic:'❤️',n:'Player Health',d:'+2 HP in boss fights.',max:50,c:100,m:1000,fx:function(l){return '+'+2*l+' HP'}},
+{id:'hp',ic:'❤️',n:'Player Health',d:'+2 HP in boss fights.',max:50,c:1,m:1000,fx:function(l){return '+'+2*l+' HP'}},
 {id:'tap',ic:'👊',n:'Boss Damage',d:'Each tap on the boss deals +0.1 more damage.',max:10,c:1e3,m:1000,fx:function(l){return '+'+(l/10).toFixed(1)+' per tap'}},
 {id:'mdmg',ic:'💥',n:'Minigame Damage',d:'+1% damage from minigame attacks.',max:10,c:1e3,m:1000,fx:function(l){return '+'+l+'% damage'}}];
 var STUDENTS=['Orion H','Jackson E','Jackson A','Oliver J','Tristan P','Riley M','Ethan J','Garrett L','Bronwyn B','Joey H','Kayden M','Bryan S','Peyton M','Noah B','Chase L','Josh A','Nick W'];
