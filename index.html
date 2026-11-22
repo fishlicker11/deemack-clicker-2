@@ -423,7 +423,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=105;
+var BUILD=106;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -663,9 +663,21 @@ $("bar").onclick=function(e){var m=e.target.getAttribute&&e.target.getAttribute(
 mult=m==="max"?"max":+m;Array.prototype.forEach.call($("bar").children,function(b){b.className=b===e.target?"on":""});update()};
 var ST=[],lockUntil=0,locked=false;
 function unlock(){locked=false;$("mc").classList.remove("locked");$("nac").hidden=true}
+/* caught by an auto clicker check: the button is locked for 10 seconds */
+function acCatch(now){S.st.caught=1;locked=true;lockUntil=now+10000;ST=[];AC=[];$("mc").classList.add("locked");$("nac").hidden=false;setTimeout(function(){if(Date.now()>=lockUntil)unlock()},10000)}
+/* auto clicker check 2: clicking at one exact, unchanging speed for 3 seconds. Caught when, over the last 3+ seconds, every gap
+   between clicks is within AC_TOL ms of all the others (people always wobble by much more than that, even when they try to keep
+   a steady beat), with at least AC_MIN gaps, and every click landed on the exact same spot (so a phone that rounds tap times
+   to its screen's frames can't catch a steady person: a finger never lands on the same pixel every time). */
+var AC=[],AC_SPAN=3000,AC_TOL=2,AC_MIN=8;
+function acSteady(t,x,y){AC.push({t:t,x:x,y:y});while(AC.length>2&&AC[1].t<=t-AC_SPAN)AC.shift();if(AC.length>400)AC.shift();
+if(AC.length<AC_MIN+1||t-AC[0].t<AC_SPAN)return false;var lo=1e9,hi=-1;
+for(var i=1;i<AC.length;i++){var g=AC[i].t-AC[i-1].t;if(g<lo)lo=g;if(g>hi)hi=g;if(hi-lo>AC_TOL||Math.abs(AC[i].x-AC[0].x)>1||Math.abs(AC[i].y-AC[0].y)>1)return false}
+return true}
 $("mc").onclick=function(e){var now=Date.now();if(locked){if(now<lockUntil)return;unlock()}
 ST.push(now);while(ST.length&&ST[0]<now-1000)ST.shift();
-if(ST.length>20){S.st.caught=1;locked=true;lockUntil=now+10000;ST=[];$("mc").classList.add("locked");$("nac").hidden=false;setTimeout(function(){if(Date.now()>=lockUntil)unlock()},10000);return}
+if(ST.length>20){acCatch(now);return}
+if(acSteady(e.timeStamp>0?e.timeStamp:performance.now(),e.clientX||0,e.clientY||0)){acCatch(now);return}
 var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2:1);if(!(c>=0)||!isFinite(c))c=0;S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});S.st.clicks++;if(crit)S.st.crit++;S.st.earned+=c;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<RUNE_CHANCE*(1+rbOf(S)[4]))giveRune();
 var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top;
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
