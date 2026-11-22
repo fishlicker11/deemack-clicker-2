@@ -423,7 +423,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=104;
+var BUILD=105;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -755,7 +755,7 @@ function bossRewI(i){var M=[5,5,6,6,7,7,8,8,9,9,10,10,12,12,15],n=T.length;if(!(
 return{pct:Math.round(5*Math.pow(20,f)),min:M[Math.round(f*(M.length-1))]}}
 function bossIdx(id){for(var i=0;i<T.length;i++)if(T[i].id===id)return i;return -1}
 var BOSS_CD=60*60*1000;
-/* Boss HP setting (bosses screen): +10% steps up to +BHP_MAX%. Bosses get that much more HP and their reward % goes up by the
+/* Boss HP setting (bosses screen): +50% steps (BHP_STEP) up to +BHP_MAX%. Bosses get that much more HP and their reward % goes up by the
    same share of itself (6% at +10% HP = 6.6%; Mr Linboom's 100% = 110%). A boost keeps the multiplier it was won with. */
 function bhpMul(){return 1+((S.bhp||0)/100)}function rpct(x){return Math.round(x*10)/10}
 function bossCdLeft(id){var w=S.bossCd&&S.bossCd[id];if(!w)return 0;var n=Date.now();if(w>n){S.bossCd[id]=n;w=n}return Math.max(0,w+BOSS_CD-n)}
@@ -1023,8 +1023,10 @@ var BTIER=[['Easy','#22a35a'],['Normal','#3b82f6'],['Hard','#f59e0b'],['Expert',
 function tierOf(i){return Math.min(BTIER.length-1,Math.floor(i*BTIER.length/T.length))}
 function bossTier(i){return BTIER[tierOf(i)]}
 function bhpUI(){var v=S.bhp||0;$('bhpt').innerHTML='💪 <b>Boss HP +'+v+'%</b><small>'+(v?'Bosses have '+v+'% more HP · rewards are '+v+'% bigger':'Tap + to give bosses more HP for bigger rewards')+'</small>';$('bhpm').disabled=v<=0;$('bhpp').disabled=v>=BHP_MAX}
-function setBhp(d){var v=Math.max(0,Math.min(BHP_MAX,(S.bhp||0)+d));if(v===(S.bhp||0))return;S.bhp=v;save();bhpUI();updBossTimers()}
-$('bhpm').onclick=function(){setBhp(-10)};$('bhpp').onclick=function(){setBhp(10)};
+/* +/- go to the next step of 50 up or down (an old save on e.g. +30% goes to +50% or +0%) */
+var BHP_STEP=50;
+function setBhp(d){var c=S.bhp||0,v=d>0?Math.floor(c/BHP_STEP)*BHP_STEP+BHP_STEP:Math.ceil(c/BHP_STEP)*BHP_STEP-BHP_STEP;v=Math.max(0,Math.min(BHP_MAX,v));if(v===(S.bhp||0))return;S.bhp=v;save();bhpUI();updBossTimers()}
+$('bhpm').onclick=function(){setBhp(-1)};$('bhpp').onclick=function(){setBhp(1)};
 function towUI(){var c=S.tf||0,f=towerFloor(c+1),x=[];if(f.hpm>1)x.push('+'+Math.round((f.hpm-1)*100)+'% HP');if(f.dmm>1)x.push('hits '+Math.round((f.dmm-1)*100)+'% harder');
 $('towt').innerHTML='';var b=document.createElement('b');b.textContent='🗼 Boss tower · Floor '+(c+1);var sm=document.createElement('small');sm.textContent='Next: '+f.t.name+(x.length?' ('+x.join(', ')+')':' · '+bossTier(f.di)[0])+'. '+c+' floor'+(c===1?'':'s')+' cleared · +'+rpct(towerBonus(S)*100)+'% income forever (+'+TOWER_PCT+'% per floor)';$('towt').appendChild(b);$('towt').appendChild(sm)}
 $('towgo').onclick=startTower;
