@@ -29,7 +29,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .slots button.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
 .tabs{display:flex;gap:6px;margin:14px 0 0}
 .tabs[hidden],.bar[hidden]{display:none}
-.tabs button{flex:1;padding:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+.tabs button{flex:1;min-width:0;padding:9px 2px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px;cursor:pointer}
 .tabs button.on{background:var(--btn);color:var(--btntext);border-color:var(--btn)}
 #stushop{margin-top:14px}
 .stuinfo{font-size:13px;color:var(--muted);text-align:center;margin:0 0 10px;line-height:1.4}
@@ -71,6 +71,8 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 system-ui,-a
 .in,.mk{font-size:13px;color:var(--muted)}
 .mk{color:var(--text)}
 .bt{display:flex;flex-direction:column;gap:5px;flex:none}
+.bt button.tg{background:transparent;color:var(--text);border:1px solid var(--line);font-size:12px;padding:4px 10px}
+.bt button.tg.on{border-color:#22a35a}
 .bt button.e{background:linear-gradient(135deg,#f59e0b,#a855f7);color:#fff}
 .bt button,.cu button{border:0;border-radius:9px;background:var(--btn);color:var(--btntext);font:inherit;font-size:13px;font-weight:700;padding:6px 10px;min-width:104px;cursor:pointer;line-height:1.2}
 .bt button small,.cu button small{display:block;font-weight:500;opacity:.9;pointer-events:none}
@@ -341,10 +343,10 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 
 <div class="gb" id="gb">0</div><div class="sub">Games Blocked</div><div class="sub" id="cps"></div><div class="sub" id="bst" hidden></div><div class="slots" id="slots" hidden></div>
 <div class="stage" id="stage"><button class="mc" id="mc" aria-label="Click Mr McCoy"><img id="mcimg" alt="Mr McCoy"></button><div class="nac" id="nac" hidden>no auto clicker</div><div class="side lside"><button class="runebtn logbtn" id="logb" aria-label="Update log">📜<small>Log</small><span class="ldot" id="logdot" hidden>NEW</span></button><button class="runebtn" id="qb">📋<small>Quests</small><span class="ldot" id="qdot" hidden></span></button><button class="runebtn" id="ab">🏅<small>Achievements</small></button><button class="runebtn" id="xb">💾<small>Data</small></button><button class="runebtn" id="bob">⚔️<small>Bosses</small></button><button class="runebtn" id="crb">🎬<small>Credits</small></button><button class="runebtn" id="devb" hidden>🛠️<small>Dev</small></button></div><div class="side"><button class="runebtn" id="prb">🌳<small id="prn">Prestige</small></button><button class="runebtn" id="mgb">🎮<small>Minigames</small></button><button class="runebtn" id="tb">🎨<small>Themes</small></button><button class="runebtn" id="rlb">🎰<small>Roller</small></button><button class="runebtn" id="lbb">🏆<small>Leaderboard</small></button><button class="runebtn" id="rb">Runes<small id="rbn"></small></button><button class="runebtn" id="db">Dice<small id="dn"></small></button><button class="runebtn" id="cb">Cards<small id="cn2"></small></button></div></div>
-<div class="tabs" id="tabs" hidden><button data-t="t" class="on">👩‍🏫 Teachers</button><button data-t="s">🎮 Students</button></div>
+<div class="tabs" id="tabs"><button data-t="t" class="on">👩‍🏫 Teachers</button><button data-t="s">🎮 Students</button><button data-t="p">💪 Player upgrades</button></div>
 <div class="bar" id="bar"><button data-m="1" class="on">×1</button><button data-m="5">×5</button><button data-m="20">×20</button><button data-m="max">Max</button></div>
 <div id="shop"></div>
-<div id="stushop" hidden></div>
+<div id="stushop" hidden></div><div id="pushop" hidden></div>
 <button class="rs" id="rs">Erase save</button>
 <div class="ov" id="ov" hidden><div class="box"><h1>DeeMack Clicker 2</h1><p id="nmsg">Pick a display name for the leaderboard.</p><input id="nin" maxlength="16" placeholder="Display name" autocomplete="off"><input id="ncode" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off" hidden><button id="nok">Play</button><button id="nimp" class="sec">I have a save code</button><button id="ncancel" class="sec" hidden>Cancel</button><p id="nerr"></p></div></div>
 <div class="ov" id="devv" hidden><div class="box rbox"><div class="phd"><h1>🛠️ Dev tools</h1><button class="xbtn" id="devvx" aria-label="Close">✕</button></div><p>Owner only. Commands only change your own game.</p><div id="devl"></div></div></div>
@@ -388,7 +390,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=84;
+var BUILD=85;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -449,6 +451,12 @@ var EVO_LV=25,EVO_STEP=5,EVO_MAX=5,EVO_PRICE=3;
 var LAUNCH={pct:10,from:Date.UTC(2026,10,21,2,0),until:Date.UTC(2026,10,23,2,0)};
 /* students whose game websites pop up. Only add new names at the END (saved websites remember a student by their spot
    in this list). STUBG: a student's website background photo (a key in PHOTOS). */
+/* ===== Player upgrades (the 💪 tab): bought with Games Blocked, kept when you prestige, and each can be switched off.
+   c = first price, m = price multiplier per level. ===== */
+var PUP=[{id:'time',ic:'⏱️',n:'Minigame Time',d:'+1% more time in Red circles, Tap race, Reaction test, Path trace and Memory draw.',max:10,c:1e3,m:100,fx:function(l){return '+'+l+'% time'}},
+{id:'hp',ic:'❤️',n:'Player Health',d:'+2 HP in boss fights.',max:50,c:100,m:100,fx:function(l){return '+'+2*l+' HP'}},
+{id:'tap',ic:'👊',n:'Boss Damage',d:'Each tap on the boss deals +0.1 more damage.',max:10,c:1e3,m:100,fx:function(l){return '+'+(l/10).toFixed(1)+' per tap'}},
+{id:'mdmg',ic:'💥',n:'Minigame Damage',d:'+1% damage from minigame attacks.',max:10,c:1e3,m:100,fx:function(l){return '+'+l+'% damage'}}];
 var STUDENTS=['Orion H','Jackson E','Jackson A','Oliver J','Tristan P','Riley M','Ethan J','Garrett L','Bronwyn B','Joey H','Kayden M','Bryan S','Peyton M','Noah B','Chase L','Josh A','Nick W'];
 var STUBG={'Bryan S':'bryans','Garrett L':'garrettl','Oliver J':'oliverj'};
 var WEB_AT=1e15,WEB_STEAL=0.05,WEB_SLOTS=[-135,-45,90,-90,135,45]; /* where websites sit around Mr McCoy (degrees) */
@@ -506,13 +514,14 @@ function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
 var PRS_CD=10*60*1000;
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+PRS_CD-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
 function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
 if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
+if(o.pu&&typeof o.pu==='object'){PUP.forEach(function(u){var v=o.pu.lv&&+o.pu.lv[u.id];if(v>0&&v===Math.floor(v))d.pu.lv[u.id]=Math.min(u.max,v);if(o.pu.off&&o.pu.off[u.id])d.pu.off[u.id]=1})}
 if(o.flaw&&typeof o.flaw==='object')T.forEach(function(t){var v=+o.flaw[t.id];if(v>0&&isFinite(v))d.flaw[t.id]=Math.floor(v)});
 if(Array.isArray(o.as))o.as.forEach(function(r){r=+r;if(r>=0&&r<6&&r===Math.floor(r)&&d.as.indexOf(r)<0)d.as.push(r)});
 if(o.evo&&typeof o.evo==='object')T.forEach(function(t){var v=+o.evo[t.id];if(v>0&&v===Math.floor(v))d.evo[t.id]=Math.min(EVO_MAX,v)})}}catch(e){}return d}
@@ -589,7 +598,7 @@ function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>"
 function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
 var base=total()*(1-webDrain()),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);if(slot===1&&disp>bestMem&&isFinite(disp))bestMem=disp;
 var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
-function update(noAnim){var anim=ready&&!noAnim;var su=!!(S.stu&&S.stu.u);$('tabs').hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}
+function update(noAnim){var anim=ready&&!noAnim;var su=!!(S.stu&&S.stu.u),stb=$('tabs').querySelector('[data-t="s"]');if(stb.hidden===su)stb.hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}if(shopTab==='p')pupUpd();
 $("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt>=LAUNCH.from&&nt<LAUNCH.until)bp.push("🎉 Release party: +"+LAUNCH.pct+"% income · "+hms(LAUNCH.until-nt)+" left");if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 var rb=rbOf(S),am=allMul(),allT=allTeachers();
@@ -946,27 +955,27 @@ function arena(){var A=$('bfa');A.textContent='';A.classList.remove('hurt');retu
 /* phones: a finger on a minigame's play area must never scroll or bounce the screen (iPhones and in-app browsers
    don't always obey touch-action, and a scroll cancels the drag, so the dot gets stuck). The game claims those touches. */
 function grab(el){var f=function(e){if(e.cancelable)e.preventDefault()};el.addEventListener('touchstart',f,{passive:false});el.addEventListener('touchmove',f,{passive:false});return el}
-function fRender(){if(!BF)return;$('bfhb').style.width=(100*BF.hp/BF.max)+'%';$('bfht').textContent=BF.hp+' / '+BF.max;$('bfpb').style.width=BF.php+'%';$('bfpt').textContent=BF.php+' / 100'}
+function fRender(){if(!BF)return;$('bfhb').style.width=(100*BF.hp/BF.max)+'%';var pm=BF.pmax||100;$('bfpb').style.width=Math.min(100,100*BF.php/pm)+'%';$('bfpt').textContent=BF.php+' / '+pm;$('bfht').textContent=Math.ceil(BF.hp)+' / '+BF.max}
 function fFloat(txt,cls,x,y){var A=$('bfa'),f=document.createElement('div');f.className='dmgf'+(cls?' '+cls:'');f.textContent=txt;f.style.left=(x==null?A.clientWidth/2-14:x)+'px';f.style.top=(y==null?A.clientHeight/2-40:y)+'px';A.appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800)}
-function hurtBoss(n,x,y){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.dealt+=n;BF.hp=Math.max(0,BF.hp-n);fFloat('-'+n,'',x,y);fRender();if(BF.hp<=0)fEnd(true)}
+function hurtBoss(n,x,y,tap){if(!BF||BF.ph==='over')return;if(!tap)n=Math.max(1,Math.round(n*mgDmgMul()));n=Math.round(n*10)/10;if(BF.mini)BF.mini.dealt+=n;BF.hp=Math.max(0,BF.hp-n);fFloat('-'+n,'',x,y);fRender();if(BF.hp<=0)fEnd(true)}
 function hurtMe(n){if(!BF||BF.ph==='over')return;if(BF.mini)BF.mini.taken+=n;BF.php=Math.max(0,BF.php-n);fFloat('-'+n+' HP','me',12,12);var A=$('bfa');A.classList.remove('hurt');void A.offsetWidth;A.classList.add('hurt');fRender();if(BF.php<=0)fEnd(false)}
 function startFight(i){closeBO();var t=T[i],d=fdiff(i),tr=bossTier(i);FCK=[];
-BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:3*Math.round(40+d*260),php:100,attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
+BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'idle',base:Math.round(40+d*260),hp:3*Math.round(40+d*260),php:pHP(),pmax:pHP(),attacks:0,dmg:Math.round(8+d*19),t0:Date.now()};BF.max=BF.hp;$('bw').hidden=true;
 $('bf').classList.remove('mini');$('bfi').style.display='';$('bfi').src=PHOTOS[t.ph||t.id]||'';$('bfn').textContent=tName(t);var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
 $('bf').hidden=false;fRender();fIdle()}
 function closeFight(){BF=null;$('bf').hidden=true;$('bw').hidden=true;$('bfa').textContent='';$('bf').classList.remove('mini');$('bfi').style.display=''}
 function fIdle(){if(!BF||BF.ph==='over')return;BF.ph='idle';var id=BF.id,A=arena(),b=document.createElement('button');b.className='bfboss';b.setAttribute('aria-label','Hit '+BF.t.name);
 var im=document.createElement('img');im.alt='';im.src=PHOTOS[BF.t.ph||BF.t.id]||'';b.appendChild(im);A.appendChild(b);
-b.onpointerdown=function(e){e.preventDefault();if(!fAlive(id)||BF.ph!=='idle'||!fOk())return;var r=A.getBoundingClientRect();hurtBoss(1,e.clientX-r.left-8,e.clientY-r.top-30)};
+b.onpointerdown=function(e){e.preventDefault();if(!fAlive(id)||BF.ph!=='idle'||!fOk())return;var r=A.getBoundingClientRect();hurtBoss(tapDmg(),e.clientX-r.left-8,e.clientY-r.top-30,true)};
 fStatus('Click '+BF.t.name+'!');fl(nextAttack,Math.round((4.5-BF.d*2)*1000))}
 var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;if(t.name==='Mr Scott')SIMON9=i+1}); /* Simon squares: 4 before Mr Reiman, 6 for Mr Reiman and Mr Scott, 9 for everyone above Mr Scott */
 var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace',draw:'Memory draw'};
 function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace','draw'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
-if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in 10s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
+if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(10*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
-var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(BF.php>=100){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
+var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(BF.php>=(BF.pmax||100)){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
 var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=win?'Victory!':'Defeated';
 var p=document.createElement('p');p.textContent=win?('You beat '+t.name+(first?' for the first time!':'!')):(t.name+' was too strong this time.');
 var a=document.createElement('button');a.textContent='Fight again';a.onclick=function(){startFight(i)};
@@ -974,9 +983,9 @@ var bk=document.createElement('button');bk.className='sec';bk.textContent='Back 
 w.appendChild(h);w.appendChild(p);w.appendChild(a);w.appendChild(bk);A.appendChild(w);fStatus(win?'You won':'You lost');if(win)showWin(i,t,first,rew)}
 function showWin(i,t,first,rew){var tr=bossTier(i),secs=Math.max(0,Math.round((Date.now()-BF.t0)/1000));
 $('bwi').src=PHOTOS[t.ph||t.id]||'';$('bwi').style.borderColor=tr[1];$('bwn').textContent='You beat '+t.name+'!';
-$('bwp').textContent=(BF.php>=100?'No damage taken! ':'')+(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
+$('bwp').textContent=(BF.php>=(BF.pmax||100)?'No damage taken! ':'')+(first?'First win! ':'')+tr[0]+' boss · Boss '+(i+1)+' of '+T.length;
 var rw=$('bwrw');rw.className='bwrw'+(rew&&rew.given?'':' prac');rw.textContent=!rew?'':rew.given?'🎁 +'+rew.pct+'% income for '+rew.min+' minutes!':rew.blocked?'⏳ No new reward: your +'+rew.blocked.pct+'% from '+T[rew.blocked.i].name+' still has '+mmss(rew.blocked.until-Date.now())+' left. '+t.name+' has no cooldown, so you can win its reward later.':'🔁 Practice win. Reward ready again in '+mmss(rew.wait)+'.';
-var st=$('bws');st.textContent='';[[BF.php+'/100','HP left'],[Math.floor(secs/60)+':'+(secs%60<10?'0':'')+secs%60,'Time'],[BF.attacks,'Attacks']].forEach(function(x){var d=document.createElement('div'),b=document.createElement('b');b.textContent=x[0];d.appendChild(b);d.appendChild(document.createTextNode(x[1]));st.appendChild(d)});
+var st=$('bws');st.textContent='';[[BF.php+'/'+(BF.pmax||100),'HP left'],[Math.floor(secs/60)+':'+(secs%60<10?'0':'')+secs%60,'Time'],[BF.attacks,'Attacks']].forEach(function(x){var d=document.createElement('div'),b=document.createElement('b');b.textContent=x[0];d.appendChild(b);d.appendChild(document.createTextNode(x[1]));st.appendChild(d)});
 $('bwr').onclick=function(){$('bw').hidden=true;startFight(i)};
 $('bwb').onclick=function(){$('bw').hidden=true;closeFight();renderBosses();$('bov').hidden=false};
 $('bw').hidden=false;$('bwr').focus()}
@@ -985,7 +994,7 @@ $('bfx').onclick=closeFight;
 var DODGE_DMG=80,DODGE_PEN=10; /* dodge: damage dealt when it ends, minus this much per red block that hit you */
 function fCounter(m){var n=Math.max(2,Math.round(BF.base*0.10*(m||1)));fStatus('Perfect! Counterattack for '+n+'!');hurtBoss(n);return fAlive(BF&&BF.id)}
 function mashNeed(){return Math.round(17+BF.d*66)}
-ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+(1+1.0*(1+n*(0.6-BF.d*0.38))).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
+ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+((1+1.0*(1+n*(0.6-BF.d*0.38)))*mgTime()).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
 fStatus(n>1?'Tap all '+n+' red circles!':'Tap the red circle!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var W=A.clientWidth,H=A.clientHeight,pts=[],cs=[];
 function draw(){tm.textContent=left+' left · '+Math.max(0,(end-Date.now())/1000).toFixed(1)+'s'}
@@ -999,7 +1008,7 @@ requestAnimationFrame(mv)}if(spd>0)requestAnimationFrame(mv);
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}draw();if(Date.now()>=end){over=true;clearInterval(iv);[].slice.call(A.querySelectorAll('.rc')).forEach(function(c){c.remove()});
 fStatus(left+' circle'+(left>1?'s':'')+' hit you!');hurtMe(left*hit);if(fAlive(id))fl(atkDone,800)}},100);draw()};
 
-ATK.mash=function(){var id=BF.id,A=arena(),secs=10,need=mashNeed(),got=0,end=Date.now()+secs*1000,over=false;
+ATK.mash=function(){var id=BF.id,A=arena(),secs=+(10*mgTime()).toFixed(1),need=mashNeed(),got=0,end=Date.now()+secs*1000,over=false;
 fStatus('Tap '+need+' times in '+secs+' seconds!');
 var w=document.createElement('div');w.className='acol';var cnt=document.createElement('div');cnt.className='big';var b=document.createElement('button');b.className='mash tapbig';b.textContent='TAP!';var tm=document.createElement('div');
 w.appendChild(cnt);w.appendChild(b);w.appendChild(tm);A.appendChild(w);
@@ -1026,7 +1035,7 @@ g.fillStyle=mut;g.font='600 13px system-ui,sans-serif';g.fillText(Math.max(0,(du
 if(gt>=dur){var dd=Math.max(0,DODGE_DMG-hits*DODGE_PEN);if(dd>0){hurtBoss(dd);if(!fAlive(id))return;fStatus((hits?'Hit '+hits+' time'+(hits>1?'s':'')+' · ':'Perfect dodge! ')+'You hit for '+dd+'!')}else fStatus('Hit '+hits+' times · no damage');fl(atkDone,900);return}requestAnimationFrame(frame)}
 requestAnimationFrame(frame)};
 
-ATK.react=function(){var id=BF.id,A=arena(),lim=Math.max(0.38,0.9-BF.d*0.52),state='wait',t0=0,to=null;
+ATK.react=function(){var id=BF.id,A=arena(),lim=Math.max(0.38,0.9-BF.d*0.52)*mgTime(),state='wait',t0=0,to=null;
 fStatus('Tap when it turns green! (within '+lim.toFixed(2)+'s)');
 var w=document.createElement('div');w.className='acol';var b=document.createElement('button');b.className='rbtn';b.textContent='Wait...';var m=document.createElement('div');m.className='big';w.appendChild(b);w.appendChild(m);A.appendChild(w);
 fl(function(){if(state!=='wait')return;state='go';b.className='rbtn go';b.textContent='TAP!';t0=performance.now();
@@ -1170,7 +1179,7 @@ var P=[raw[0]],carry=0;for(i=1;i<raw.length;i++){var a=raw[i-1],b=raw[i],dx=b.x-
 P.push(raw[raw.length-1]);var N=P.length,plen=(N-1)*4;
 var turn=0;for(i=2;i<N;i++){var ta=Math.atan2(P[i-1].y-P[i-2].y,P[i-1].x-P[i-2].x),tb=Math.atan2(P[i].y-P[i-1].y,P[i].x-P[i-1].x),tda=Math.abs(tb-ta);if(tda>Math.PI)tda=2*Math.PI-tda;turn+=tda}
 /* time: path length at a steady speed, plus 2s, plus 0.35s for every quarter turn (longer and twistier shapes get more time) */
-var limit=+(plen/(95+d*75)+2+0.35*turn/(Math.PI/2)).toFixed(1),t0=performance.now(),dot={x:P[0].x,y:P[0].y},R=16,drag=false,prog=0,sum=0,lenSum=0,off=false,over=false,lastOff=-9;
+var limit=+((plen/(95+d*75)+2+0.35*turn/(Math.PI/2))*mgTime()).toFixed(1),t0=performance.now(),dot={x:P[0].x,y:P[0].y},R=16,drag=false,prog=0,sum=0,lenSum=0,off=false,over=false,lastOff=-9;
 /* how far ahead progress may jump depends on how far the finger has moved since progress last went up (trav):
    a small slip still counts when you rejoin a bit further on, but cutting across a loop, a crossing, two maze rows or a
    closed shape's gap needs about as much finger travel as tracing that part properly, so shortcuts never save time.
@@ -1265,7 +1274,7 @@ Q=Q.map(function(p){return [p[0]/k,p[1]/k]});var C=dFit(Tn.p,Q),Pr=dFit(Q,Tn.p);
 var b=best,ca2=Math.cos(-b.r*Math.PI/180),sa2=Math.sin(-b.r*Math.PI/180);
 /* al: maps a point of the real shape onto your drawing (undoing the best tilt/stretch), to show them on top of each other */
 return {raw:b.raw,cov:b.C,prec:b.P,sc:Math.max(0,Math.min(1,(b.raw-DRAW_LO)/(DRAW_HI-DRAW_LO))),al:function(q){var x=(q[0]-Tn.cx)/Tn.s,y=(q[1]-Tn.cy)/Tn.s,X=(x*ca2-y*sa2)/b.xs,Y=x*sa2+y*ca2;return [Dn.cx+X*b.k*Dn.s,Dn.cy+Y*b.k*Dn.s]}}}
-ATK.draw=function(){var id=BF.id,A=arena(),d=BF.d,shape=pickDraw(d),look=+(4-2*d).toFixed(1),dlim=8+2*shape.r,nm=lcName(shape.n);
+ATK.draw=function(){var id=BF.id,A=arena(),d=BF.d,shape=pickDraw(d),look=+(4-2*d).toFixed(1),dlim=8+2*shape.r,nm=lcName(shape.n);look=+(look*mgTime()).toFixed(1);dlim=+(dlim*mgTime()).toFixed(1);
 fStatus('Memorize the '+nm+'! It disappears in a moment.');
 var cv=grab(document.createElement('canvas'));cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
@@ -1474,6 +1483,25 @@ if(!SLB){SLB=[1,2].map(function(n){var b=document.createElement('button');b.oncl
 SLB.forEach(function(b,i){var n=i+1,act=n===slot,sum=act?fmt(S.gb)+' Games Blocked':(slotOther||(slotOther=slotSum(n)));
 var h=(n===1?'💾 Slot 1':'🧪 Slot 2 · not on leaderboard')+'<small>'+sum+'</small>';if(b._h!==h){b.innerHTML=h;b._h=h}var cl=act?'on':'';if(b.className!==cl)b.className=cl})}
 setInterval(renderSlots,1000);
+/* ===== Player upgrades tab ===== */
+function pupLv(id){return (S.pu&&S.pu.lv&&S.pu.lv[id])||0}
+function pupOn(id){return !(S.pu&&S.pu.off&&S.pu.off[id])}
+function pupEff(id){return pupOn(id)?pupLv(id):0}
+function pupCost(u){return u.c*Math.pow(u.m,pupLv(u.id))}
+function mgTime(){return 1+0.01*pupEff('time')}
+function pHP(){return 100+2*pupEff('hp')}
+function tapDmg(){return Math.round((1+0.1*pupEff('tap'))*10)/10}
+function mgDmgMul(){return 1+0.01*pupEff('mdmg')}
+var PREFS=[];
+function renderPup(){var L=$('pushop');L.textContent='';PREFS=[];var h=document.createElement('div');h.className='stuinfo';h.textContent='Upgrades for you in boss fights and minigames. Bought with Games Blocked and kept when you prestige. Tap On/Off to switch one off (for a challenge).';L.appendChild(h);
+PUP.forEach(function(u){var d=document.createElement('div');d.className='card';d.innerHTML='<div class="sui"></div><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button><button class="tg"></button></div>';
+d.querySelector('.sui').textContent=u.ic;d.querySelector('.nm').textContent=u.n;d.querySelector('.in').textContent=u.d;var b=d.querySelector('.b'),tg=d.querySelector('.tg');b.onclick=function(){buyPup(u)};tg.onclick=function(){togPup(u)};
+PREFS.push({u:u,b:b,tg:tg,mk:d.querySelector('.mk')});L.appendChild(d)});pupUpd()}
+function pupUpd(){PREFS.forEach(function(o){var lv=pupLv(o.u.id),mx=lv>=o.u.max,c=pupCost(o.u),on=pupOn(o.u.id),t='Level '+lv+' / '+o.u.max+(lv?' · '+o.u.fx(lv)+(on?'':' (off)'):'');if(o.mk.textContent!==t)o.mk.textContent=t;
+var h=mx?'Maxed':'Buy<small>'+fmt(c)+'</small>';if(o.b._h!==h){o.b.innerHTML=h;o.b._h=h}var dis=mx||S.gb<c;if(o.b.disabled!==dis)o.b.disabled=dis;
+var th=on?'✅ On':'⛔ Off';if(o.tg._h!==th){o.tg.textContent=th;o.tg._h=th;o.tg.className='tg'+(on?' on':'')}if(o.tg.hidden!==!lv)o.tg.hidden=!lv})}
+function buyPup(u){var lv=pupLv(u.id),c=pupCost(u);if(lv>=u.max||S.gb<c)return;S.gb-=c;if(!S.pu)S.pu={lv:{},off:{}};S.pu.lv[u.id]=lv+1;save();pupUpd();update();toast(u.ic+' '+u.n+' is now level '+(lv+1)+' ('+u.fx(lv+1)+')','#3b82f6')}
+function togPup(u){if(!pupLv(u.id))return;if(!S.pu.off)S.pu.off={};if(S.pu.off[u.id])delete S.pu.off[u.id];else S.pu.off[u.id]=1;save();pupUpd();toast(u.ic+' '+u.n+(pupOn(u.id)?' is on':' is off'),'#3b82f6')}
 /* ===== Game websites around Mr McCoy + the Students tab ===== */
 function supLv(id){return (S.stu&&S.stu.lv&&S.stu.lv[id])||0}
 function webMax(){return Math.min(WEB_SLOTS.length,3+supLv('more'))}
@@ -1528,7 +1556,7 @@ $('webx').onclick=closeWeb;$('webv').onclick=function(e){if(e.target===$('webv')
 function webCashAll(){var sum=0;(S.web||[]).forEach(function(w){sum+=webReward(w)});if(sum>0){S.gb=Math.min(1e300,S.gb+sum);S.run=Math.min(1e300,S.run+sum);S.st.earned+=sum}S.web=[];renderWebs()}
 /* the Teachers / Students tabs above the shop */
 var shopTab='t',SREFS=[];
-function setTab(t){shopTab=t;[].forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':''});$('bar').hidden=t!=='t';$('shop').hidden=t!=='t';$('stushop').hidden=t!=='s';if(t==='s')renderStu()}
+function setTab(t){shopTab=t;[].forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':''});$('bar').hidden=t!=='t';$('shop').hidden=t!=='t';$('stushop').hidden=t!=='s';$('pushop').hidden=t!=='p';if(t==='s')renderStu();if(t==='p')renderPup()}
 $('tabs').onclick=function(e){var b=e.target.closest&&e.target.closest('[data-t]');if(b)setTab(b.getAttribute('data-t'))};
 function supCost(u){return u.c*Math.pow(u.m,supLv(u.id))}
 function renderStu(){var L=$('stushop');L.textContent='';SREFS=[];var h=document.createElement('div');h.className='stuinfo';h.id='stuinfo';L.appendChild(h);
@@ -1658,7 +1686,7 @@ BF={i:i,t:t,d:d,id:Date.now()+Math.random(),ph:'atk',base:Math.round(40+d*260),h
 $('bw').hidden=true;$('bf').classList.add('mini');$('bfi').style.display='none';$('bfn').textContent=g[1]+' '+g[2];var bd=$('bfd');bd.textContent=tr[0];bd.style.setProperty('--dc',tr[1]);
 $('bf').hidden=false;nextAttack(k)}
 function miniEnd(){var m=BF.mini;BF.ph='over';var A=arena(),w=document.createElement('div');w.className='bfend';var h=document.createElement('div');h.className='big';h.textContent=m.taken?'Done!':'Flawless!';
-var pp=document.createElement('p');pp.textContent='Damage dealt: '+m.dealt+' · Damage taken: '+m.taken;
+var pp=document.createElement('p');pp.textContent='Damage dealt: '+Math.round(m.dealt*10)/10+' · Damage taken: '+m.taken;
 var a=document.createElement('button');a.textContent='Play again';a.onclick=function(){miniStart(m.k,m.ti)};
 var c=document.createElement('button');c.className='sec';c.textContent='Pick another';c.onclick=function(){closeFight();renderMG();$('mgv').hidden=false};
 var x=document.createElement('button');x.className='sec';x.textContent='Close';x.onclick=closeFight;
