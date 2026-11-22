@@ -423,7 +423,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=103;
+var BUILD=104;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -432,6 +432,7 @@ var CREDITS=[
 {role:'PLAYTESTERS',names:['Oliver J','Robbie M','Xander L','Garrett L','Kale S','Ty B','Jackson E']},
 {role:'FIRST PERSON TO BEAT DEEMACK CLICKER 1',names:['Jackson E']}];
 var UPDATES=[
+{id:6,date:'Nov 21, 2026',title:'New minigames/boss attacks!',text:'Check them out.'},
 {id:5,date:'Nov 21, 2026',title:'Added new features to boss mode + player upgrades.',text:'Ps. Check the bottom of the achievements tab'},
 {id:4,date:'Nov 21, 2026',title:'There has been some issues with the leaderboard not showing the correct number that I am aware of.',text:'If you are currently having any issues with the leaderboard please tell me so I can try to fix it.'},
 {id:3,date:'Nov 20, 2026',title:'Holy crap 22 people in 3 minutes within launch tuff.',text:'Also remember there\'s always room for improvements and updates to the game. It\'s not even fully finished i still have more i wanna add so feel free to recommend anything'},
@@ -1805,7 +1806,7 @@ function pick(block){if(busy||over||!fAlive(id))return;busy=true;pid=null;var it
 if(block===it.g){ok++;card.classList.add('good');fStatus(block?'Blocked! 🚫':'Allowed! ✅')}else{card.classList.add('bad');fStatus(it.g?'That was a game! Block it!':'That was school stuff! Allow it!');hurtMe(hit);if(!fAlive(id))return}
 fl(next,230)}
 function next(){i++;if(i>=n){finish();return}show()}
-function finish(){over=true;wrap.style.visibility='hidden';var acc=ok/n,dmg=Math.max(1,Math.round(BF.base*0.42*acc*acc));cnt.textContent=n+' / '+n+' · '+ok+' right';
+function finish(){over=true;wrap.style.visibility='hidden';var acc=ok/n,dmg=Math.max(1,Math.round(BF.base*0.378*acc*acc));cnt.textContent=n+' / '+n+' · '+ok+' right';
 if(ok>0){hurtBoss(dmg);if(!fAlive(id))return}fStatus(ok+' of '+n+' right'+(ok===n?' · Perfect!':'')+(ok?' · You hit for '+dmg+'!':''));fl(atkDone,1000)}
 bB.onpointerdown=function(e){e.preventDefault();pick(true)};bA.onpointerdown=function(e){e.preventDefault();pick(false)};
 card.onpointerdown=function(e){e.preventDefault();if(busy||over)return;pid=e.pointerId;sx=e.clientX;dx=0;card.style.transition='none';try{card.setPointerCapture(e.pointerId)}catch(_){}};
@@ -1819,7 +1820,7 @@ show();requestAnimationFrame(frame)};
 
 /* Cup shuffle: a phone is hidden under one cup, the cups swap places, then you tap the cup with the phone.
    Harder: more cups (3, 4 from Insane, 5 from Nightmare), more swaps (3 up to 9) and faster swaps. */
-ATK.cups=function(){var id=BF.id,A=arena(),d=BF.d,n=d<0.45?3:d<0.75?4:5,sw=3+Math.round(d*6),dur=Math.round((640-260*d)*mgTime()),W=A.clientWidth,H=A.clientHeight,phase='show',to=null;
+ATK.cups=function(){var id=BF.id,A=arena(),d=BF.d,n=d<0.45?3:d<0.75?4:5,sw=3+Math.round(d*6),dur=Math.round((560-240*d)*mgTime()),W=A.clientWidth,H=A.clientHeight,phase='show',to=null;
 fStatus('Watch the cup with the phone!');
 var cw=Math.min(72,Math.floor((W-24)/n)-12),ch=Math.round(cw*1.1),gx=(W-n*cw)/(n+1),cy=Math.round(H*0.55-ch/2);
 function sx(s){return Math.round(gx+s*(cw+gx))}
@@ -1864,9 +1865,9 @@ if(nx>n){over=true;clearInterval(iv);if(!fCounter(3.2))return;fl(atkDone,800);re
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}draw();if(Date.now()>=end){over=true;clearInterval(iv);bs.forEach(function(b){b.remove()});
 fStatus('Out of time! You got to '+(nx-1)+' of '+n+'.');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,900)}},100);draw()};
 
-/* Count it: dots flash for a moment, then you pick how many there were. 2 rounds. Never more than 8 dots.
-   Harder: more dots (3-5 on Easy, 6-8 on Impossible), a shorter flash, and (from Hard up) dots of different sizes and colors. */
-ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(1.7-0.9*d)*mgTime(),lo=3+Math.round(3*d),hi=Math.min(8,5+Math.round(3*d)),ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
+/* Count it: dots flash for a moment, then you pick how many there were. 2 rounds. Always 8 to 12 dots.
+   Harder: more dots (8-9 on Easy, 10-12 on Impossible), a shorter flash, and (from Hard up) dots of different sizes and colors. */
+ATK.count=function(){var id=BF.id,A=arena(),d=BF.d,R=2,r=0,ok=0,flash=(1.7-0.9*d)*mgTime(),lo=8+Math.round(2*d),hi=Math.min(12,9+Math.round(3*d)),ans=0,busy=true,over=false,hit=Math.max(2,Math.round(BF.dmg*0.6)),end=0,W=A.clientWidth,H=A.clientHeight,bs=[];
 var COLS=['#3b82f6','#ef4444','#22a35a','#f59e0b','#a855f7','#ec4899'];
 fStatus('Count the dots!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var field=document.createElement('div');field.className='cfield';A.appendChild(field);var opts=document.createElement('div');opts.className='copts';A.appendChild(opts);
@@ -1875,7 +1876,7 @@ for(var k=0;k<ans;k++){var s=mixed?14+Math.round(Math.random()*16):22,x,y,t=0;do
 pts.push({x:x,y:y,s:s});var dot=document.createElement('i');dot.className='cdot';dot.style.left=x.toFixed(1)+'px';dot.style.top=y.toFixed(1)+'px';dot.style.width=dot.style.height=s+'px';dot.style.background=mixed?COLS[Math.floor(Math.random()*COLS.length)]:COLS[0];field.appendChild(dot)}
 tm.textContent='Round '+r+' of '+R+' · Look!';fStatus('Count the dots!');
 fl(function(){field.textContent='';ask()},Math.round(flash*1000))}
-function ask(){var c=mgShuffle([-3,-2,-1,1,2,3].map(function(o){return ans+o}).filter(function(v){return v>=1&&v<=8})).slice(0,3);c.push(ans);c.sort(function(a,b){return a-b});
+function ask(){var c=mgShuffle([-3,-2,-1,1,2,3].map(function(o){return ans+o}).filter(function(v){return v>=lo-2&&v<=hi+2})).slice(0,3);c.push(ans);c.sort(function(a,b){return a-b});
 bs=c.map(function(v){var b=mgBtn(String(v),'cbtn');b.onpointerdown=function(e){e.preventDefault();pick(v,b)};opts.appendChild(b);return b});
 fStatus('How many dots were there?');end=Date.now()+Math.round(6000*mgTime());busy=false;draw()}
 function draw(){tm.textContent='Round '+r+' of '+R+' · '+Math.max(0,(end-Date.now())/1000).toFixed(1)+'s'}
@@ -1889,7 +1890,7 @@ round()};
 
 /* Shield block: teachers' faces fly at you from the sides. Tap or swipe toward one (or use the arrow keys) to turn your shield that way.
    A shot that reaches you while your shield faces it is blocked; otherwise it hits you. Harder: attacks from all 4 sides
-   (from Hard up), more of them, faster. Blocks add up to the hit you deal at the end. */
+   (from Hard up), more of them (7 up to 16), faster. Blocks add up to the hit you deal at the end. */
 /* teacher photos as round faces for Shield block (cached; a photo that hasn't loaded yet shows as a red ball) */
 var FACEC={};function faceImg(t){var k=t.ph||t.id;if(!FACEC[k]){var im=new Image();im.src=PHOTOS[k];FACEC[k]=im}return FACEC[k]}
 function drawFace(g,im,x,y,r){if(im&&im.complete&&im.naturalWidth){var w=im.naturalWidth,h=im.naturalHeight,s=Math.min(w,h);g.save();g.beginPath();g.arc(x,y,r,0,6.2832);g.clip();g.drawImage(im,(w-s)/2,(h-s)*0.3,s,s,x-r,y-r,2*r,2*r);g.restore()}
@@ -1897,8 +1898,8 @@ else{g.fillStyle='#ef4444';g.beginPath();g.arc(x,y,r,0,6.2832);g.fill()}g.lineWi
 ATK.shield=function(){var id=BF.id,A=arena(),d=BF.d;fStatus('Tap or swipe toward each teacher to block them!');
 var cv=grab(document.createElement('canvas'));cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
-var cx=W/2,cy=H/2+10,PR=18,SR=34,DIRS=d>=0.4?[0,1,2,3]:[0,2],n=6+Math.round(d*8),every=(1.25-0.7*d)*1000*mgTime(),travel=(1.7-0.85*d)*1000*mgTime(),
-dir=0,shots=[],made=0,blocked=0,hits=0,gt=0,last=performance.now(),nextS=600,hit=Math.max(2,Math.round(BF.dmg/3)),fx=[],down=false,done=false,DX=[1,0,-1,0],DY=[0,1,0,-1],FR=20,
+var cx=W/2,cy=H/2+10,PR=18,SR=34,DIRS=d>=0.3?[0,1,2,3]:[0,2],n=7+Math.round(d*9),every=(1.1-0.65*d)*1000*mgTime(),travel=(1.45-0.75*d)*1000*mgTime(),
+dir=0,shots=[],made=0,blocked=0,hits=0,gt=0,last=performance.now(),nextS=600,hit=Math.max(2,Math.round(BF.dmg/2.5)),fx=[],down=false,done=false,DX=[1,0,-1,0],DY=[0,1,0,-1],FR=20,
 faces=T.filter(function(t){return PHOTOS[t.ph||t.id]}).map(function(t){return faceImg(t)});
 var mut=(getComputedStyle(document.documentElement).getPropertyValue('--muted')||'').trim()||'#888';
 function aim(e){var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*(r.width?W/r.width:1)-cx,y=(e.clientY-r.top)*(r.height?H/r.height:1)-cy;if(x*x+y*y<100)return;
