@@ -403,7 +403,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=91;
+var BUILD=92;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1026,7 +1026,7 @@ var SIMON6=0,SIMON9=0;T.forEach(function(t,i){if(t.name==='Mr Reiman')SIMON6=i;i
 var ANM={circles:'Red circles',mash:'Tap race',dodge:'Dodge',react:'Reaction test',simon:'Simon says',power:'Power strike',rhythm:'Rhythm battle',trace:'Path trace',draw:'Memory draw'};
 function nextAttack(force){var pool=['circles','mash','dodge','react','simon','power','rhythm','trace','draw'],k=force||(BF.attacks===0?'circles':pool[Math.floor(Math.random()*pool.length)]);BF.attacks++;BF.ph='atk';var id=BF.id;
 var A=arena(),w=document.createElement('div');w.className='acol';w.style.animation='pop .3s ease-out';var h=document.createElement('div');h.className='big';h.textContent=ANM[k]+'!';var s=document.createElement('div');s.textContent='Get ready...';w.appendChild(h);w.appendChild(s);A.appendChild(w);
-if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(10*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
+if(k==='mash'){h.textContent='Tap race: '+mashNeed()+' taps in '+(+(8*mgTime()).toFixed(1))+'s!';var c=3;s.textContent='Starts in 3...';fStatus('Get ready to tap!');var cd=setInterval(function(){if(!fAlive(id)){clearInterval(cd);return}c--;if(c>0)s.textContent='Starts in '+c+'...';else clearInterval(cd)},1000);fl(ATK[k],3000)}else if(k==='rhythm'){s.textContent='Tap each circle as it reaches the bottom';fStatus('Get ready!');fl(ATK[k],1800)}else if(k==='trace'){s.textContent='Drag the circle along the path to the flag';fStatus('Get ready!');fl(ATK[k],1500)}else if(k==='draw'){s.textContent='Memorize the shape, then draw it from memory';fStatus('Get ready!');fl(ATK[k],1700)}else{fStatus('Get ready!');fl(ATK[k],1000)}}
 function atkDone(){if(BF&&BF.ph!=='over'){if(BF.mini)miniEnd();else fIdle()}}
 function fEnd(win){if(!BF||BF.ph==='over')return;BF.ph='over';var i=BF.i,t=BF.t,first=false;
 var rew=null;if(win){if(!S.bossWins)S.bossWins={};first=!S.bossWins[t.id];S.bossWins[t.id]=1;S.st.bw++;if(t.id==='linboom'&&BF.bmul>=1+BHP_MAX/100-1e-9&&BF.noPup&&PUP.every(function(u){return !pupEff(u.id)})){if(!S.gach)S.gach={};S.gach.lin=1}if(BF.php>=(BF.pmax||100)){if(!S.flaw)S.flaw={};S.flaw[t.id]=(S.flaw[t.id]||0)+1}rew=giveBossReward(i,t);save()}
@@ -1062,7 +1062,7 @@ requestAnimationFrame(mv)}if(spd>0)requestAnimationFrame(mv);
 var iv=setInterval(function(){if(!fAlive(id)||over){clearInterval(iv);return}draw();if(Date.now()>=end){over=true;clearInterval(iv);[].slice.call(A.querySelectorAll('.rc')).forEach(function(c){c.remove()});
 fStatus(left+' circle'+(left>1?'s':'')+' hit you!');hurtMe(left*hit);if(fAlive(id))fl(atkDone,800)}},100);draw()};
 
-ATK.mash=function(){var id=BF.id,A=arena(),secs=+(10*mgTime()).toFixed(1),need=mashNeed(),got=0,end=Date.now()+secs*1000,over=false;
+ATK.mash=function(){var id=BF.id,A=arena(),secs=+(8*mgTime()).toFixed(1),need=mashNeed(),got=0,end=Date.now()+secs*1000,over=false;
 fStatus('Tap '+need+' times in '+secs+' seconds!');
 var w=document.createElement('div');w.className='acol';var cnt=document.createElement('div');cnt.className='big';var b=document.createElement('button');b.className='mash tapbig';b.textContent='TAP!';var tm=document.createElement('div');
 w.appendChild(cnt);w.appendChild(b);w.appendChild(tm);A.appendChild(w);
@@ -1072,7 +1072,7 @@ b.onpointerdown=function(e){e.preventDefault();if(over||!fAlive(id)||!fOk())retu
 
 ATK.dodge=function(){var id=BF.id,A=arena();fStatus('Drag the blue dot to dodge!');var cv=grab(document.createElement('canvas'));cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
-var R=13,px=W/2,py=H-34,obs=[],t0=performance.now(),last=t0,gt=0,dur=(6+BF.d*3)*1000,every=Math.max(205,610-BF.d*370),nextS=400,speed=185+BF.d*235,inv=0,hit=Math.max(3,Math.round(BF.dmg*0.45)),down=false,hits=0;
+var R=13,px=W/2,py=H-34,obs=[],t0=performance.now(),last=t0,gt=0,dur=(6+BF.d*3)*1000,every=Math.max(205,610-BF.d*370),nextS=400,speed=185+BF.d*235,inv=0,hit=5,down=false,hits=0;
 var mut=(getComputedStyle(document.documentElement).getPropertyValue('--muted')||'').trim()||'#888';
 function setX(e){var r=cv.getBoundingClientRect();px=Math.max(R,Math.min(W-R,(e.clientX-r.left)*(r.width?W/r.width:1)))}
 cv.onpointerdown=function(e){e.preventDefault();down=true;try{cv.setPointerCapture(e.pointerId)}catch(_){}setX(e)};
@@ -1109,7 +1109,7 @@ function show(){r++;pos=0;lock(true);fStatus('Watch... ('+r+' of '+L+')');
 for(var j=0;j<r;j++)(function(j){fl(function(){lit(seq[j],fms)},350+j*(fms+gap))})(j);
 fl(function(){lock(false);fStatus('Your turn! ('+r+' of '+L+')')},350+r*(fms+gap))}
 function press(k){if(!input||!fAlive(id))return;lit(k,150);
-if(k!==seq[pos]){lock(true);fStatus('Wrong!');hurtMe(BF.dmg);if(fAlive(id))fl(atkDone,800);return}
+if(k!==seq[pos]){lock(true);fStatus('Wrong!');hurtMe(10);if(fAlive(id))fl(atkDone,800);return}
 pos++;if(pos>=r){lock(true);if(r>=L){if(!fCounter(3.6))return;fl(atkDone,800)}else fl(show,300)}}
 show()};
 
@@ -1212,10 +1212,17 @@ var TRACE=[
 {n:'Loop-the-loop',r:3,p:[[.04,.72],[.3,.72],[.55,.56],[.62,.26],[.45,.12],[.33,.3],[.42,.6],[.65,.72],[.96,.7]]},
 {n:'Infinity sign',r:3,p:[[.2,.25],[.38,.33],[.5,.5],[.62,.67],[.8,.75],[.94,.52],[.8,.27],[.62,.35],[.5,.5],[.38,.67],[.2,.75],[.07,.52]]},
 {n:'Star',r:3,p:[[.5,.08],[.765,.894],[.072,.391],[.928,.391],[.235,.894],[.43,.28]]},
-{n:'Snake',r:3,p:twav(18,0.22,4)}];
+{n:'Snake',r:3,p:twav(18,0.22,4)},
+/* r:4 = very complex, only for the hardest bosses */
+{n:'Pretzel',r:4,p:[[.3,.94],[.5,.74],[.7,.52],[.84,.32],[.76,.12],[.56,.12],[.5,.3],[.44,.12],[.24,.12],[.16,.32],[.3,.52],[.5,.74],[.7,.94]]},
+{n:'Clover',r:4,p:(function(){var o=[];for(var i=0;i<=54;i++){var t=Math.PI*i/54,r=.44*Math.cos(3*t);o.push([.5+r*Math.cos(t),.5+r*Math.sin(t)])}return o})()},
+{n:'Long maze',r:4,p:[[.06,.06],[.94,.06],[.94,.28],[.06,.28],[.06,.5],[.94,.5],[.94,.72],[.06,.72],[.06,.94],[.94,.94]]},
+{n:'Heartbeat',r:4,p:tsharp([[.02,.55],[.16,.55],[.21,.42],[.26,.55],[.34,.55],[.39,.12],[.44,.92],[.49,.55],[.58,.55],[.63,.4],[.68,.55],[.76,.55],[.81,.18],[.86,.88],[.9,.55],[.98,.55]],.12)},
+{n:'Coil',r:4,p:(function(){var o=[];for(var i=0;i<=64;i++){var t=8*Math.PI*i/64;o.push([.1+.8*i/64-.07*Math.sin(t),.5-.3*Math.cos(t)])}return o})()},
+{n:'Big spiral',r:4,p:(function(){var o=[];for(var i=0;i<=44;i++){var t=i/44,a=(-90+t*900)*Math.PI/180,rr=.47-.38*t;o.push([.5+rr*Math.cos(a),.5+rr*Math.sin(a)])}return o})()}];
 function lcName(n){return /^[A-Z][a-z]/.test(n)?n.charAt(0).toLowerCase()+n.slice(1):n}
 var traceLast=-1;
-function pickShape(d){var mr=d<0.2?1:d<0.5?2:3,L=[];TRACE.forEach(function(s,i){if(s.r<=mr&&i!==traceLast)L.push(i)});var i=L[Math.floor(Math.random()*L.length)];traceLast=i;return TRACE[i]}
+function pickShape(d){var mr=d<0.2?1:d<0.5?2:d<0.8?3:4,L=[];TRACE.forEach(function(s,i){if(s.r<=mr&&i!==traceLast)L.push(i)});var i=L[Math.floor(Math.random()*L.length)];traceLast=i;return TRACE[i]}
 ATK.trace=function(){var id=BF.id,A=arena(),d=BF.d,shape=pickShape(d);fStatus('Trace the '+lcName(shape.n)+'! Drag the blue circle to the 🏁');
 var cv=grab(document.createElement('canvas'));cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
@@ -1307,10 +1314,17 @@ var DRAW=[
 {n:'Sailboat',r:3,s:[[[.1,.7],[.9,.7],[.76,.86],[.24,.86],[.1,.7]],[[.5,.7],[.5,.06]],[[.53,.1],[.86,.62],[.53,.62],[.53,.1]],[[.47,.2],[.2,.62],[.47,.62],[.47,.2]]]},
 {n:'Ice cream cone',r:3,s:[[[.3,.46],[.5,.95],[.7,.46],[.3,.46]],tarc(.5,.36,.21,.2,160,380,24),dcirc(.5,.12,.04),[[.36,.56],[.59,.72]],[[.64,.56],[.41,.72]]]},
 {n:'Umbrella',r:3,s:[tarc(.5,.5,.42,.36,180,360,30),tarc(.22,.5,.14,.06,180,360,10),tarc(.5,.5,.14,.06,180,360,10),tarc(.78,.5,.14,.06,180,360,10),[[.5,.5],[.5,.86]].concat(tarc(.43,.86,.07,.07,0,180,8))]},
-{n:'Star in a circle',r:3,s:[dcirc(.5,.5,.46),dstar(.5,.53,.4,.16,5)]}];
+{n:'Star in a circle',r:3,s:[dcirc(.5,.5,.46),dstar(.5,.53,.4,.16,5)]},
+/* r:4 = very detailed, only for the hardest bosses */
+{n:'Castle',r:4,s:[[[.12,.94],[.12,.3],[.22,.3],[.22,.38],[.32,.38],[.32,.3],[.42,.3],[.42,.38],[.58,.38],[.58,.3],[.68,.3],[.68,.38],[.78,.38],[.78,.3],[.88,.3],[.88,.94],[.12,.94]],[[.42,.94],[.42,.72]].concat(tarc(.5,.72,.08,.08,180,360,10)).concat([[.58,.94]]),drect(.2,.52,.29,.62),drect(.71,.52,.8,.62),[[.5,.38],[.5,.06]],[[.5,.06],[.66,.11],[.5,.16]]]},
+{n:'Robot',r:4,s:[drect(.22,.24,.78,.74),[[.5,.24],[.5,.12]],dcirc(.5,.09,.03),dcirc(.37,.42,.07),dcirc(.63,.42,.07),drect(.34,.56,.66,.64),[[.45,.56],[.45,.64]],[[.55,.56],[.55,.64]],drect(.14,.4,.22,.54),drect(.78,.4,.86,.54),[[.4,.74],[.4,.9]],[[.6,.74],[.6,.9]]]},
+{n:'Butterfly',r:4,s:[tarc(.5,.54,.04,.26,0,360,24),tarc(.3,.37,.2,.16,0,360,30),tarc(.7,.37,.2,.16,0,360,30),tarc(.33,.68,.13,.12,0,360,24),tarc(.67,.68,.13,.12,0,360,24),[[.48,.29],[.38,.08]],[[.52,.29],[.62,.08]]]},
+{n:'UFO',r:4,s:[tarc(.5,.46,.18,.17,180,360,20),tarc(.5,.52,.42,.1,0,360,36),dcirc(.28,.52,.025),dcirc(.5,.55,.025),dcirc(.72,.52,.025),[[.38,.62],[.24,.94]],[[.62,.62],[.76,.94]]]},
+{n:'Bicycle',r:4,s:[dcirc(.24,.68,.17),dcirc(.76,.68,.17),[[.24,.68],[.42,.42],[.68,.42],[.76,.68]],[[.24,.68],[.5,.68],[.42,.42]],[[.5,.68],[.68,.42]],[[.42,.42],[.42,.34]],[[.35,.34],[.49,.34]],[[.68,.42],[.66,.28],[.76,.26]]]},
+{n:'Pizza slice',r:4,s:[[[.5,.94],[.14,.2],[.86,.2],[.5,.94]],[[.17,.27],[.83,.27]],dcirc(.38,.4,.06),dcirc(.6,.42,.06),dcirc(.5,.6,.055),dcirc(.5,.78,.03)]}];
 var drawLast=-1;
 /* easy bosses: simple shapes only; then simple + medium; medium; medium + complex; the hardest bosses: complex only */
-function pickDraw(d){var lo=d<0.45?1:d<0.85?2:3,hi=d<0.2?1:d<0.7?2:3,L=[];DRAW.forEach(function(x,i){if(x.r>=lo&&x.r<=hi&&i!==drawLast)L.push(i)});var i=L[Math.floor(Math.random()*L.length)];drawLast=i;return DRAW[i]}
+function pickDraw(d){var lo=d<0.45?1:d<0.8?2:d<0.9?3:4,hi=d<0.2?1:d<0.65?2:d<0.8?3:4,L=[];DRAW.forEach(function(x,i){if(x.r>=lo&&x.r<=hi&&i!==drawLast)L.push(i)});var i=L[Math.floor(Math.random()*L.length)];drawLast=i;return DRAW[i]}
 /* scoring: both drawings become evenly spaced dots, then each is centered and scaled to the same size. Your drawing is
    also tried a little tilted (DRAW_ROT degrees) and a little wider/narrower (DRAW_XS), keeping the best fit.
    Coverage = how much of the real shape you drew near; neatness = how much of your drawing is near the real shape.
