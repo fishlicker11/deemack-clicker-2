@@ -358,6 +358,11 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .gall{width:100%;margin:2px 0 8px}.gup.own button{background:#22a35a;color:#fff;opacity:1}
 .gnote{color:var(--muted);font-size:13px;padding:6px 0}.gsum{border-top:1px solid var(--line);margin-top:4px;padding-top:8px}
 .gwin{text-align:center;padding:6px 0}.gwin b{font-size:18px}.gwin button{margin-top:6px;padding:10px 14px}
+.onl{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));right:8px;z-index:19;border:0;border-radius:999px;padding:5px 11px;background:rgba(0,0,0,.8);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.onl i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;box-shadow:0 0 6px #22c55e;vertical-align:1px}.onl.err i{background:#9ca3af;box-shadow:none}
+.onl[hidden],.onlp[hidden]{display:none}
+.onlp{position:fixed;top:calc(40px + env(safe-area-inset-top,0px));right:8px;z-index:19;width:min(260px,88vw);max-height:60vh;overflow:auto;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);box-sizing:border-box}
+.onlp>b{display:block;margin-bottom:4px}.onlp div{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-top:1px solid var(--line)}.onlp div b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.onlp span{color:var(--muted);flex:none}
 #gend{position:fixed;inset:0;z-index:60;background:#000;color:#fff;overflow:hidden}#gend[hidden]{display:none}
 .gscroll{position:absolute;left:0;right:0;top:100%;text-align:center;padding:0 20px;max-width:560px;margin:0 auto}
 .gscroll h1{font-size:40px;margin:10px 0;letter-spacing:2px;color:#fde68a}.gscroll h2{font-size:24px;margin:22px 0 8px}.gscroll h3{font-size:14px;letter-spacing:2px;color:#a5b4fc;margin:26px 0 6px}.gscroll p{color:#cbd5e1}.gscroll .gnm{font-size:18px;margin:4px 0}
@@ -439,6 +444,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div class="garea" id="garea" hidden><canvas id="gcv" aria-label="The galaxy"></canvas><div class="glock" id="glock" hidden></div></div><div class="glist" id="glist" hidden></div>
 </div></div>
 <div id="bf" hidden><div class="bfw"><div class="bfh"><img id="bfi" alt=""><div class="bft"><b id="bfn"></b><span class="dif" id="bfd"></span></div><button class="xbtn2" id="bfx" aria-label="Run away">✕</button></div><div class="hpl"><span>Boss</span><span id="bfht"></span></div><div class="hp"><div id="bfhb" class="hpf boss"></div></div><div class="hpl"><span>You</span><span id="bfpt"></span></div><div class="hp"><div id="bfpb" class="hpf me"></div></div><div id="bfs" class="bfs"></div><div id="bfa" class="bfa"></div></div></div>
+<button id="onl" class="onl" hidden aria-label="Who's online"></button><div id="onlp" class="onlp" hidden></div>
 <div id="gend" hidden><div class="gscroll" id="gscroll"></div><button id="gendx" aria-label="Close">✕</button></div>
 <div class="ov" id="ev" hidden><div class="box"><h1>Erase your save?</h1><p id="evs"></p><input id="evi" maxlength="10" placeholder="Type ERASE" autocomplete="off" autocapitalize="characters" spellcheck="false"><button id="evgo" disabled>Erase save</button><button id="evx" class="sec">Cancel</button></div></div>
 <div class="ov" id="bw" hidden><div class="box"><div class="bwt">🏆</div><img id="bwi" class="bwimg" alt=""><h1 id="bwn"></h1><p id="bwp"></p><div class="bwrw" id="bwrw"></div><div class="bwst" id="bws"></div><button id="bwr">Replay boss</button><button id="bwb" class="sec">Back to boss menu</button></div></div>
@@ -462,7 +468,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=115;
+var BUILD=116;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1828,6 +1834,8 @@ function allTeachers(){return isOwnerName(NAME)&&devOk()&&devFlag('allteach')}
 var DEVCMDS=[
 {id:'themes',type:'toggle',name:'Unlock all themes',desc:'Every theme can be used, no achievements needed.',
  run:function(on){if(on)toast('All themes unlocked','#a855f7');else{var n=achCount(S);if(S.theme>=0&&n<5*(S.theme+1)){S.theme=-1;applyTheme(-1);save()}toast('Themes back to normal','#a855f7')}if(!$('tv').hidden)renderThemes()}},
+{id:'online',type:'toggle',name:'Who\u2019s online',desc:'Shows how many players are online right now at the top right of the main screen (their game sent its score in the last 75 seconds). Tap it to see their names.',
+ run:function(on){onlUI();if(on)onlFetch();toast(on?'Showing who\u2019s online':'Online counter hidden','#a855f7')}},
 {id:'allteach',type:'toggle',name:'Show all teachers',desc:'Shows every teacher in the shop, even ones you haven\u2019t unlocked yet. Doesn\u2019t buy anything.',
  run:function(on){update(true);toast(on?'All teachers shown':'Teachers back to normal','#a855f7')}},
 {id:'setpp',type:'input',name:'Set prestige points',desc:'Sets how many prestige points you have to spend.',ph:'Points',
@@ -2409,6 +2417,27 @@ var c=document.createElement('div');c.className='lbm3';c.textContent=lbStatus();
 var LB_EVERY=15,lbNext=0;
 function lbTick(){if($('lv').hidden||document.hidden)return;lbMe();var n=Date.now();if(n>=lbNext){lbNext=n+LB_EVERY*1000;loadLB()}$('lbref').textContent='🔄 Refreshes every '+LB_EVERY+' seconds · next in '+Math.max(1,Math.ceil((lbNext-n)/1000))+'s'}
 setInterval(lbTick,1000);
+/* ===== Owner only (dev toggle "Who's online"): a pill at the top right of the screen with how many players are online now,
+   meaning their game sent its score to the server in the last ONL_MS (a running game sends it every 15 s, a game in a
+   background tab about once a minute). Tap it for their names. It checks the server every 20 seconds while it's on. ===== */
+var ONL_MS=75000,onlList=null,onlErr=false,onlBusy=false;
+function onlOn(){return isOwnerName(NAME)&&devOk()&&devFlag('online')&&!!FB}
+function onlFetch(){if(!onlOn()||onlBusy||document.hidden)return;onlBusy=true;
+tfetch(FB+'/players.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():Promise.reject(r.status)}).then(function(o){onlBusy=false;onlErr=false;var n=Date.now(),by={};o=o&&typeof o==='object'?o:{};
+for(var k in o){var d=o[k];if(!d||typeof d!=='object')continue;var t=+d.t||0;if(!(n-t<=ONL_MS&&t<=n+120000))continue;var nm=String(d.name||'Player').slice(0,16),key=nm.toLowerCase();
+if(!by[key]||t>by[key].t)by[key]={name:nm,t:t,me:k===uid||key===String(NAME||'').toLowerCase()}}
+onlList=Object.keys(by).map(function(x){return by[x]}).sort(function(a,b){return b.t-a.t});onlUI()},function(){onlBusy=false;onlErr=true;onlUI()})}
+function onlUI(){var b=$('onl'),on=onlOn();if(b.hidden===on)b.hidden=!on;if(!on){$('onlp').hidden=true;return}b.textContent='';b.classList.toggle('err',onlErr&&!onlList);
+b.appendChild(document.createElement('i'));b.appendChild(document.createTextNode(onlList?onlList.length+' online':onlErr?'Can\u2019t check':'Checking…'));if(!$('onlp').hidden)onlPanel()}
+function onlPanel(){var P=$('onlp');P.textContent='';var h=document.createElement('b');
+if(!onlList){h.textContent=onlErr?'Can\u2019t reach the server right now.':'Checking…';P.appendChild(h);return}
+h.textContent=onlList.length+' player'+(onlList.length===1?'':'s')+' online now';P.appendChild(h);
+onlList.forEach(function(x){var r=document.createElement('div'),a=document.createElement('b'),sp=document.createElement('span');a.textContent=x.name+(x.me?' (you)':'');var sec=Math.max(0,Math.round((Date.now()-x.t)/1000));sp.textContent=sec<5?'now':sec+'s ago';r.appendChild(a);r.appendChild(sp);P.appendChild(r)})}
+$('onl').onclick=function(e){e.stopPropagation();var P=$('onlp');P.hidden=!P.hidden;if(!P.hidden){onlPanel();onlFetch()}};
+document.addEventListener('click',function(e){var P=$('onlp');if(!P.hidden&&!P.contains(e.target))P.hidden=true});
+setInterval(function(){if(onlOn())onlFetch();else if(!$('onl').hidden)onlUI()},20000);
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&onlOn())onlFetch()});
+onlUI();if(onlOn())onlFetch();
 if(NAME)pushStats(true);
 if(!LS_OK)$('nosave').hidden=false;
 applyTheme(S.theme);checkAch();update(true);ready=true;renderWebs();renderSlots();
