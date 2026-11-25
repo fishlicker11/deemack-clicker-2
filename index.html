@@ -468,7 +468,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=117;
+var BUILD=118;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -477,6 +477,7 @@ var CREDITS=[
 {role:'PLAYTESTERS',names:['Oliver J','Robbie M','Xander L','Garrett L','Kale S','Ty B','Jackson E']},
 {role:'FIRST PERSON TO BEAT DEEMACK CLICKER 1',names:['Jackson E']}];
 var UPDATES=[
+{id:8,date:'Nov 24, 2026',title:'The game\u2019s code has changed a little.',text:'The game calculates money differently now and you can now go up to 1e999 or 1x10⁹⁹⁹ Games Blocked.'},
 {id:7,date:'Nov 22, 2026',title:'Added the ability to show and hide teachers + something special if you complete the skill tree.',text:''},
 {id:6,date:'Nov 21, 2026',title:'New minigames/boss attacks!',text:'Check them out.'},
 {id:5,date:'Nov 21, 2026',title:'Added new features to boss mode + player upgrades.',text:'Ps. Check the bottom of the achievements tab'},
@@ -489,6 +490,8 @@ var UPDATES=[
    everyone after it moves up one spot and takes that spot's strength (Mr Cluver took Mr Finney's old spot; Ms Winkler
    took Mr Lawrence's; Officer Kitts took Mr Holmgren's; Young Mac took Mr Mac's; Mr Myers took Young Hill's; Mr Ingram took Mr Myers's;
    Mr Philips took Mr Finney's; Gordon took Mr Rutan's). New top spots are added at the end. Bosses follow the same order. */
+/* big numbers: amounts are kept as powers of 10 up to CAP_L (see lAdd and friends); LZ means nothing (0) */
+var CAP_L=999,LZ=-Infinity,LOG2=Math.LOG10E*Math.LN2;
 var T=[
 {id:"davis",name:"Kid Davis",cps:2,buy:25,up:200},
 {id:"cluver",name:"Mr Cluver",cps:100,buy:2507,up:20010},
@@ -515,7 +518,7 @@ var T=[
 var MEM={},LS_OK=(function(){try{var k='deemackClicker2.test';localStorage.setItem(k,'1');localStorage.removeItem(k);return true}catch(e){return false}})();
 var LS=LS_OK?localStorage:{getItem:function(k){return Object.prototype.hasOwnProperty.call(MEM,k)?MEM[k]:null},setItem:function(k,v){MEM[k]=String(v)},removeItem:function(k){delete MEM[k]}};
 var BASE="deemackClicker2.slot",ACT="deemackClicker2.active",PCT=0.2,PRICE=0.9;
-var CK=[],disp=null,bestMem=0; /* bestMem: the highest income per second this session without boosts or clicking (totalOf), for the leaderboard */
+var CK=[],disp=null,bestMem=-Infinity; /* disp: the shown "per second" (a power of 10); bestMem: the highest income per second this session without boosts or clicking (totalL, a power of 10), for the leaderboard */
 /* Runes: each click has a RUNE_CHANCE chance (0.5%) to find a rune (raised by Fortune runes). Only when a rune drops is its rarity rolled, using the RW weights (out of 10000):
    Common 70%, Uncommon 22%, Rare 6%, Epic 1.5%, Legendary 0.49%, Mythic 0.01%.
    Quest reward runes have their own odds (QRW, next to giveRuneMin). */
@@ -569,7 +572,8 @@ function rlParse(r){var x={next:0,pct:0,until:0,d:[0,0,0,0,0,0]};if(r&&typeof r=
 function stParse(o){var x={clicks:0,crit:0,maxcps:0,caught:0,earned:0,found:0,sold:0,deleted:0,dice:0,rolled:0,bp:0,bs:0,buys:0,ups:0,bw:0,gold:0,rf:[0,0,0,0,0,0],kf:[]};
 if(o&&typeof o==='object'){Object.keys(x).forEach(function(k){if(k==='rf'||k==='kf')return;x[k]=+o[k]>0?+o[k]:0});
 if(Array.isArray(o.rf))for(var i=0;i<6;i++)x.rf[i]=+o.rf[i]>0?+o.rf[i]:0;
-if(Array.isArray(o.kf))for(var j=0;j<o.kf.length&&j<64;j++)x.kf[j]=+o.kf[j]>0?+o.kf[j]:0}return x}
+if(Array.isArray(o.kf))for(var j=0;j<o.kf.length&&j<64;j++)x.kf[j]=+o.kf[j]>0?+o.kf[j]:0}
+x.earnedL=(o&&typeof o.earnedL==='number'&&isFinite(o.earnedL))?Math.min(CAP_L,o.earnedL):lOf(x.earned);return x}
 var TREE=[[-1,0,0,0,1,36],[0,0,-48,2,1,36],[1,0,-96,8,1,36],[2,0,-144,3,1,36],[3,0,-192,0,2,36],[4,0,-240,4,2,36],[5,0,-288,0,2,36],[6,0,-336,5,2,36],[7,-12,-383,0,2,20],[8,-35,-424,3,2,20],[9,-59,-463,0,2,20],[10,-83,-503,4,2,20],[11,-105,-543,0,3,20],[12,-128,-583,6,3,20],[13,-196,-575,0,3,12],[14,-231,-598,3,3,12],[15,-266,-621,0,4,12],[16,-292,-657,4,4,12],[17,-321,-688,7,5,12],[18,-422,-579,2,6,4],[19,-463,-580,0,6,4],[20,-492,-615,3,7,4],[21,-530,-624,0,8,4],[22,-561,-652,5,9,4],[23,-616,-602,0,11,2],[24,-646,-633,2,12,2],[25,-683,-643,0,14,2],[26,-719,-652,6,16,2],[27,-760,-640,0,18,1],[28,-800,-631,4,21,1],[29,-831,-660,0,24,1],[30,-862,-686,1,28,1],[27,-741,-709,0,18,1],[32,-771,-735,4,21,1],[33,-811,-730,0,24,1],[34,-837,-772,1,28,1],[23,-572,-728,0,11,2],[36,-607,-742,2,12,2],[37,-643,-755,0,14,2],[38,-672,-786,7,16,2],[39,-723,-760,0,18,1],[40,-757,-774,4,21,1],[41,-779,-821,0,24,1],[42,-815,-831,1,28,1],[39,-698,-822,0,18,1],[44,-724,-854,4,21,1],[45,-753,-883,0,24,1],[46,-787,-898,1,28,1],[18,-355,-711,2,6,4],[48,-384,-742,0,6,4],[49,-412,-772,3,7,4],[50,-434,-813,5,8,4],[51,-495,-791,4,9,2],[52,-521,-824,0,11,2],[53,-559,-837,2,12,2],[54,-578,-883,6,14,2],[55,-630,-869,3,16,1],[56,-657,-900,0,18,1],[57,-687,-925,4,21,1],[58,-712,-959,1,24,1],[55,-596,-928,3,16,1],[60,-616,-968,0,18,1],[61,-646,-992,4,21,1],[62,-678,-1015,1,24,1],[51,-445,-866,4,9,2],[64,-467,-904,0,11,2],[65,-492,-938,7,12,2],[66,-530,-953,0,14,1],[67,-557,-982,3,16,1],[68,-586,-1009,0,18,1],[69,-617,-1033,1,21,1],[66,-506,-983,0,14,1],[71,-532,-1014,3,16,1],[72,-540,-1067,0,18,1],[73,-569,-1095,1,21,1],[18,-256,-821,2,6,4],[75,-268,-868,0,6,4],[76,-290,-906,3,7,4],[77,-320,-937,0,8,4],[78,-334,-982,5,9,4],[79,-397,-983,0,11,2],[80,-407,-1031,2,12,2],[81,-435,-1062,0,14,2],[82,-456,-1100,6,16,2],[83,-498,-1116,0,18,1],[84,-529,-1142,4,21,1],[85,-563,-1166,0,24,1],[86,-561,-1226,1,28,1],[83,-466,-1146,0,18,1],[88,-491,-1179,4,21,1],[89,-505,-1222,0,24,1],[90,-523,-1261,1,28,1],[79,-306,-1056,0,11,2],[92,-326,-1094,2,12,2],[93,-356,-1126,0,14,2],[94,-368,-1170,3,16,2],[95,-382,-1214,7,18,2],[96,-424,-1235,4,21,1],[97,-436,-1279,0,24,1],[98,-469,-1307,2,28,1],[99,-497,-1338,1,32,1],[96,-375,-1269,4,21,1],[101,-407,-1299,0,24,1],[102,-404,-1351,2,28,1],[103,-421,-1391,1,32,1],[13,-72,-666,8,3,8],[105,-56,-720,3,3,8],[106,-53,-769,0,4,8],[107,-61,-816,4,4,8],[108,-57,-865,5,5,8],[109,-134,-892,2,6,4],[110,-136,-940,0,6,4],[111,-158,-981,3,7,4],[112,-167,-1027,0,8,4],[113,-171,-1075,4,9,4],[114,-183,-1119,6,11,4],[115,-247,-1141,2,12,2],[116,-267,-1180,0,14,2],[117,-273,-1227,7,16,2],[118,-295,-1264,0,18,1],[119,-317,-1302,4,21,1],[120,-333,-1343,0,24,1],[121,-354,-1380,1,28,1],[118,-262,-1280,0,18,1],[123,-282,-1319,4,21,1],[124,-293,-1361,0,24,1],[125,-273,-1418,1,28,1],[115,-143,-1179,2,12,2],[127,-150,-1224,0,14,2],[128,-162,-1268,3,16,2],[129,-158,-1316,5,18,2],[130,-213,-1346,4,21,1],[131,-203,-1396,0,24,1],[132,-219,-1438,2,28,1],[133,-231,-1480,1,32,1],[130,-158,-1362,4,21,1],[135,-168,-1406,0,24,1],[136,-153,-1455,2,28,1],[137,-175,-1496,1,32,1],[109,2,-917,2,6,4],[139,5,-964,0,6,4],[140,10,-1011,3,7,4],[141,0,-1058,0,8,4],[142,3,-1105,4,9,4],[143,6,-1152,6,11,4],[144,-41,-1196,2,12,2],[145,-43,-1242,0,14,2],[146,-49,-1288,7,16,2],[147,-76,-1330,0,18,1],[148,-86,-1374,4,21,1],[149,-87,-1420,0,24,1],[150,-108,-1462,1,28,1],[147,-20,-1335,0,18,1],[152,-36,-1379,4,21,1],[153,-22,-1425,0,24,1],[154,-16,-1470,1,28,1],[144,55,-1195,2,12,2],[156,56,-1241,0,14,2],[157,56,-1287,3,16,2],[158,74,-1332,0,18,2],[159,69,-1378,5,21,2],[160,14,-1427,0,24,1],[161,25,-1472,2,28,1],[162,49,-1515,8,32,1],[163,21,-1562,1,37,1],[160,102,-1419,0,24,1],[165,91,-1466,2,28,1],[166,86,-1512,0,32,1],[167,103,-1555,1,37,1],[7,15,-381,8,2,16],[169,43,-418,3,2,16],[170,72,-452,0,2,16],[171,100,-487,4,2,16],[172,128,-522,0,3,16],[173,154,-558,6,3,16],[174,137,-632,0,3,8],[175,136,-687,3,3,8],[176,149,-733,0,4,8],[177,165,-776,4,4,8],[178,173,-824,7,5,8],[179,130,-894,2,6,4],[180,135,-941,0,6,4],[181,162,-980,3,7,4],[182,155,-1031,0,8,4],[183,185,-1070,5,9,4],[184,153,-1128,0,11,2],[185,154,-1175,2,12,2],[186,170,-1218,0,14,2],[187,159,-1268,6,16,2],[188,130,-1321,0,18,1],[189,165,-1358,4,21,1],[190,141,-1410,0,24,1],[191,176,-1447,1,28,1],[188,211,-1299,0,18,1],[193,213,-1344,4,21,1],[194,233,-1384,0,24,1],[195,219,-1435,1,28,1],[184,239,-1094,0,11,2],[197,254,-1136,2,12,2],[198,269,-1178,0,14,2],[199,279,-1223,7,16,2],[200,251,-1283,0,18,1],[201,261,-1327,4,21,1],[202,274,-1369,0,24,1],[203,299,-1406,1,28,1],[200,323,-1249,0,18,1],[205,333,-1292,4,21,1],[206,331,-1342,0,24,1],[207,340,-1386,1,28,1],[179,256,-821,2,6,4],[209,268,-867,0,6,4],[210,297,-900,3,7,4],[211,312,-944,0,8,4],[212,344,-974,5,9,4],[213,310,-1053,0,11,2],[214,324,-1096,2,12,2],[215,346,-1133,0,14,2],[216,372,-1168,6,16,2],[217,351,-1232,0,18,1],[218,364,-1274,4,21,1],[219,403,-1300,0,24,1],[220,406,-1349,1,28,1],[217,407,-1194,0,18,1],[222,437,-1224,4,21,1],[223,462,-1258,0,24,1],[224,463,-1310,1,28,1],[213,395,-985,0,11,2],[226,409,-1029,2,12,2],[227,433,-1064,0,14,2],[228,454,-1102,3,16,2],[229,477,-1137,7,18,2],[230,494,-1177,4,21,1],[231,498,-1229,0,24,1],[232,531,-1256,2,28,1],[233,551,-1293,1,32,1],[230,528,-1145,4,21,1],[235,540,-1191,0,24,1],[236,579,-1209,2,28,1],[237,595,-1251,1,32,1],[174,222,-537,0,3,8],[239,260,-551,3,3,8],[240,298,-567,0,4,8],[241,327,-599,4,4,8],[242,357,-629,5,5,8],[243,352,-715,2,6,4],[244,387,-737,8,6,4],[245,410,-775,3,7,4],[246,444,-798,0,8,4],[247,461,-845,6,9,4],[248,460,-913,0,11,2],[249,494,-935,2,12,2],[250,507,-984,0,14,2],[251,540,-1008,7,16,2],[252,543,-1068,0,18,1],[253,573,-1094,4,21,1],[254,595,-1130,0,24,1],[255,633,-1146,1,28,1],[252,592,-1005,0,18,1],[257,615,-1041,4,21,1],[258,633,-1083,0,24,1],[259,679,-1087,1,28,1],[248,522,-824,0,11,2],[261,555,-846,2,12,2],[262,577,-886,0,14,2],[263,609,-909,5,16,2],[264,617,-969,0,18,1],[265,658,-978,4,21,1],[266,680,-1015,0,24,1],[267,721,-1023,1,28,1],[264,659,-899,0,18,1],[269,689,-924,4,21,1],[270,724,-940,0,24,1],[271,749,-975,1,28,1],[243,427,-564,2,6,4],[273,462,-583,0,6,4],[274,492,-614,3,7,4],[275,524,-639,6,8,4],[276,548,-684,4,9,2],[277,577,-713,0,11,2],[278,607,-741,2,12,2],[279,643,-755,7,14,2],[280,658,-813,3,16,1],[281,694,-825,0,18,1],[282,715,-869,4,21,1],[283,750,-884,1,24,1],[280,680,-763,3,16,1],[285,721,-759,0,18,1],[286,753,-780,4,21,1],[287,787,-797,1,24,1],[276,574,-608,4,9,2],[289,616,-601,0,11,2],[290,651,-615,2,12,2],[291,681,-644,5,14,2],[292,712,-671,3,16,1],[293,738,-713,0,18,1],[294,776,-714,4,21,1],[295,802,-755,1,24,1],[292,725,-625,3,16,1],[297,758,-643,0,18,1],[298,791,-661,4,21,1],[299,827,-670,1,24,1],[0,0,72,0,5,15],[301,4,118,2,6,13],[302,5,164,0,6,13],[303,8,210,0,7,10],[304,13,256,2,8,8],[305,14,302,7,8,8],[306,13,348,0,9,7],[307,11,394,0,10,3],[308,9,440,7,12,3],[309,11,486,0,13,1],[310,9,532,2,14,1],[311,9,578,1,16,1],[312,5,624,1,17,1],[313,4,670,7,19,1],[314,5,716,0,22,1],[315,2,762,1,24,1],[301,-45,83,7,6,1],[317,-90,94,0,6,1],[318,-136,100,2,7,1],[319,-177,120,5,8,1],[320,-215,146,1,8,1],[321,-252,173,0,9,1],[322,-284,206,2,10,1],[301,46,78,8,6,1],[324,91,88,0,6,1],[325,136,97,2,7,1],[326,182,103,0,8,1],[327,226,115,0,8,1],[328,266,137,0,9,1],[329,302,165,7,10,1],[330,338,193,2,12,1],[303,-35,187,8,7,3],[332,-69,218,1,8,3],[333,-66,264,5,8,1],[334,-70,310,7,9,1],[335,-69,356,0,10,1],[336,-69,402,1,12,1],[333,-106,246,7,8,2],[338,-144,271,0,9,2],[339,-146,317,0,10,1],[340,-152,363,1,12,1],[341,-156,409,5,13,1],[342,-156,455,1,14,1],[339,-183,295,0,10,1],[344,-222,320,0,12,1],[345,-258,349,7,13,1],[346,-288,384,2,14,1],[347,-316,421,0,16,1],[348,-346,456,0,17,1],[349,-386,478,0,19,1],[350,-421,508,5,22,1],[351,-454,540,1,24,1],[352,-485,574,0,27,1],[353,-513,611,2,29,1],[304,49,232,0,8,2],[355,89,255,0,8,2],[356,126,282,0,9,2],[357,165,306,7,10,2],[358,205,328,8,12,2],[359,206,374,0,13,1],[360,204,420,2,14,1],[359,245,351,0,13,1],[362,291,357,0,14,1],[363,334,373,0,16,1],[364,374,396,1,17,1],[306,-24,328,1,9,1],[307,48,378,0,10,4],[367,83,408,1,12,4],[368,117,439,0,13,4],[369,152,469,5,14,4],[370,182,504,7,16,4],[371,210,540,2,17,4],[372,256,546,0,19,1],[373,302,552,2,22,1],[374,346,565,0,24,1],[375,389,581,1,27,1],[372,234,579,5,19,3],[377,213,620,0,22,1],[378,193,662,0,24,1],[379,172,703,5,27,1],[380,147,741,1,29,1],[377,257,619,7,22,2],[382,302,628,2,24,1],[383,347,639,2,27,1],[384,389,658,1,29,1],[385,431,677,2,33,1],[386,474,694,1,36,1],[382,277,661,0,24,1],[388,294,704,8,27,1],[389,333,729,2,29,1],[390,365,762,1,33,1],[391,389,801,2,36,1],[392,415,839,1,40,1],[309,-26,470,0,13,2],[394,-56,505,0,14,2],[395,-102,511,7,16,1],[396,-147,519,2,17,1],[395,-80,544,8,16,1],[398,-99,586,1,17,1],[399,-114,630,0,19,1],[400,-123,675,0,22,1],[401,-157,706,0,24,1],[402,-183,744,0,27,1],[403,-210,781,1,29,1]];
 /* ===== Skill tree: 301 upgrades shaped like a leafless tree, plus 104 roots below the ground (rows after TRUNK_N). Each row: [parent, x, y, type, cost, twigs above].
    Buying an upgrade reveals the ones growing from it. Upgrades get stronger (and pricier) further from the trunk.
@@ -647,9 +651,9 @@ case 'evo':return 'Evolving teachers costs '+pc(v)+' less';case 'tc':return 'Tea
 case 'tcuc':return 'Teachers and teacher upgrades '+pc(v)+' cheaper';case 'mgt':return 'Minigames give '+Math.round((v-1)*100)+'% more time';
 case 'time':return 'Minigames give double time and you deal ×3 damage in boss fights'}return ''}
 /* prestige points: 1 for reaching 1M earned in a run, +1 for every 1000x after that (1B, 1T, 1Qa...) */
-function ppBase(E){E=Math.min(+E||0,1e300);return E>=1e6?Math.floor((Math.log10(E)+1e-9-6)/3)+1:0}
-function ppPending(){var b=ppBase(S.run),x=galFx(S);return b<1?0:Math.floor(b*(1+tfx(S).pp+x.ppa)*x.ppm)+x.ppf} /* galaxy: +% (ppa), × (ppm) and flat (ppf) points; flat only when the run earns a point */
-function ppNext(){return 1e6*Math.pow(1000,ppBase(S.run))}
+function ppBaseL(L){L=lCap(L);return L>=6-1e-9?Math.floor((L+1e-9-6)/3)+1:0} /* 1 point at 1M earned, +1 for every 1000x after that (up to 1e999) */
+function ppPending(){var b=ppBaseL(S.runL),x=galFx(S);return b<1?0:Math.floor(b*(1+tfx(S).pp+x.ppa)*x.ppm)+x.ppf} /* galaxy: +% (ppa), × (ppm) and flat (ppf) points; flat only when the run earns a point */
+function ppNext(){return 6+3*ppBaseL(S.runL)} /* a power of 10 */
 /* you can prestige once every 10 minutes */
 var PRS_CD=10*60*1000;
 /* galaxy upgrades shorten it (never below 1 minute), and the Singularity makes it 30 seconds */
@@ -657,13 +661,13 @@ function prsCd(){var x=galFx(S);return x.cd30?30000:Math.max(60000,Math.round(PR
 function cdTxt(ms){var s=Math.round(ms/1000),m=Math.floor(s/60),r=s%60;return (m?m+' minute'+(m===1?'':'s'):'')+(m&&r?' ':'')+(r?r+' second'+(r===1?'':'s'):'')}
 function prsWait(){if(!S.prsAt)return 0;var n=Date.now();if(S.prsAt>n)S.prsAt=n;return Math.max(0,S.prsAt+prsCd()-n)}
 function mmss(ms){var t=Math.ceil(ms/1000);return Math.floor(t/60)+':'+(t%60<10?'0':'')+(t%60)}
-function fresh(){var d={gb:0,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},tf:0,th:{},gal:{},gseen:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{},ctheme:{bg:'#101828',ac:'#facc15'}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
+function fresh(){var d={gb:0,gbL:LZ,runL:LZ,own:{},lvl:{},runes:[],eq:[],cards:{},rolls:0,rl:rlParse(null),ach:{},st:stParse(null),rev:0,q:null,theme:-1,tv:2,gold:{m:1,until:0},qb:[],bossWins:{},tf:0,th:{},gal:{},gseen:{},bossCd:{},bossBuffs:{},pp:0,ppt:0,prs:0,prsAt:0,tree:[],run:0,stu:{u:0,lv:{},n:0,nx:0,by:{}},web:[],evo:{},as:[],flaw:{},pu:{lv:{},off:{}},bhp:0,bossMul:{},gach:{},ctheme:{bg:'#101828',ac:'#facc15'}};T.forEach(function(t){d.own[t.id]=0;d.lvl[t.id]=1});return d}
 /* owner only: save slot 2 lives under its own key (the old 3-slot merge never touches it) */
 function slotKey(n){return n===2?'deemackClicker2.oslot2':BASE+n}
 function ownerAtLoad(){try{return String(LS.getItem('deemackClicker2.name')||'').trim().replace(/\s+/g,' ').toLowerCase()==='trenton'&&LS.getItem('deemackClicker2.devok')==='1'}catch(e){return false}}
-function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);
+function load(n){var d=fresh();try{var o=JSON.parse(LS.getItem(slotKey(n)));if(o&&typeof o==='object'&&!Array.isArray(o)){d.gb=(typeof o.gb==='number'&&o.gb>=0&&isFinite(o.gb))?o.gb:0;d.gbL=(typeof o.gbL==='number'&&isFinite(o.gbL))?Math.min(CAP_L,o.gbL):lOf(d.gb);d.rev=+o.rev>0?Math.floor(+o.rev):0;d.q=(o.q&&typeof o.q==='object'&&!Array.isArray(o.q))?o.q:null;d.runes=Array.isArray(o.runes)?o.runes.filter(function(r){return r&&typeof r.id==='string'&&RT[r.k]&&RT[r.k].v[r.r]!=null}):[];d.eq=Array.isArray(o.eq)?o.eq.filter(function(id){return d.runes.some(function(r){return r.id===id})}).slice(0,3):[];d.rolls=o.rolls>0?Math.floor(o.rolls):0;d.rl=rlParse(o.rl);d.ach={};if(o.ach&&typeof o.ach==='object')Object.keys(o.ach).forEach(function(k){if(o.ach[k])d.ach[k]=1});d.st=stParse(o.st);d.bossWins={};if(o.bossWins&&typeof o.bossWins==='object')Object.keys(o.bossWins).forEach(function(k){if(o.bossWins[k])d.bossWins[k]=1});['bossCd','bossBuffs'].forEach(function(f){var src=o[f];if(src&&typeof src==='object')Object.keys(src).forEach(function(k){var v=+src[k];if(v>0&&T.some(function(x){return x.id===k}))d[f][k]=v})});d.theme=(o.theme===(o.theme|0)&&o.theme>=-1&&o.theme<100)?o.theme:-1;if(o.tv!==2&&d.theme>=0)d.theme=2*d.theme+1;d.gold=(o.gold&&+o.gold.m>=1&&+o.gold.m<=3&&+o.gold.until>0)?{m:+o.gold.m,until:+o.gold.until}:{m:1,until:0};d.qb=Array.isArray(o.qb)?o.qb.filter(function(q){return q&&+q.p>0&&+q.p<=1000&&+q.un>+q.st&&+q.st>0}).map(function(q){return{p:+q.p,st:+q.st,un:+q.un}}):[];d.cards={};if(o.cards&&typeof o.cards==='object'){Object.keys(o.cards).forEach(function(k){var v=+o.cards[k];if(v>=-1&&v<=9&&v===Math.floor(v)&&T.some(function(x){return x.id===k}))d.cards[k]=v})}T.forEach(function(t){var a=+(o.own&&o.own[t.id]),v=+(o.lvl&&o.lvl[t.id]);d.own[t.id]=a>0&&isFinite(a)?Math.floor(a):0;d.lvl[t.id]=v>=1&&isFinite(v)?Math.floor(v):1});d.pp=o.pp>0?Math.floor(o.pp):0;d.ppt=o.ppt>0?Math.floor(o.ppt):0;d.prs=o.prs>0?Math.floor(o.prs):0;d.prsAt=o.prsAt>0?+o.prsAt:0;d.tree=[];if(Array.isArray(o.tree)){var has={};o.tree.map(Number).filter(function(i){return i===Math.floor(i)&&i>=0&&i<TN.length}).sort(function(a,b){return a-b}).forEach(function(i){if(!has[i]&&(TN[i].p<0||has[TN[i].p])){has[i]=1;d.tree.push(i)}})}d.run=typeof o.run==='number'&&o.run>=0?o.run:(d.prs?0:d.st.earned);d.runL=(typeof o.runL==='number'&&isFinite(o.runL))?Math.min(CAP_L,o.runL):lOf(d.run);
 if(o.stu&&typeof o.stu==='object'){d.stu.u=o.stu.u?1:0;d.stu.n=+o.stu.n>0?Math.floor(+o.stu.n):0;d.stu.nx=+o.stu.nx>0?+o.stu.nx:0;if(o.stu.lv&&typeof o.stu.lv==='object')SUP.forEach(function(u){var v=+o.stu.lv[u.id];if(v>0&&v===Math.floor(v))d.stu.lv[u.id]=Math.min(u.max,v)});if(o.stu.by&&typeof o.stu.by==='object')STUDENTS.forEach(function(nm,i){var v=+o.stu.by[i];if(v>0&&isFinite(v))d.stu.by[i]=Math.floor(v)})}
-if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;d.web.push({s:s,k:k,st:st>0&&isFinite(st)?st:0,b:+w.b>0?+w.b:Date.now()})})}
+if(Array.isArray(o.web)){var seenS={};o.web.forEach(function(w){if(!w||typeof w!=='object')return;var s=+w.s,k=+w.k,st=+w.st;if(!(s>=0&&s<WEB_SLOTS.length&&s===Math.floor(s))||seenS[s]||!(k>=0&&k<STUDENTS.length&&k===Math.floor(k)))return;seenS[s]=1;st=st>0&&isFinite(st)?st:0;d.web.push({s:s,k:k,st:st,stL:(typeof w.stL==='number'&&isFinite(w.stL))?Math.min(CAP_L,w.stL):lOf(st),b:+w.b>0?+w.b:Date.now()})})}
 d.bhp=(+o.bhp>0&&+o.bhp<=BHP_MAX)?Math.round(+o.bhp/10)*10:0;if(o.bossMul&&typeof o.bossMul==='object')T.forEach(function(t){var v=+o.bossMul[t.id];if(v>1&&v<=1+BHP_MAX/100)d.bossMul[t.id]=v});
 if(o.gach&&typeof o.gach==='object'&&o.gach.lin)d.gach.lin=1;d.tf=(+o.tf>0&&isFinite(+o.tf))?Math.min(1e6,Math.floor(+o.tf)):0;if(o.th&&typeof o.th==='object')T.forEach(function(t){if(o.th[t.id])d.th[t.id]=1});if(o.gal&&typeof o.gal==='object')GAL.forEach(function(B){B.ups.forEach(function(u){if(o.gal[u.id])d.gal[u.id]=1})});if(o.gseen&&typeof o.gseen==='object')['orbit','bh','nova'].forEach(function(k){if(o.gseen[k])d.gseen[k]=1});if(o.ctheme&&typeof o.ctheme==='object')['bg','ac'].forEach(function(k){if(/^#[0-9a-f]{6}$/i.test(o.ctheme[k]))d.ctheme[k]=o.ctheme[k]});
 if(o.pu&&typeof o.pu==='object'){PUP.forEach(function(u){var v=o.pu.lv&&+o.pu.lv[u.id];if(v>0&&v===Math.floor(v))d.pu.lv[u.id]=Math.min(u.max,v);if(o.pu.off&&o.pu.off[u.id])d.pu.off[u.id]=1})}
@@ -692,27 +696,44 @@ var TAB_ID=Math.random().toString(36).slice(2)+Date.now().toString(36),tabDead=f
 function storedRev(){try{var o=JSON.parse(LS.getItem(slotKey(slot)));return o&&+o.rev>0?+o.rev:0}catch(e){return 0}}
 function killTab(why){if(tabDead)return;tabDead=true;$('tabmsg').textContent=why;$('tabv').hidden=false}
 var STALE_MSG='Your game was played in another tab or window since this one was open. This copy has paused so it can’t overwrite your newer progress.';
-function save(){if(tabDead)return;try{var cur=storedRev();if(cur>(S.rev||0)){killTab(STALE_MSG);return}S.rev=cur+1;LS.setItem(slotKey(slot),JSON.stringify(S));if(slot===1)LS.setItem(ACT,'1')}catch(e){}}
-function geo(b,r,k){return Math.ceil(b*(Math.pow(r,k)-1)/(r-1))}
-function maxK(b,r,m){var k=Math.max(0,Math.floor(Math.log(m*(r-1)/b+1)/Math.log(r)));while(geo(b,r,k+1)<=m)k++;while(k>0&&geo(b,r,k)>m)k--;return k}
+function save(){if(tabDead)return;try{moneySync();var cur=storedRev();if(cur>(S.rev||0)){killTab(STALE_MSG);return}S.rev=cur+1;LS.setItem(slotKey(slot),JSON.stringify(S));if(slot===1)LS.setItem(ACT,'1')}catch(e){}}
+/* the price of k more, starting at a price of 10^bL and going up r times each (a power of 10) */
+function geoL(bL,r,k){var kr=k*Math.log10(r);if(bL+kr<290)return lOf(Math.ceil(Math.pow(10,bL)*(Math.pow(r,k)-1)/(r-1)*(1-1e-12)));return bL+kr+Math.log10(1-Math.pow(r,-k))-Math.log10(r-1)}
+function maxKL(bL,r,mL){if(!(mL>LZ))return 0;var x=mL-bL+Math.log10(r-1),k=Math.max(0,Math.floor((x<300?Math.log10(Math.pow(10,x)+1):x)/Math.log10(r)));while(lGe(mL,geoL(bL,r,k+1)))k++;while(k>0&&!lGe(mL,geoL(bL,r,k)))k--;return k}
 function fmt(x){x=+x;if(!isFinite(x))return x>0?"∞":"0";if(x<0)x=0;if(x<1000)return String(x<100?Math.floor(x*100+1e-6)/100:Math.floor(x+1e-9));if(x>=1e66){var ex=Math.floor(Math.log10(x)),mt=x/Math.pow(10,ex);if(mt>=9.995){mt/=10;ex++}return mt.toFixed(2)+"e"+ex}var u=["","K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","Ud","Dd","Td","Qad","Qid","Sxd","Spd","Ocd","Nod","Vg"],e=Math.min(Math.floor(Math.log10(x)/3+1e-12),u.length-1),v=x/Math.pow(1000,e);if(v>=1000&&e<u.length-1){e++;v/=1000}var d=v<10?100:v<100?10:1,f=Math.floor(v*d+1e-6)/d;if(f>=1000&&e<u.length-1){e++;f=Math.floor(f/1000*100+1e-6)/100}return f.toFixed(f<10?2:f<100?1:0)+u[e]}
-function totalOf(d){var b=rbOf(d),s=1;T.forEach(function(t,i){s+=t.cps*Math.pow(2,d.lvl[t.id]-1+((d.evo&&d.evo[t.id])||0))*d.own[t.id]*tm(i,b)});var v=s*(1+cardBonus(d)+achBonus(d)+towerBonus(d))*tfx(d).inc*galFx(d).inc;return v>1e300?1e300:v} /* capped: past 1e300 nothing more can be earned */
-function total(){return totalOf(S)*boostMul()}
+/* income per second without boosts, as a power of 10 (capped at 1e999) */
+function totalL(d){var b=rbOf(d),terms=[0];T.forEach(function(t,i){var o=d.own[t.id];if(o>0)terms.push(Math.log10(t.cps)+(d.lvl[t.id]-1+((d.evo&&d.evo[t.id])||0))*LOG2+Math.log10(o)+Math.log10(tm(i,b)))});
+return lCap(lSum(terms)+Math.log10(1+cardBonus(d)+achBonus(d)+towerBonus(d))+Math.log10(tfx(d).inc)+Math.log10(galFx(d).inc))}
+function totalNowL(){return lCap(totalL(S)+Math.log10(boostMul()))} /* with boosts */
 /* what one teacher really earns per second right now: level x runes (Greed, Dawn, Dusk) x cards x achievements
    x skill tree income upgrades x active boosts. All the teachers' amounts add up to your income per second. */
-function allMul(){return (1+cardBonus(S)+achBonus(S)+towerBonus(S))*tfx(S).inc*galFx(S).inc*boostMul()}
+function allMulL(){return Math.log10(1+cardBonus(S)+achBonus(S)+towerBonus(S))+Math.log10(tfx(S).inc)+Math.log10(galFx(S).inc)+Math.log10(boostMul())}
 /* a teacher's income as a power of 10 (log10), so it can still be shown when it's past what a normal number can hold
    (about 1.8e308, where it would show ∞) */
-function eachLog(t,i,rb,am){return Math.log10(t.cps)+(S.lvl[t.id]-1+((S.evo&&S.evo[t.id])||0))*Math.LOG10E*Math.LN2+Math.log10(tm(i,rb||rbOf(S)))+Math.log10(am==null?allMul():am)}
-function fmtLog(L){if(!isFinite(L))return '0';if(L<300)return fmt(Math.pow(10,L));var ex=Math.floor(L),mt=Math.pow(10,L-ex);if(mt>=9.995){mt=1;ex++}return mt.toFixed(2)+'e'+ex}
-function fmtBig(v,L){return isFinite(v)&&v<1e300?fmt(v):fmtLog(L)}
-function eachOf(t,i,rb,am){return t.cps*Math.pow(2,S.lvl[t.id]-1+((S.evo&&S.evo[t.id])||0))*tm(i,rb||rbOf(S))*(am==null?allMul():am)}
-function tcps(t){return eachOf(t,T.indexOf(t))*S.own[t.id]}
-function plan(kind,t){var b,r;
-if(kind==="b"){b=PRICE*(1-Math.min(.75,rbOf(S)[2]))*t.buy*Math.pow(EVO_PRICE,(S.evo&&S.evo[t.id])||0)*Math.pow(1.15,S.own[t.id])*tfx(S).tc*galFx(S).tc;r=1.15}else{b=PRICE*(1-Math.min(.75,rbOf(S)[3]))*t.up*Math.pow(3.5,S.lvl[t.id]-1)*tfx(S).uc*galFx(S).uc;r=3.5}
-var k=mult==="max"?maxK(b,r,S.gb):mult,show=Math.max(k,1),cost=geo(b,r,show);
-return{k:show,cost:cost,ok:cost<=S.gb&&(kind==="b"||S.own[t.id]>0)}}
-function act(kind,t){var p=plan(kind,t);if(!p.ok)return;S.gb=Math.max(0,S.gb-p.cost);
+function eachL(t,i,rb,amL){return Math.log10(t.cps)+(S.lvl[t.id]-1+((S.evo&&S.evo[t.id])||0))*LOG2+Math.log10(tm(i,rb||rbOf(S)))+(amL==null?allMulL():amL)} /* one teacher's income, a power of 10 */
+/* ===== Big numbers (up to 1e999): money, income and prices are kept as powers of 10 ("logs": 1000 is kept as 3, nothing as
+   -Infinity), because normal numbers stop at about 1.8e308. S.gbL / S.runL / S.st.earnedL are the real amounts; S.gb, S.run and
+   S.st.earned are plain copies capped at 1e300 (achievements, quests and older versions of the game read those). ===== */
+function lOf(x){x=+x;return x===Infinity?CAP_L:x>0?Math.log10(x):LZ}
+function lVal(L){return L>LZ?Math.pow(10,L):0}
+function lLin(L){return Math.min(1e300,lVal(L))}
+function lAdd(a,b){if(!(a>LZ))return b>LZ?b:LZ;if(!(b>LZ))return a;var h=a>b?a:b,l=a>b?b:a;return h+Math.log10(1+Math.pow(10,l-h))}
+function lSub(a,b){if(!(b>LZ))return a;if(!(a>b+1e-12))return LZ;return a+Math.log10(1-Math.pow(10,b-a))}
+function lSum(arr){var h=LZ;arr.forEach(function(x){if(x>h)h=x});if(!(h>LZ))return LZ;var t=0;arr.forEach(function(x){if(x>LZ)t+=Math.pow(10,x-h)});return h+Math.log10(t)}
+function lCap(L){return L>CAP_L?CAP_L:L>LZ?L:LZ}
+function lGe(a,b){return !(b>LZ)||a>=b-1e-12}
+function jL(L){return L>LZ?Math.round(L*1e6)/1e6:-1e9} /* for the server: -1e9 means nothing */
+function fmtL(L){if(!(L>LZ))return '0';if(L<300)return fmt(Math.pow(10,L));var ex=Math.floor(L),mt=Math.pow(10,L-ex);if(mt>=9.995){mt=1;ex++}return mt.toFixed(2)+'e'+ex}
+/* money in and out: everything goes through these so the real amounts and the plain copies stay together */
+function moneySync(){S.gb=lLin(S.gbL);S.run=lLin(S.runL);S.st.earned=lLin(S.st.earnedL)}
+function earnL(L,noStat){if(!(L>LZ))return;S.gbL=lCap(lAdd(S.gbL,L));S.runL=lCap(lAdd(S.runL,L));if(!noStat)S.st.earnedL=lCap(lAdd(S.st.earnedL,L));moneySync()}
+function spendL(L){S.gbL=lSub(S.gbL,L);moneySync()}
+function canL(L){return lGe(S.gbL,L)}
+function plan(kind,t){var bL,r;
+if(kind==="b"){bL=Math.log10(PRICE*(1-Math.min(.75,rbOf(S)[2]))*t.buy*tfx(S).tc*galFx(S).tc)+((S.evo&&S.evo[t.id])||0)*Math.log10(EVO_PRICE)+S.own[t.id]*Math.log10(1.15);r=1.15}else{bL=Math.log10(PRICE*(1-Math.min(.75,rbOf(S)[3]))*t.up*tfx(S).uc*galFx(S).uc)+(S.lvl[t.id]-1)*Math.log10(3.5);r=3.5}
+var k=mult==="max"?maxKL(bL,r,S.gbL):mult,show=Math.max(k,1),costL=geoL(bL,r,show);
+return{k:show,costL:costL,ok:canL(costL)&&(kind==="b"||S.own[t.id]>0)}}
+function act(kind,t){var p=plan(kind,t);if(!p.ok)return;spendL(p.costL);
 if(kind==="b"){S.own[t.id]+=p.k;S.st.buys+=p.k}else{S.lvl[t.id]+=p.k;S.st.ups+=p.k}
 var c=refs[t.id].card;c.classList.add("flash");setTimeout(function(){c.classList.remove("flash")},250);update();save()}
 function $(i){return document.getElementById(i)}
@@ -737,20 +758,20 @@ function starStr(n){return n?' '+starIcons(n):''}
 function tName(t){return t.name+starStr(starsOf(t.id))}
 function totalStars(d){var n=0;T.forEach(function(t){n+=starsOf(t.id,d)});return n}
 function evoNeed(t){return EVO_LV+EVO_STEP*starsOf(t.id)}
-function evoCost(t){return t.up*Math.pow(3.5,evoNeed(t)-1)*3*galFx(S).evo}
-function evolve(t){var e=(S.evo&&S.evo[t.id])||0,c=evoCost(t);if(S.lvl[t.id]<evoNeed(t)||e>=EVO_MAX||S.gb<c)return;
+function evoCostL(t){return Math.log10(t.up*3*galFx(S).evo)+(evoNeed(t)-1)*Math.log10(3.5)} /* a power of 10 */
+function evolve(t){var e=(S.evo&&S.evo[t.id])||0,c=evoCostL(t);if(S.lvl[t.id]<evoNeed(t)||e>=EVO_MAX||!canL(c))return;
 if(evoArm!==t.id){evoArm=t.id;clearTimeout(evoArmT);evoArmT=setTimeout(function(){evoArm=null;update()},3000);update();return}
-evoArm=null;clearTimeout(evoArmT);S.gb-=c;if(!S.evo)S.evo={};S.evo[t.id]=e+1;S.own[t.id]=0;S.lvl[t.id]=1;save();update(true);
+evoArm=null;clearTimeout(evoArmT);spendL(c);if(!S.evo)S.evo={};S.evo[t.id]=e+1;S.own[t.id]=0;S.lvl[t.id]=1;save();update(true);
 toast('✨ '+t.name+' evolved to '+starIcons(e+1)+(e+1>5?' ('+(e+1)+' stars)':'')+'! They make ×'+(e+1<=10?Math.pow(2,e+1):fmt(Math.pow(2,e+1)))+' money now.','#f59e0b')}
 function evoUI(t,r){var e=(S.evo&&S.evo[t.id])||0;if(r.ev!==e){r.ev=e;r.nm.textContent=t.name+starStr(e)}
-var can=S.lvl[t.id]>=evoNeed(t)&&e<EVO_MAX;if(r.e.hidden===can)r.e.hidden=!can;if(!can)return;var c=evoCost(t);
-var h=evoArm===t.id?'Tap again<small>resets to 0 owned</small>':'✨ Evolve '+starIc(e+1)+(e+1)+'<small>'+fmt(c)+'</small>';if(r.e._h!==h){r.e.innerHTML=h;r.e._h=h}var dis=S.gb<c;if(r.e.disabled!==dis)r.e.disabled=dis;
+var can=S.lvl[t.id]>=evoNeed(t)&&e<EVO_MAX;if(r.e.hidden===can)r.e.hidden=!can;if(!can)return;var c=evoCostL(t);
+var h=evoArm===t.id?'Tap again<small>resets to 0 owned</small>':'✨ Evolve '+starIc(e+1)+(e+1)+'<small>'+fmtL(c)+'</small>';if(r.e._h!==h){r.e.innerHTML=h;r.e._h=h}var dis=!canL(c);if(r.e.disabled!==dis)r.e.disabled=dis;
 var sk=t.id+':'+e;if(ready&&!evoSeen[sk])toast('✨ '+t.name+' can evolve! Each ⭐ doubles their money.','#f59e0b');evoSeen[sk]=1}
 /* only redraw a shop button when its text changes (redrawing it mid-tap can swallow the tap) */
-function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmt(p.cost)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
-function rate(dt){var now=Date.now(),s=0;while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){s+=c.v});
-var base=total()*(1-webDrain()),tgt=base+s/2;if(disp===null)disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);var nb=totalOf(S);if(slot===1&&nb>bestMem&&isFinite(nb))bestMem=nb;
-var el=$("cps");el.textContent=fmt(disp)+" per second · "+fmt(clickVal())+" per click";el.className="sub"+(tgt>base*1.02?" hot":"")}
+function label(btn,name,p){var h=name+" ×"+p.k+"<small>"+fmtL(p.costL)+"</small>";if(btn._h!==h){btn.innerHTML=h;btn._h=h}if(btn.disabled!==!p.ok)btn.disabled=!p.ok}
+function rate(dt){var now=Date.now(),cl=[];while(CK.length&&CK[0].t<now-2000)CK.shift();CK.forEach(function(c){cl.push(c.l)});
+var dr=webDrain(),base=totalNowL()+(dr>0?Math.log10(1-dr):0),tgt=lAdd(base,lSum(cl)-Math.log10(2));if(typeof disp!=='number'||!(disp>LZ))disp=tgt;disp+=(tgt-disp)*Math.min(1,dt*6);var nb=totalL(S);if(slot===1&&nb>bestMem)bestMem=nb;
+var el=$("cps");el.textContent=fmtL(disp)+" per second · "+fmtL(clickL())+" per click";el.className="sub"+(tgt>base+Math.log10(1.02)?" hot":"")}
 /* show / hide teachers: the button under the ×1 ×5 ×20 Max bar turns on hide mode, where every teacher gets a Hide / Show
    button (hidden ones look faded). Hidden teachers still make money; they just aren't listed. Kept in the save (S.th). */
 var thEdit=false,thTxt='';
@@ -758,15 +779,15 @@ function thUI(){var n=0;T.forEach(function(t){if(S.th&&S.th[t.id])n++});var x=th
 if(x!==thTxt){thTxt=x;$('thb').textContent=x;$('thb').className=thEdit?'on':''}$('shop').classList.toggle('thedit',thEdit)}
 $('thb').onclick=function(){thEdit=!thEdit;update(true)};
 function update(noAnim){var anim=ready&&!noAnim;thUI();var su=!!(S.stu&&S.stu.u),stb=$('tabs').querySelector('[data-t="s"]');if(stb.hidden===su)stb.hidden=!su;if(shopTab==='s'){if(!su)setTab('t');else stuUpd()}if(shopTab==='p')pupUpd();
-$("gb").textContent=fmt(S.gb);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt>=LAUNCH.from&&nt<LAUNCH.until)bp.push("🎉 Release party: +"+LAUNCH.pct+"% income · "+hms(LAUNCH.until-nt)+" left");if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
+$("gb").textContent=fmtL(S.gbL);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt>=LAUNCH.from&&nt<LAUNCH.until)bp.push("🎉 Release party: +"+LAUNCH.pct+"% income · "+hms(LAUNCH.until-nt)+" left");if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+pn+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
-var rb=rbOf(S),am=allMul(),allT=allTeachers();
+var rb=rbOf(S),am=allMulL(),allT=allTeachers();
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0||((S.evo&&S.evo[t.id])>0);
 if(!vis){r.card.hidden=true;return}
 var hid=!!(S.th&&S.th[t.id]);if(r.hid!==hid){r.hid=hid;r.card.classList.toggle('thid',hid);r.h.textContent=hid?'👁 Show':'🙈 Hide'}if(hid&&!thEdit){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
-var each=eachOf(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];var eL=(isFinite(each)&&each<1e300)?0:eachLog(t,i,rb,am);r.in.textContent=fmtBig(each,eL)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?" · "+starIc(starsOf(t.id)+1)+" at Lv "+en:"");
-r.mk.textContent="Making "+(S.own[t.id]>0?fmtBig(each*S.own[t.id],eL+Math.log10(S.own[t.id])):"0")+"/s";
+var eL=eachL(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];r.in.textContent=fmtL(eL)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?" · "+starIc(starsOf(t.id)+1)+" at Lv "+en:"");
+r.mk.textContent="Making "+(S.own[t.id]>0?fmtL(eL+Math.log10(S.own[t.id])):"0")+"/s";
 label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t));evoUI(t,r)})}
 
 $("bar").onclick=function(e){var m=e.target.getAttribute&&e.target.getAttribute("data-m");if(!m)return;
@@ -788,12 +809,12 @@ $("mc").onclick=function(e){var now=Date.now();if(locked){if(now<lockUntil)retur
 ST.push(now);while(ST.length&&ST[0]<now-1000)ST.shift();
 if(ST.length>19){acCatch(now);return} /* 20+ clicks in one second */
 if(acSteady(e.timeStamp>0?e.timeStamp:performance.now(),e.clientX||0,e.clientY||0)){acCatch(now);return}
-var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2*galFx(S).crit:1);if(!(c>=0)||!isFinite(c))c=0;S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});S.st.clicks++;if(crit)S.st.crit++;S.st.earned+=c;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<RUNE_CHANCE*(1+rbOf(S)[4]))giveRune();
+var crit=Math.random()<0.01+tfx(S).crit,cL=lCap(clickL()+(crit?Math.log10(2*galFx(S).crit):0));earnL(cL);CK.push({t:Date.now(),l:cL});S.st.clicks++;if(crit)S.st.crit++;if(ST.length>S.st.maxcps)S.st.maxcps=ST.length;if(Math.random()<RUNE_CHANCE*(1+rbOf(S)[4]))giveRune();
 var st=$("stage").getBoundingClientRect(),x=e.clientX-st.left,y=e.clientY-st.top;
 if(!e.clientX&&!e.clientY){x=st.width/2;y=st.height/2}
-var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmt(c);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
+var f=document.createElement("div");f.className="f"+(crit?" crit":"");f.textContent=(crit?"CRIT +":"+")+fmtL(cL);f.style.left=(x-12)+"px";f.style.top=(y-20)+"px";
 $("stage").appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800);update()};
-setInterval(function(){if(nameBlocked){last=Date.now();return}var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalOf(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0,LAUNCH.from,LAUNCH.until].concat(Object.keys(BB).map(function(k){return BB[k]})).concat((S.qb||[]).reduce(function(a,q){a.push(q.st,q.un);return a},[])).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=base*multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}if(!(g>=0)||!isFinite(g))g=0;g=webSteal(g);S.gb=Math.min(1e300,S.gb+g);S.run=Math.min(1e300,S.run+g);S.st.earned+=g;update()},150);
+setInterval(function(){if(nameBlocked){last=Date.now();return}var n=Date.now(),dt=Math.min((n-last)/1000,3600),from=n-dt*1000;last=n;var base=totalL(S),pts=[from,n],BB=S.bossBuffs||{};[RL.until,S.gold?S.gold.until:0,LAUNCH.from,LAUNCH.until].concat(Object.keys(BB).map(function(k){return BB[k]})).concat((S.qb||[]).reduce(function(a,q){a.push(q.st,q.un);return a},[])).forEach(function(u){if(u>from&&u<n)pts.push(u)});pts.sort(function(x,y){return x-y});var g=0;for(var j=0;j<pts.length-1;j++){if(pts[j+1]>pts[j])g+=multAt((pts[j]+pts[j+1])/2)*(pts[j+1]-pts[j])/1000}earnL(webStealL(g>0&&isFinite(g)?base+Math.log10(g):LZ));update()},150);
 var lr=Date.now();setInterval(function(){var n=Date.now();rate((n-lr)/1000);lr=n},80);
 /* ===== Auto clickers (5 Auto Clickers in the skill tree and 5 Root Clickers in the roots): each one clicks Mr McCoy once every 2 seconds, shown as DM
    arrowheads circling him that poke him when they click. Their clicks earn money (like a click, crits too) and can find runes,
@@ -803,10 +824,10 @@ var AUTO_EVERY=2000,acAcc=0,acLast=Date.now(),acN=-1,acEls=[],acTurn=0;
 function autoN(){return Math.min(10,tfx(S).auto||0)}
 function acLayout(){var n=autoN(),box=$('acl');if(n!==acN){acN=n;box.textContent='';acEls=[];for(var i=0;i<n;i++){var w=document.createElement('div');w.className='acw';var im=document.createElement('img');im.src=PHOTOS.autoclk;im.alt='';w.appendChild(im);box.appendChild(w);acEls.push(w)}}
 var mc=$('mc'),R=mc.offsetWidth/2;box.style.left=(mc.offsetLeft+R)+'px';box.style.top=(mc.offsetTop+R)+'px';acEls.forEach(function(w,i){w.style.transform='rotate('+(i*360/n)+'deg) translateX('+(R-2)+'px) rotate(180deg)'})}
-function autoClick(i){var crit=Math.random()<0.01+tfx(S).crit,c=clickVal()*(crit?2*galFx(S).crit:1);if(!(c>=0)||!isFinite(c))c=0;
-S.gb=Math.min(1e300,S.gb+c);S.run=Math.min(1e300,S.run+c);CK.push({t:Date.now(),v:c});if(Math.random()<RUNE_CHANCE*(1+rbOf(S)[4]))giveRune();
+function autoClick(i){var crit=Math.random()<0.01+tfx(S).crit,cL=lCap(clickL()+(crit?Math.log10(2*galFx(S).crit):0));
+earnL(cL,true);CK.push({t:Date.now(),l:cL});if(Math.random()<RUNE_CHANCE*(1+rbOf(S)[4]))giveRune();
 var w=acEls[i];if(!w||document.hidden)return;var im=w.firstChild;im.classList.remove('poke');void im.offsetWidth;im.classList.add('poke');
-var r=w.getBoundingClientRect(),st=$('stage').getBoundingClientRect(),f=document.createElement('div');f.className='f fa'+(crit?' crit':'');f.textContent=(crit?'CRIT +':'+')+fmt(c);
+var r=w.getBoundingClientRect(),st=$('stage').getBoundingClientRect(),f=document.createElement('div');f.className='f fa'+(crit?' crit':'');f.textContent=(crit?'CRIT +':'+')+fmtL(cL);
 f.style.left=(r.left-st.left-14)+'px';f.style.top=(r.top-st.top-18)+'px';$('stage').appendChild(f);setTimeout(function(){if(f.parentNode)f.parentNode.removeChild(f)},800)}
 setInterval(function(){var now=Date.now(),n=autoN();if(n!==acN)acLayout();if(!n||nameBlocked||tabDead){acLast=now;acAcc=0;return}
 acAcc=Math.min(acAcc+(now-acLast)/AUTO_EVERY*n,n+2);acLast=now;while(acAcc>=1){acAcc-=1;acTurn=(acTurn+1)%n;autoClick(acTurn)}},200);
@@ -817,14 +838,14 @@ document.addEventListener("visibilitychange",function(){if(document.hidden)save(
 var armed=false,rt;
 $("rs").onclick=function(){var d=S,bits=[fmt(d.gb)+' Games Blocked'],own=0,pl=function(n,w){return n+' '+w+(n===1?'':'s')};T.forEach(function(t){own+=d.own[t.id]});
 if(own)bits.push(pl(own,'teacher'));if(d.prs)bits.push(pl(d.prs,'prestige'));if(d.tree.length)bits.push(pl(d.tree.length,'skill tree upgrade'));if(d.pp)bits.push(pl(d.pp,'unspent prestige point'));
-if(d.runes.length)bits.push(pl(d.runes.length,'rune'));var nc=Object.keys(d.cards).length;if(nc)bits.push(pl(nc,'card'));var na=achCount(d);if(na)bits.push(pl(na,'achievement'));var bst=0;try{bst=+LS.getItem('deemackClicker2.best2')||0}catch(e){}if(slot===1&&bst>=1)bits.push('your leaderboard best of '+fmt(bst));
+if(d.runes.length)bits.push(pl(d.runes.length,'rune'));var nc=Object.keys(d.cards).length;if(nc)bits.push(pl(nc,'card'));var na=achCount(d);if(na)bits.push(pl(na,'achievement'));var bst=bestScore();if(slot===1&&bst>=0)bits.push('your leaderboard best of '+fmtL(bst));
 $('evs').textContent='This deletes all your progress'+(slot===2?' in save slot 2':'')+' and can’t be undone: '+bits.join(', ')+'. Type ERASE to confirm.';$('evi').value='';$('evgo').disabled=true;$('ev').hidden=false;$('evi').focus()};
 function evOk(){return $('evi').value.trim().toUpperCase()==='ERASE'}
 function closeEV(){$('ev').hidden=true;$('evi').value=''}
 $('evi').oninput=function(){$('evgo').disabled=!evOk()};$('evi').onkeydown=function(e){if(e.key==='Enter'&&evOk())$('evgo').click()};
 $('evx').onclick=closeEV;$('ev').onclick=function(e){if(e.target===$('ev'))closeEV()};
 $('evgo').onclick=function(){if(!evOk())return;closeEV();CK=[];disp=null;S=fresh();S.rev=storedRev();RL=S.rl;applyTheme(S.theme);update(true);save();renderWebs();
-if(slot===1){try{LS.setItem('deemackClicker2.best2','0')}catch(e){}bestMem=0;lastSent=0;srvChecked=true;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
+if(slot===1){try{LS.setItem('deemackClicker2.best2','0');LS.setItem('deemackClicker2.best3','-Infinity')}catch(e){}bestMem=LZ;lastSent=0;srvChecked=true;pushStats(true)}toast('Save erased','#ef4444')}; /* erasing also resets your leaderboard best score */
 var NAME='',nameBlocked=false;try{NAME=LS.getItem('deemackClicker2.name')||''}catch(e){} /* nameBlocked: the name failed the rude-name filter */
 var srvChecked=false,db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',nameErr='',lbRank=0,lbLoaded=false,lbAfterPush=false;
 /* leaderboard rune bonus: your 3 rarest runes (any you own, equipped or not) add RP% each to your rank score:
@@ -832,15 +853,18 @@ var srvChecked=false,db=null,uid=null,busy=false,lastSent=0,lastOk=0,pushErr='',
 function runeBonus(d){var v=((d&&d.runes)||[]).map(function(r){return RP[r.r]||0}).sort(function(a,b){return b-a});return (v[0]||0)+(v[1]||0)+(v[2]||0)}
 function myStats(n){var rc=[0,0,0,0,0,0],eqs=[];S.runes.forEach(function(r){rc[r.r]++});
 S.eq.forEach(function(id){S.runes.forEach(function(r){if(r.id===id)eqs.push(RT[r.k].n+' ('+RN[r.r]+')')})});
-var ac=achCount(S),cps=totalOf(S),cs=cardStats(S),best=bestScore(),rb=runeBonus(S);return{bps:best,rb:rb,te:S.st.earned,name:NAME,cps:cps,gb:S.gb,t:n,ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,ts:totalStars(S),tf:S.tf||0,gx:galCount(S),gw:galStage(S)>=GAL.length?1:0,now:isFinite(disp)?+disp||0:0,bv:2,score:best*(1+rb/100)}}
+var ac=achCount(S),cpsL=totalL(S),cs=cardStats(S),best=bestScore(),rb=runeBonus(S),scL=best>LZ?lCap(best+Math.log10(1+rb/100)):LZ,dL=typeof disp==='number'?disp:LZ;
+return{bps:lLin(best),rb:rb,te:S.st.earned,name:NAME,cps:lLin(cpsL),gb:S.gb,t:n,bpsL:jL(best),cpsL:jL(cpsL),teL:jL(S.st.earnedL),gbL:jL(S.gbL),nowL:jL(dL),scoreL:jL(scL),ac:ac,rn:S.runes.length,rc:rc,eqs:eqs,cc:cs.n,cb:cs.best,cr:cs.byR,pr:S.prs,tn:S.tree.length,wb:S.stu?S.stu.n:0,ts:totalStars(S),tf:S.tf||0,gx:galCount(S),gw:galStage(S)>=GAL.length?1:0,now:lLin(dL),bv:3,score:lLin(scL)}} /* plain numbers capped at 1e300 (the server sorts by score), exact powers of 10 in the ...L fields */
 /* rank score = your best "… per second" ever x your rune bonus (see runeBonus). The best per second is the highest
    "… per second" the game has ever shown you (boosts and fast clicking count), kept on this device, so prestiging never
    lowers it. Erasing your save resets it. The rune bonus uses the runes you own right now. */
-function bestScore(){var b=0;try{b=+LS.getItem('deemackClicker2.best2')||0}catch(e){}if(isFinite(bestMem)&&bestMem>b){b=bestMem;try{LS.setItem('deemackClicker2.best2',String(b))}catch(e){}}return b}
+/* your best income per second without boosts, as a power of 10 (best3; best2 was the plain number before 1e999 money) */
+function bestScore(){var b=LZ;try{var v=LS.getItem('deemackClicker2.best3');if(v!=null&&v!=='')b=+v;else b=lOf(+LS.getItem('deemackClicker2.best2')||0)}catch(e){}if(!(b>LZ)||b>CAP_L)b=b>CAP_L?CAP_L:LZ;
+if(bestMem>b){b=bestMem;try{LS.setItem('deemackClicker2.best3',String(b))}catch(e){}}return b}
 function cardStats(d){var o={n:0,p:0,best:-2,byR:[0,0,0,0,0,0,0,0,0,0,0]};Object.keys(d.cards||{}).forEach(function(id){var r=d.cards[id];o.n++;o.p+=5+3*(r+1);o.byR[r+1]++;if(r>o.best)o.best=r});return o}
 function rbOf(d){var b=[0,0,0,0,0,0,0];(d.eq||[]).forEach(function(id){for(var i=0;i<d.runes.length;i++){var r=d.runes[i];if(r.id===id){b[r.k]+=RT[r.k].v[r.r]/100;break}}});return b}
 function tm(i,b){return 1+b[0]+(i<8?b[5]:0)+(i>=T.length-8?b[6]:0)}
-function clickVal(){return total()*PCT*(1+rbOf(S)[1])*tfx(S).clk*galFx(S).clk}
+function clickL(){return lCap(totalNowL()+Math.log10(PCT*(1+rbOf(S)[1])*tfx(S).clk*galFx(S).clk))} /* one click, a power of 10 */
 function rtext(r){return RT[r.k].t.replace('{v}',RT[r.k].v[r.r])}
 var tstT;function toast(t,c){var el=$('tst');el.textContent=t;el.style.setProperty('--rc',c);el.hidden=false;el.style.animation='none';void el.offsetWidth;el.style.animation='';clearTimeout(tstT);tstT=setTimeout(function(){el.hidden=true},2600)}
 /* ===== Auto-sell: new runes of the rarities picked in the Runes panel are sold for dice rolls as soon as they're found.
@@ -1057,7 +1081,7 @@ ACH_POOL=0;ACH.forEach(function(a){ACH_POOL+=ACHV[a.id]});ACH_POOL=Math.round(AC
 function achVal(a){return ACHV[a.id]||0}
 function achBonus(d){var s=0;if(!ACHV||!d||!d.ach)return 0;for(var k in d.ach)if(ACHV[k])s+=ACHV[k];return s/100}
 function achCount(d){var n=0;ACH.forEach(function(a){if(d.ach[a.id])n++});return n}
-function checkAch(){var inc=totalOf(S),got=[],before=achCount(S);
+function checkAch(){var inc=lLin(totalL(S)),got=[],before=achCount(S);
 ACH.forEach(function(a){if(!S.ach[a.id]){var ok=false;try{ok=a.t(S,inc)}catch(e){}if(ok){S.ach[a.id]=1;got.push(a)}}});
 if(!got.length)return;
 var after=achCount(S),th=Math.floor(after/5)>Math.floor(before/5)&&Math.floor(after/5)<=THEMES.length;
@@ -1067,7 +1091,7 @@ save();if(!$('av').hidden)renderAch();if(!$('tv').hidden)renderThemes()}
 function achProg(a,inc){if(!a.pr)return null;var q;try{q=a.pr(S,inc)}catch(e){return null}var c=Math.max(0,+q[0]||0),n=+q[1]||1,f=n>=1e6?Math.log10(Math.max(1,c))/Math.log10(n):c/n;
 return [Math.max(0,Math.min(1,f)),(n>=1e4?fmt(Math.min(c,n)):Math.min(Math.floor(c),n))+' / '+(n>=1e4?fmt(n):n)]}
 var ABARS=[];
-function renderAch(){var L=$('avl');L.textContent='';ABARS=[];var inc=totalOf(S);
+function renderAch(){var L=$('avl');L.textContent='';ABARS=[];var inc=lLin(totalL(S));
 $('avs').textContent=achCount(S)+'/'+ACH.length+' unlocked · +'+(achBonus(S)*100).toFixed(2)+'% income (all of them give +'+ACH_POOL+'%)';
 var cats=[];ACH.forEach(function(a){if(cats.indexOf(a.cat)<0)cats.push(a.cat)});
 cats.forEach(function(cat){var gold=cat==='Golden achievements',h=document.createElement('div');h.className='rsec'+(gold?' gsec':'');h.textContent=(gold?'🏆 ':'')+cat;L.appendChild(h);
@@ -1078,7 +1102,7 @@ var t=document.createElement('div');t.className='at';var b=document.createElemen
 var pg=on?null:achProg(a,inc);if(pg){var w=document.createElement('div');w.className='abar';var fi=document.createElement('i');fi.style.width=(pg[0]*100).toFixed(1)+'%';w.appendChild(fi);var tx=document.createElement('small');tx.className='abt';tx.textContent=pg[1];t.appendChild(w);t.appendChild(tx);ABARS.push({a:a,fi:fi,tx:tx})}
 var v=document.createElement('div');v.className='ab';v.textContent='+'+achVal(a).toFixed(2)+'%';
 r.appendChild(c);r.appendChild(t);r.appendChild(v);L.appendChild(r)})})}
-function achBars(){if(!ABARS.length)return;var inc=totalOf(S);ABARS.forEach(function(o){var pg=achProg(o.a,inc);if(!pg)return;var w=(pg[0]*100).toFixed(1)+'%';if(o.fi.style.width!==w)o.fi.style.width=w;if(o.tx.textContent!==pg[1])o.tx.textContent=pg[1]})}
+function achBars(){if(!ABARS.length)return;var inc=lLin(totalL(S));ABARS.forEach(function(o){var pg=achProg(o.a,inc);if(!pg)return;var w=(pg[0]*100).toFixed(1)+'%';if(o.fi.style.width!==w)o.fi.style.width=w;if(o.tx.textContent!==pg[1])o.tx.textContent=pg[1]})}
 /* ===== Your own theme (S.theme === CT): unlocked by the Golden Linboom achievement. You pick 2 colors (background and main
    color) and the rest is worked out so text stays readable: light text on dark backgrounds, dark text on light ones. ===== */
 var CT=99;
@@ -1113,7 +1137,7 @@ r.appendChild(sw);r.appendChild(x);r.onclick=function(){if(!ok)return;S.theme=CT
 $('ab').onclick=function(){renderAch();$('av').hidden=false};function closeAV(){$('av').hidden=true}$('avx').onclick=closeAV;$('av').onclick=function(e){if(e.target===$('av'))closeAV()};
 $('tb').onclick=function(){renderThemes();$('tv').hidden=false};function closeTV(){$('tv').hidden=true}$('tvx').onclick=closeTV;$('tv').onclick=function(e){if(e.target===$('tv'))closeTV()};
 setInterval(function(){checkAch();if(!$('av').hidden)achBars()},1000);
-var XK=['deemackClicker2.slot1','deemackClicker2.name','deemackClicker2.uid','deemackClicker2.auth','deemackClicker2.best2'],XA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',xArm=false,xPending=null;
+var XK=['deemackClicker2.slot1','deemackClicker2.name','deemackClicker2.uid','deemackClicker2.auth','deemackClicker2.best2','deemackClicker2.best3'],XA='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',xArm=false,xPending=null;
 function xFB(){return (typeof FB!=='undefined'&&FB)?FB:''}
 function b64e(u8){var s='';for(var i=0;i<u8.length;i+=8192)s+=String.fromCharCode.apply(null,u8.subarray(i,i+8192));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function b64d(t){t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';var s=atob(t),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u}
@@ -1150,10 +1174,10 @@ xPending=o.k;xArm=true;go.disabled=false;go.textContent='Tap again to replace th
 .catch(function(e){go.disabled=false;xMsg((e&&e.message&&e.message.length<90)?e.message:'That code did not work.',true)})}
 function applyImport(k){var oldName=NAME,oldUid=uid,oldOk=nameOk;try{['deemackClicker2.slot1','deemackClicker2.slot2','deemackClicker2.slot3'].forEach(function(key){if(typeof k[key]==='string')LS.setItem(key,k[key]);else LS.removeItem(key)});
 if(typeof k['deemackClicker2.active']==='string')LS.setItem('deemackClicker2.active',k['deemackClicker2.active']);
-if(typeof k['deemackClicker2.name']==='string'&&k['deemackClicker2.name'].length>=2)LS.setItem('deemackClicker2.name',k['deemackClicker2.name'].slice(0,16));var kb=+k['deemackClicker2.best2'];if(kb>0&&isFinite(kb)&&kb>(+LS.getItem('deemackClicker2.best2')||0))LS.setItem('deemackClicker2.best2',String(kb));
+if(typeof k['deemackClicker2.name']==='string'&&k['deemackClicker2.name'].length>=2)LS.setItem('deemackClicker2.name',k['deemackClicker2.name'].slice(0,16));var kb=+k['deemackClicker2.best2'];if(kb>0&&isFinite(kb)&&kb>(+LS.getItem('deemackClicker2.best2')||0))LS.setItem('deemackClicker2.best2',String(kb));var kb3=k['deemackClicker2.best3'];if(kb3!=null&&+kb3>LZ&&+kb3<=CAP_L&&+kb3>bestScore())LS.setItem('deemackClicker2.best3',String(+kb3));
 if(typeof FB!=='undefined'&&typeof k['deemackClicker2.uid']==='string'&&/^[a-z0-9]{6,40}$/.test(k['deemackClicker2.uid']))LS.setItem('deemackClicker2.uid',k['deemackClicker2.uid']);
 if(typeof k['deemackClicker2.auth']==='string'){try{var aa=JSON.parse(k['deemackClicker2.auth']);if(aa&&typeof aa.refreshToken==='string'&&typeof aa.uid==='string'&&/^[A-Za-z0-9]{6,64}$/.test(aa.uid))LS.setItem('deemackClicker2.auth',JSON.stringify({refreshToken:aa.refreshToken,uid:aa.uid,idToken:'',exp:0}))}catch(e2){}}}catch(e){xMsg('This browser would not save the data. Try again in a normal browser tab.',true);return}
-oneSave();slot=1;try{LS.setItem('deemackClicker2.oactive','1')}catch(e){}slotOther=null;bestMem=0;srvChecked=false;
+oneSave();slot=1;try{LS.setItem('deemackClicker2.oactive','1')}catch(e){}slotOther=null;bestMem=LZ;srvChecked=false;
 S=load(slot);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;last=Date.now();
 try{NAME=LS.getItem('deemackClicker2.name')||NAME}catch(e){}if(NAME){$('ov').hidden=true;nameBlocked=false}if(NAME&&badName(NAME))setTimeout(function(){askName('',false,true)},0);
 if(FB_KEY){authLoad();if(AUTH)uid=AUTH.uid;var lg=null;try{lg=LS.getItem('deemackClicker2.uid')}catch(e){}LEGACY=lg&&/^p[a-z0-9]+$/.test(lg)?lg:'';legacyGone=false;if(LEGACY)authToken().then(migrate,function(){})}
@@ -1645,15 +1669,15 @@ save();tsel=-1;tRefresh(nw,pop);tInfo();psStats();update();checkAch();
 toast('🌳 Bought '+n+' upgrade'+(n===1?'':'s')+' for '+pl.spent+' point'+(pl.spent===1?'':'s'),'#a855f7');var v=tFitView(false);if(v)tGo(v,450)}
 function psStats(){var pn=ppPending(),fx=tfx(S),L=tLocked();
 $('pspts').textContent=(S.pp>=1e5?fmt(S.pp):S.pp)+' prestige point'+(S.pp===1?'':'s')+' to spend · '+S.prs+' prestige'+(S.prs===1?'':'s');$('pscd').textContent='You can prestige once every '+cdTxt(prsCd())+'.';galTabUI();if(PTAB==='gal'&&PSO)galRefresh();
-$('psrun').textContent='This run: '+fmt(S.run)+' Games Blocked earned → +'+pn+' point'+(pn===1?'':'s');
-$('psnext').textContent=S.run<1e6?'Earn 1M Games Blocked in one run to get your first point.':'Next point at '+fmt(ppNext())+' earned this run.';
+$('psrun').textContent='This run: '+fmtL(S.runL)+' Games Blocked earned → +'+pn+' point'+(pn===1?'':'s');
+$('psnext').textContent=S.runL<6-1e-9?'Earn 1M Games Blocked in one run to get your first point.':ppNext()>CAP_L?'You\u2019ve earned the most points a run can give.':'Next point at '+fmtL(ppNext())+' earned this run.';
 var bits=[];if(fx.inc>1)bits.push('×'+fmt(fx.inc)+' income');if(fx.clk>1)bits.push('×'+fmt(fx.clk)+' clicks');var cut=function(v){var x=(1-v)*100;return (x>99?x.toFixed(1):Math.round(x))+'%'};if(fx.tc<1)bits.push('teachers −'+cut(fx.tc));if(fx.uc<1)bits.push('upgrades −'+cut(fx.uc));if(fx.pp)bits.push('+'+Math.round(fx.pp*100)+'% points');if(fx.start)bits.push('start with '+fmt(fx.start));if(fx.crit)bits.push('+'+(fx.crit*100).toFixed(1)+'% crit chance');if(fx.auto)bits.push(fx.auto+' auto clicker'+(fx.auto===1?'':'s'));
 $('psfx').textContent=bits.length?'Tree bonuses: '+bits.join(' · '):'';
 var b=$('psgo'),w=prsWait();b.disabled=pn<1||w>0;b.textContent=pn<1?'Prestige (needs 1M earned this run)':w>0?'Prestige ready in '+mmss(w)+' (+'+pn+' so far)':psArm?'Tap again to prestige for +'+pn:'Prestige for +'+pn+' point'+(pn===1?'':'s');
 $('tlock').hidden=!L;$('tctl').hidden=L;$('tzoom').hidden=L;$('tsvg').style.visibility=L?'hidden':'';if(!L)tBallUpd()}
 function doPrestige(){var pn=ppPending();if(pn<1||prsWait()>0)return;
 if(!psArm){psArm=true;clearTimeout(psArmT);psArmT=setTimeout(function(){psArm=false;if(PSO)psStats()},3000);psStats();return}
-psArm=false;clearTimeout(psArmT);if(S.web&&S.web.length){webCashAll();pn=ppPending()}var first=tLocked();S.pp+=pn;S.ppt+=pn;S.prs++;S.prsAt=Date.now();var gx=galFx(S);S.gb=Math.min(1e300,tfx(S).start*gx.start);T.forEach(function(t){S.own[t.id]=0;if(!gx.keep)S.lvl[t.id]=1});S.run=0;CK=[];disp=null;
+psArm=false;clearTimeout(psArmT);if(S.web&&S.web.length){webCashAll();pn=ppPending()}var first=tLocked();S.pp+=pn;S.ppt+=pn;S.prs++;S.prsAt=Date.now();var gx=galFx(S);S.gbL=lCap(lOf(tfx(S).start)+lOf(gx.start));T.forEach(function(t){S.own[t.id]=0;if(!gx.keep)S.lvl[t.id]=1});S.runL=LZ;moneySync();CK=[];disp=null;
 save();update(true);checkAch();pushStats(true);toast('Prestiged! +'+pn+' point'+(pn===1?'':'s')+(first?' · skill tree unlocked!':''),'#a855f7');
 psStats();tRefresh();tInfo();if(first)requestAnimationFrame(function(){tGo(tFitView(false))})}
 $('psgo').onclick=doPrestige;
@@ -1901,13 +1925,13 @@ setInterval(goldTick,1000);
 /* ===== Owner only: two save slots. Slot 2 is a practice save: it never sends scores or changes your leaderboard record. ===== */
 var SLB=null,slotOther=null;
 function ownerSlots(){return isOwnerName(NAME)&&devOk()}
-function slotSum(n){var raw=null;try{raw=LS.getItem(slotKey(n))}catch(e){}if(!raw)return 'Empty';return fmt(load(n).gb)+' Games Blocked'}
+function slotSum(n){var raw=null;try{raw=LS.getItem(slotKey(n))}catch(e){}if(!raw)return 'Empty';return fmtL(load(n).gbL)+' Games Blocked'}
 function switchSlot(n,force){if(n===slot||tabDead||(!force&&!ownerSlots()))return;save();slot=n;try{LS.setItem('deemackClicker2.oactive',String(n))}catch(e){}
-S=load(n);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;bestMem=0;last=Date.now();closeWeb();renderWebs();update(true);slotOther=null;renderSlots();
+S=load(n);RL=S.rl;applyTheme(S.theme);CK=[];disp=null;bestMem=LZ;last=Date.now();closeWeb();renderWebs();update(true);slotOther=null;renderSlots();
 toast(n===2?'🧪 Save slot 2: practice save, it doesn\u2019t count for the leaderboard':'💾 Save slot 1','#a855f7');if(n===1){lastSent=0;pushStats(true)}}
 function renderSlots(){var el=$('slots'),on=ownerSlots();if(!on&&slot===2){switchSlot(1,true);return}el.hidden=!on;if(!on)return;
 if(!SLB){SLB=[1,2].map(function(n){var b=document.createElement('button');b.onclick=function(){switchSlot(n)};el.appendChild(b);return b})}
-SLB.forEach(function(b,i){var n=i+1,act=n===slot,sum=act?fmt(S.gb)+' Games Blocked':(slotOther||(slotOther=slotSum(n)));
+SLB.forEach(function(b,i){var n=i+1,act=n===slot,sum=act?fmtL(S.gbL)+' Games Blocked':(slotOther||(slotOther=slotSum(n)));
 var h=(n===1?'💾 Slot 1':'🧪 Slot 2 · not on leaderboard')+'<small>'+sum+'</small>';if(b._h!==h){b.innerHTML=h;b._h=h}var cl=act?'on':'';if(b.className!==cl)b.className=cl})}
 setInterval(renderSlots,1000);
 /* ===== Player upgrades tab ===== */
@@ -1925,9 +1949,9 @@ PUP.forEach(function(u){var d=document.createElement('div');d.className='card';d
 d.querySelector('.sui').textContent=u.ic;d.querySelector('.nm').textContent=u.n;d.querySelector('.in').textContent=u.d;var b=d.querySelector('.b'),tg=d.querySelector('.tg');b.onclick=function(){buyPup(u)};tg.onclick=function(){togPup(u)};
 PREFS.push({u:u,b:b,tg:tg,mk:d.querySelector('.mk')});L.appendChild(d)});pupUpd()}
 function pupUpd(){PREFS.forEach(function(o){var lv=pupLv(o.u.id),mx=lv>=o.u.max,c=pupCost(o.u),on=pupOn(o.u.id),t='Level '+lv+' / '+o.u.max+(lv?' · '+o.u.fx(lv)+(on?'':' (off)'):'');if(o.mk.textContent!==t)o.mk.textContent=t;
-var h=mx?'Maxed':'Buy<small>'+fmt(c)+'</small>';if(o.b._h!==h){o.b.innerHTML=h;o.b._h=h}var dis=mx||S.gb<c;if(o.b.disabled!==dis)o.b.disabled=dis;
+var h=mx?'Maxed':'Buy<small>'+fmt(c)+'</small>';if(o.b._h!==h){o.b.innerHTML=h;o.b._h=h}var dis=mx||!canL(lOf(c));if(o.b.disabled!==dis)o.b.disabled=dis;
 var th=on?'✅ On':'⛔ Off';if(o.tg._h!==th){o.tg.textContent=th;o.tg._h=th;o.tg.className='tg'+(on?' on':'')}if(o.tg.hidden!==!lv)o.tg.hidden=!lv})}
-function buyPup(u){var lv=pupLv(u.id),c=pupCost(u);if(lv>=u.max||S.gb<c)return;S.gb-=c;if(!S.pu)S.pu={lv:{},off:{}};S.pu.lv[u.id]=lv+1;save();pupUpd();update();toast(u.ic+' '+u.n+' is now level '+(lv+1)+' ('+u.fx(lv+1)+')','#3b82f6')}
+function buyPup(u){var lv=pupLv(u.id),c=pupCost(u);if(lv>=u.max||!canL(lOf(c)))return;spendL(lOf(c));if(!S.pu)S.pu={lv:{},off:{}};S.pu.lv[u.id]=lv+1;save();pupUpd();update();toast(u.ic+' '+u.n+' is now level '+(lv+1)+' ('+u.fx(lv+1)+')','#3b82f6')}
 function togPup(u){if(!pupLv(u.id))return;if(!S.pu.off)S.pu.off={};if(S.pu.off[u.id])delete S.pu.off[u.id];else S.pu.off[u.id]=1;save();pupUpd();toast(u.ic+' '+u.n+(pupOn(u.id)?' is on':' is off'),'#3b82f6')}
 /* ===== Game websites around Mr McCoy + the Students tab ===== */
 function supLv(id){return (S.stu&&S.stu.lv&&S.stu.lv[id])||0}
@@ -1936,8 +1960,8 @@ function webRet(){return 2+0.5*supLv('filter')}
 function webWin(){return 115+15*supLv('steady')}
 function webGap(){return (120+Math.random()*120)*1000*Math.pow(0.85,supLv('pop'))}
 function webDrain(){return S.stu&&S.stu.u&&S.web&&S.web.length?Math.min(0.5,S.web.length*WEB_STEAL):0}
-function webSteal(g){var dr=webDrain();if(!(dr>0)||!(g>0))return g;var tk=g*dr,per=tk/S.web.length;S.web.forEach(function(w){w.st=Math.min(1e300,w.st+per)});return g-tk}
-function webReward(w){return Math.max(w.st*webRet(),30*totalOf(S))}
+function webStealL(gL){var dr=webDrain();if(!(dr>0)||!(gL>LZ))return gL;var per=gL+Math.log10(dr/S.web.length);S.web.forEach(function(w){w.stL=lCap(lAdd(typeof w.stL==='number'?w.stL:lOf(w.st),per));w.st=lLin(w.stL)});return gL+Math.log10(1-dr)}
+function webRewardL(w){return lCap(Math.max((typeof w.stL==='number'?w.stL:lOf(w.st))+Math.log10(webRet()),totalL(S)+Math.log10(30)))}
 function webName(w){return (STUDENTS[w.k]||'A student')+'\u2019s website'}
 var WEL={};
 function renderWebs(){var st=$('stage'),mc=$('mc');if(!st||!mc)return;var have={};
@@ -1949,7 +1973,7 @@ el.style.left=Math.round(cx+Math.cos(a)*r*0.9-23)+'px';el.style.top=Math.round(c
 Object.keys(WEL).forEach(function(k){if(!have[k]){WEL[k].remove();delete WEL[k]}})}
 window.addEventListener('resize',renderWebs);
 function webSpawn(){if(!S.stu||!S.stu.u)return false;var used={},free=[];S.web.forEach(function(w){used[w.s]=1});for(var i=0;i<webMax();i++)if(!used[i])free.push(i);if(!free.length)return false;
-var sl=free[Math.floor(Math.random()*free.length)];S.web.push({s:sl,k:Math.floor(Math.random()*STUDENTS.length),st:0,b:Date.now()});S.stu.nx=Date.now()+webGap();renderWebs();save();return true}
+var sl=free[Math.floor(Math.random()*free.length)];S.web.push({s:sl,k:Math.floor(Math.random()*STUDENTS.length),st:0,stL:LZ,b:Date.now()});S.stu.nx=Date.now()+webGap();renderWebs();save();return true}
 function webTick(){if(!S.stu)return;var n=Date.now();
 if(!S.stu.u&&S.gb>=WEB_AT){S.stu.u=1;S.stu.nx=n+20000;save();update(true);toast('🎮 Students unlocked! Their game websites will pop up around Mr McCoy. Tap one to block it.','#3b82f6')}
 if(!S.stu.u)return;if(!S.stu.nx||S.stu.nx>n+3600000)S.stu.nx=n+webGap();
@@ -1960,7 +1984,7 @@ setInterval(webTick,1000);
 var WB=null;
 function webDots(){var D=$('wdots');D.textContent='';for(var i=0;i<4;i++){var x=document.createElement('i');if(WB&&i<WB.streak)x.className='on';D.appendChild(x)}}
 function webJudge(t,c){var j=$('wjudge');j.textContent=t;j.style.color=c||''}
-function webInfo(){var w=WB&&S.web.filter(function(x){return x.s===WB.s})[0];if(!w)return;$('wst').textContent='Stolen so far: '+fmt(w.st)+' · block it to get back '+fmt(webReward(w))}
+function webInfo(){var w=WB&&S.web.filter(function(x){return x.s===WB.s})[0];if(!w)return;$('wst').textContent='Stolen so far: '+fmtL(typeof w.stL==='number'?w.stL:lOf(w.st))+' · block it to get back '+fmtL(webRewardL(w))}
 function openWeb(sl){var w=S.web.filter(function(x){return x.s===sl})[0];if(!w)return;$('webn').textContent='🎮 '+webName(w);
 var bx=$('webv').querySelector('.webbox'),bg=PHOTOS[STUBG[STUDENTS[w.k]]];bx.classList.toggle('hasbg',!!bg);bx.style.backgroundImage=bg?'linear-gradient(rgba(0,0,0,.62),rgba(0,0,0,.12) 32%,rgba(0,0,0,.12) 60%,rgba(0,0,0,.72)),url('+bg+')':'';
 WB={s:sl,t0:performance.now()+900,iv:720,win:webWin(),streak:0,last:-1,done:false,it:-1};webDots();webJudge('Get ready…','var(--muted)');webInfo();$('webv').hidden=false;requestAnimationFrame(webFrame)}
@@ -1975,12 +1999,12 @@ $('wbtn').onpointerdown=function(e){e.preventDefault();if(!WB||WB.done)return;va
 if(k>=0&&Math.abs(dt)<=WB.win&&k>WB.last){WB.last=k;WB.streak++;webDots();webJudge(Math.abs(dt)<=45?'Perfect!':'Good','#22a35a');if(WB.streak>=4)webDone();return}
 var why=(WB.last>=0&&k<=WB.last)||dt<0?'Too early':'Too late';WB.streak=0;WB.last=-1;webDots();webJudge(why+' · start over','#ef4444')};
 function webDone(){var sl=WB.s;WB.done=true;$('wbtn').classList.remove('pulse');var w=S.web.filter(function(x){return x.s===sl})[0];if(!w){closeWeb();return}
-var amt=webReward(w);S.gb=Math.min(1e300,S.gb+amt);S.run=Math.min(1e300,S.run+amt);S.st.earned+=amt;S.stu.n++;if(!S.stu.by)S.stu.by={};S.stu.by[w.k]=(S.stu.by[w.k]||0)+1;S.web=S.web.filter(function(x){return x.s!==sl});
-webJudge('Blocked! +'+fmt(amt),'#22a35a');save();update();renderWebs();toast('🚫 Blocked '+webName(w)+'! +'+fmt(amt)+' Games Blocked','#22a35a');
+var amtL=webRewardL(w);earnL(amtL);S.stu.n++;if(!S.stu.by)S.stu.by={};S.stu.by[w.k]=(S.stu.by[w.k]||0)+1;S.web=S.web.filter(function(x){return x.s!==sl});
+webJudge('Blocked! +'+fmtL(amtL),'#22a35a');save();update();renderWebs();toast('🚫 Blocked '+webName(w)+'! +'+fmtL(amtL)+' Games Blocked','#22a35a');
 setTimeout(function(){if(WB&&WB.done&&WB.s===sl)closeWeb()},800)}
 $('webx').onclick=closeWeb;$('webv').onclick=function(e){if(e.target===$('webv'))closeWeb()};
 /* prestiging blocks any open websites first (their Games Blocked count for this run) */
-function webCashAll(){var sum=0;(S.web||[]).forEach(function(w){sum+=webReward(w)});if(sum>0){S.gb=Math.min(1e300,S.gb+sum);S.run=Math.min(1e300,S.run+sum);S.st.earned+=sum}S.web=[];renderWebs()}
+function webCashAll(){var L=[];(S.web||[]).forEach(function(w){L.push(webRewardL(w))});earnL(lSum(L));S.web=[];renderWebs()}
 /* the Teachers / Students tabs above the shop */
 var shopTab='t',SREFS=[];
 function setTab(t){shopTab=t;[].forEach.call($('tabs').children,function(b){b.className=b.getAttribute('data-t')===t?'on':''});$('bar').hidden=t!=='t';$('thr').hidden=t!=='t';$('shop').hidden=t!=='t';$('stushop').hidden=t!=='s';$('pushop').hidden=t!=='p';if(t==='s')renderStu();if(t==='p')renderPup()}
@@ -1991,13 +2015,13 @@ var ro=document.createElement('div');ro.className='sroster';ro.innerHTML='<div c
 SUP.forEach(function(u){var d=document.createElement('div');d.className='card';d.innerHTML='<div class="sui"></div><div class="mid"><div class="nm"></div><div class="in"></div><div class="mk"></div></div><div class="bt"><button class="b"></button></div>';
 d.querySelector('.sui').textContent=u.ic;d.querySelector('.nm').textContent=u.n;d.querySelector('.in').textContent=u.d;var b=d.querySelector('.b');b.onclick=function(){buySup(u)};
 SREFS.push({u:u,b:b,mk:d.querySelector('.mk')});L.appendChild(d)});stuUpd();stuInfo()}
-function stuUpd(){SREFS.forEach(function(o){var lv=supLv(o.u.id),mx=lv>=o.u.max,c=supCost(o.u);o.mk.textContent='Level '+lv+' / '+o.u.max;var h=mx?'Maxed':'Buy<small>'+fmt(c)+'</small>';if(o.b._h!==h){o.b.innerHTML=h;o.b._h=h}var dis=mx||S.gb<c;if(o.b.disabled!==dis)o.b.disabled=dis})}
+function stuUpd(){SREFS.forEach(function(o){var lv=supLv(o.u.id),mx=lv>=o.u.max,c=supCost(o.u);o.mk.textContent='Level '+lv+' / '+o.u.max;var h=mx?'Maxed':'Buy<small>'+fmt(c)+'</small>';if(o.b._h!==h){o.b.innerHTML=h;o.b._h=h}var dis=mx||!canL(lOf(c));if(o.b.disabled!==dis)o.b.disabled=dis})}
 /* the roster: every student and how many of their websites you have blocked */
 function stuRoster(){var R=$('srl');if(!R)return;var by=(S.stu&&S.stu.by)||{},key=STUDENTS.map(function(nm,i){return by[i]||0}).join(',');if(R._k===key)return;R._k=key;R.textContent='';
 STUDENTS.forEach(function(nm,i){var c=document.createElement('span');c.textContent=nm;var b=document.createElement('b');b.textContent=by[i]||0;c.appendChild(b);R.appendChild(c)})}
 function stuInfo(){stuRoster();var el=$('stuinfo');if(!el)return;var n=Date.now(),open=(S.web||[]).length,mx=webMax();
 el.textContent='🚫 Websites blocked: '+((S.stu&&S.stu.n)||0)+' · Open now: '+open+' / '+mx+(open<mx&&S.stu&&S.stu.nx>n?' · next one in about '+mmss(S.stu.nx-n):'')+'. Each open website steals 5% of your income until you block it.'}
-function buySup(u){var lv=supLv(u.id),c=supCost(u);if(lv>=u.max||S.gb<c)return;S.gb-=c;S.stu.lv[u.id]=lv+1;save();stuUpd();stuInfo();update();toast(u.ic+' '+u.n+' is now level '+(lv+1)+'!','#3b82f6')}
+function buySup(u){var lv=supLv(u.id),c=supCost(u);if(lv>=u.max||!canL(lOf(c)))return;spendL(lOf(c));S.stu.lv[u.id]=lv+1;save();stuUpd();stuInfo();update();toast(u.ic+' '+u.n+' is now level '+(lv+1)+'!','#3b82f6')}
 /* ===== Update log: shows UPDATES (newest first, scroll for older ones). The button shows NEW until the latest is read. ===== */
 function logSeen(){try{return LS.getItem('deemackClicker2.logSeen')||''}catch(e){return ''}}
 function logUnread(){return UPDATES.length>0&&logSeen()!==String(UPDATES[0].id)}
@@ -2048,9 +2072,9 @@ var QW_V=3,QD_V=2; /* daily quest rules version */ /* weekly quest rules version
 function qTitle(q){var K=QK[q.k];return K?K.t.replace('{n}',q.k==='earn'?fmt(q.n):String(q.n)):''}
 function qProg(q){var K=QK[q.k];if(!K)return 0;var v=+K.v()-q.b;return Math.max(0,Math.min(q.n,isFinite(v)?v:0))}
 function qDone(q){return qProg(q)>=q.n}
-function qRewText(r){return r.t==='boost'?'⚡ +'+r.p+'% money for '+r.s+' seconds ('+Math.round(r.s/60)+' min)':r.t==='money'?'💰 '+r.l+' (~'+fmt(Math.max(1000,totalOf(S)*r.s))+')':r.t==='dice'?'🎲 '+r.n+' dice rolls':'🔮 '+(/^[AEIOU]/.test(RN[r.m])?'an ':'a ')+RN[r.m]+' or better rune'}
+function qRewText(r){return r.t==='boost'?'⚡ +'+r.p+'% money for '+r.s+' seconds ('+Math.round(r.s/60)+' min)':r.t==='money'?'💰 '+r.l+' (~'+fmtL(Math.max(3,totalL(S)+Math.log10(r.s)))+')':r.t==='dice'?'🎲 '+r.n+' dice rolls':'🔮 '+(/^[AEIOU]/.test(RN[r.m])?'an ':'a ')+RN[r.m]+' or better rune'}
 function qKinds(per,skip){return Object.keys(QK).filter(function(k){var K=QK[k];return K[per]&&!K.retired&&(!skip||skip.indexOf(k)<0)&&(!K.need||K.need())})}
-function qMake(k,per){var K=QK[k],n=K.scale?Math.max(1000,Math.round(totalOf(S)*K[per])):K[per],R=QREW[per],rw=R[Math.floor(Math.random()*R.length)];if(rw.t==='boost')rw={t:'boost',p:[100,125,150,175,200][Math.floor(Math.random()*5)],s:[900,1200,1500,1800][Math.floor(Math.random()*4)]};return{k:k,n:n,b:+K.v()||0,r:rw,c:0,nt:0}}
+function qMake(k,per){var K=QK[k],n=K.scale?Math.max(1000,Math.round(lLin(totalL(S)+Math.log10(K[per])))):K[per],R=QREW[per],rw=R[Math.floor(Math.random()*R.length)];if(rw.t==='boost')rw={t:'boost',p:[100,125,150,175,200][Math.floor(Math.random()*5)],s:[900,1200,1500,1800][Math.floor(Math.random()*4)]};return{k:k,n:n,b:+K.v()||0,r:rw,c:0,nt:0}}
 function qGen(per){var keys=qKinds(per),pick=[];
 while(pick.length<3&&keys.length)pick.push(keys.splice(Math.floor(Math.random()*keys.length),1)[0]);
 S.q[per]={at:Date.now(),list:pick.map(function(k){return qMake(k,per)})};if(per==='w')S.q.w.v=QW_V;else S.q.d.v=QD_V}
@@ -2065,7 +2089,7 @@ if(autoSold(r,k))return;
 if(S.runes.length>=100){toast('Rune inventory full: the '+RN[r]+' Rune of '+RT[k].n+' was lost',RCL[r]);return}
 S.runes.push({id:'r'+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36),k:k,r:r});toast('Quest reward: '+RN[r]+' Rune of '+RT[k].n+'!',RCL[r])}
 function claimQ(per,i){var q=S.q&&S.q[per]&&S.q[per].list[i];if(!q||q.c||!qDone(q))return;q.c=1;var r=q.r;
-if(r.t==='money'){var amt=Math.max(1000,totalOf(S)*r.s);S.gb=Math.min(1e300,S.gb+amt);S.run=Math.min(1e300,S.run+amt);S.st.earned+=amt;toast('Quest reward: +'+fmt(amt)+' Games Blocked','#22a35a')}
+if(r.t==='money'){var amtL=Math.max(3,totalL(S)+Math.log10(r.s));earnL(amtL);toast('Quest reward: +'+fmtL(amtL)+' Games Blocked','#22a35a')}
 else if(r.t==='dice'){S.rolls+=r.n;toast('Quest reward: +'+r.n+' dice rolls','#3b82f6')}
 else if(r.t==='boost'){var nw=Date.now();S.qb=(S.qb||[]).filter(function(b){return b.un>nw});var st=S.qb.length?S.qb[S.qb.length-1].un:nw;S.qb.push({p:r.p,st:st,un:st+r.s*1000});toast('Quest reward: +'+r.p+'% money for '+r.s+' seconds'+(st>nw?' (starts after your current quest boost)':'')+'!','#f59e0b')}else giveRuneMin(r.m);
 save();update();updQuests()}
@@ -2287,7 +2311,7 @@ setInterval(function(){if(!document.hidden)checkUpdate(false)},180000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden)checkUpdate(true)});
 var pvId=null;
 function rcn(d,i){return Array.isArray(d.rc)?(+d.rc[i]||0):0}
-var PSTATS=[['Rank score',function(d){return fmt(+d.score||+d.cps||0)}],['Total Games Blocked earned',function(d){return d.te!=null?fmt(+d.te||0):'Not sent yet'}],['Best per second ever (no boosts)',function(d){return fmt(d.bps!=null?+d.bps||0:+d.score||+d.cps||0)}],['Rune bonus (3 rarest runes)',function(d){return '+'+(+d.rb||0)+'%'}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmt(+d.cps||0)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Teacher stars',function(d){return +d.ts||0}],['Galaxy',function(d){return +d.gw?'🏆 Beat the game!':d.gx!=null?(+d.gx||0)+' / '+GAL_N+' upgrades':'Not sent yet'}],['Boss tower',function(d){return d.tf!=null?(+d.tf||0)+' floor'+(+d.tf===1?'':'s')+' cleared':'Not sent yet'}],['Money',function(d){return fmt(+d.gb||0)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
+var PSTATS=[['Rank score',function(d){return fmtL(d.scoreL>LZ?d.scoreL:d.cpsL)}],['Total Games Blocked earned',function(d){return d.te!=null||d.teL>LZ?fmtL(d.teL):'Not sent yet'}],['Best per second ever (no boosts)',function(d){return fmtL(d.bpsL>LZ?d.bpsL:d.scoreL)}],['Rune bonus (3 rarest runes)',function(d){return '+'+(+d.rb||0)+'%'}],['Prestiges',function(d){return +d.pr||0}],['Skill tree',function(d){return (+d.tn||0)+'/'+TN.length}],['Income per second (no boosts)',function(d){return fmtL(d.cpsL)+'/s'}],['Last played',function(d){return ago(d.t)}],['Websites blocked',function(d){return +d.wb||0}],['Teacher stars',function(d){return +d.ts||0}],['Galaxy',function(d){return +d.gw?'🏆 Beat the game!':d.gx!=null?(+d.gx||0)+' / '+GAL_N+' upgrades':'Not sent yet'}],['Boss tower',function(d){return d.tf!=null?(+d.tf||0)+' floor'+(+d.tf===1?'':'s')+' cleared':'Not sent yet'}],['Money',function(d){return fmtL(d.gbL)}],['Achievements',function(d){return (+d.ac||0)+'/'+ACH.length}],['Cards collected',function(d){return (+d.cc||0)+'/'+T.length}],['Best card',function(d){var b=d.cb;return typeof b!=='number'||b<-1?'None':b<0?'Base':(DR[b]||'Base')}],['Card rarities',function(d){if(!Array.isArray(d.cr))return 'None';var out=[];for(var i=d.cr.length-1;i>=0;i--){var c=+d.cr[i]||0;if(c>0)out.push(c+' '+(i===0?'Base':DR[i-1]))}return out.length?out.join(', '):'None'}],['Runes owned',function(d){return (+d.rn||0)+'/100'}],['Mythic runes',function(d){return rcn(d,5)}],['Legendary runes',function(d){return rcn(d,4)}],['Epic runes',function(d){return rcn(d,3)}],['Rare runes',function(d){return rcn(d,2)}],['Uncommon runes',function(d){return rcn(d,1)}],['Common runes',function(d){return rcn(d,0)}],['Equipped',function(d){return Array.isArray(d.eqs)&&d.eqs.length?d.eqs.slice(0,3).map(String).join(', '):'None'}]];
 function showProfile(doc,rank){var d=doc.data()||{};pvId=doc.id;$('pvn').textContent=String(d.name||'Player').slice(0,16);
 $('pvr').textContent='Rank #'+rank+(lbOwner&&doc.id===lbOwner?' · 👑 Owner':'')+(doc.id===uid?' · you':'');
 var box=$('pvs');box.textContent='';PSTATS.forEach(function(p){var r=document.createElement('div');r.className='pst';var a=document.createElement('span');a.textContent=p[0];var b=document.createElement('span');b.textContent=p[1](d);r.appendChild(a);r.appendChild(b);box.appendChild(r)});
@@ -2299,7 +2323,7 @@ function renderLB(docs){var el=$('lb');el.textContent='';lbLoaded=true;lbRank=0;
 docs.forEach(function(doc,i){var d=doc.data()||{},r=document.createElement('div');r.className='row'+(doc.id===uid?' me':'');
 var a=document.createElement('span');a.className='rk';a.textContent=i+1;
 var b=document.createElement('span');b.className='nmm';b.textContent=String(d.name||'Player').slice(0,16);b.title='View profile';b.onclick=function(){showProfile(doc,i+1)};
-var c=document.createElement('span');c.className='st';c.textContent=fmt(+d.score||0);if(+d.te>0){var ce=document.createElement('small');ce.textContent=fmt(+d.te)+' earned';c.appendChild(ce)}
+var c=document.createElement('span');c.className='st';c.textContent=fmtL(d.scoreL);if(d.teL>LZ){var ce=document.createElement('small');ce.textContent=fmtL(d.teL)+' earned';c.appendChild(ce)}
 r.appendChild(a);r.appendChild(b);if(lbOwner&&doc.id===lbOwner){var ob=document.createElement('span');ob.className='obadge';ob.textContent='👑 Owner';r.appendChild(ob)}r.appendChild(c);el.appendChild(r)});
 if(pvId){var cur=docs.filter(function(x){return x.id===pvId})[0];if(cur)showProfile(cur,docs.indexOf(cur)+1)}}
 /* Unique names: each name is claimed at /names/<key> on the server, holding the owner's player id.
@@ -2362,7 +2386,7 @@ fbw('/players/'+uid,{method:'DELETE'},'print=silent').catch(function(){});askNam
 function pushStats(force){if(tabDead||!FB||!NAME||busy||slot!==1||badName(NAME))return;if(!uid){if(FB_KEY)authToken().then(function(){pushStats(true)},function(){});return}if(!nameOk){verifyName();return}
 /* once per session, before the first send: read your entry on the server and keep its best per second if it's higher than this
    device's (a phone that lost its saved best can't lower your leaderboard score) */
-if(!srvChecked){srvChecked=true;busy=true;fbw('/players/'+uid).then(function(r){return r.ok?r.json():null}).then(function(o){var sb=o&&typeof o==='object'?Math.max(o.bv===2?+o.bps||0:0,+o.cps||0):0; /* old entries' bps had boosts in it: only trust bps from the new rules (bv 2), and cps (income with no boosts) from any */if(sb>0&&isFinite(sb)&&sb>bestScore()){bestMem=sb;bestScore()}},function(){}).then(function(){busy=false;pushStats(true)});return}
+if(!srvChecked){srvChecked=true;busy=true;fbw('/players/'+uid).then(function(r){return r.ok?r.json():null}).then(function(o){var sb=LZ;if(o&&typeof o==='object'){if(o.bv===3&&o.bpsL>-1e8)sb=+o.bpsL;else if(o.bv===2)sb=lOf(+o.bps);sb=Math.max(sb,o.bv===3&&o.cpsL>-1e8?+o.cpsL:lOf(+o.cps))} /* old entries' bps had boosts in it: only trust bps from bv 2+, and cps (income with no boosts) from any */if(sb>LZ&&sb<=CAP_L&&sb>bestScore()){bestMem=sb;bestScore()}},function(){}).then(function(){busy=false;pushStats(true)});return}
 var n=Date.now();if(!force&&n-lastSent<15000)return;
 busy=true;lastSent=n;fbw('/players/'+uid,{method:'PUT',body:JSON.stringify(myStats(n))},'print=silent').then(function(r){if(r&&r.ok){lastOk=Date.now();pushErr='';if(lbAfterPush&&!$('lv').hidden){lbAfterPush=false;loadLB()}}else pushErr=(r&&(r.status===401||r.status===403))?'the server refused it':'server error '+(r&&r.status)},
 function(){pushErr=FB_KEY&&authErr?'can\u2019t sign in':'the server didn\u2019t answer'}).then(function(){busy=false;lbMe()})}
@@ -2396,7 +2420,10 @@ return [raw,leet].some(function(t){if(LB_HIDE.indexOf(t.replace(/[^a-z]/g,''))>=
 var lbAll=false;
 /* players who haven't played since boosts and clicking stopped counting still have an old score with boosts in it:
    rank them by their income per second with no boosts (cps) × rune bonus instead, until they play again and send a new one */
-function lbFix(d){if(d.bv===2)return d;var x={},q;for(q in d)x[q]=d[q];var c=+d.cps||0;x.bps=c;x.score=c*(1+(+d.rb||0)/100);return x}
+function lbFix(d){var x={},q;for(q in d)x[q]=d[q];var lg=function(v){return v>-1e8&&v<=CAP_L?+v:LZ};
+if(d.bv===3){['bps','cps','te','gb','now','score'].forEach(function(f){x[f+'L']=lg(d[f+'L'])});return x}
+var c=lOf(+d.cps||0);x.cpsL=c;x.teL=lOf(+d.te||0);x.gbL=lOf(+d.gb||0);x.nowL=lOf(+d.now||0);
+if(d.bv===2){x.bpsL=lOf(+d.bps||0);x.scoreL=lOf(+d.score||0)}else{x.bpsL=c;x.scoreL=c>LZ?c+Math.log10(1+(+d.rb||0)/100):LZ}return x} /* every entry gets exact powers of 10 (...L) to show and sort by */
 function loadLB(){if(!FB){note('The leaderboard isn\u2019t connected to a server yet.');return}
 if(document.hidden||$('lv').hidden)return;
 var ownP=tfetch(FB+'/names/'+nameKey(OWNER_NAME)+'.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():null}).catch(function(){return null});
@@ -2405,7 +2432,7 @@ if(r.ok)return o;var m=String(o&&o.error||'');if(/index/i.test(m)&&!lbAll){lbAll
 var docs=Object.keys(o).filter(function(k){return o[k]&&typeof o[k].score==='number'&&!lbHidden(o[k].name)&&!badName(o[k].name)&&!(ownerLike(o[k].name)&&k!==lbOwner)}).map(function(k){var v=lbFix(o[k]);return{id:k,data:function(){return v}}});
 /* names are unique, so two entries with one name means one is an old dead copy: show only the most recently active */
 var seen={},nk=function(x){return nameKey(String(x.data().name||''))};docs.forEach(function(x){var k=nk(x),t=+x.data().t||0;if(!seen[k]||t>seen[k].t||(t===seen[k].t&&x.id===uid))seen[k]={id:x.id,t:t}});
-docs=docs.filter(function(x){return seen[nk(x)].id===x.id}).sort(function(a,b){return b.data().score-a.data().score}).slice(0,100);
+docs=docs.filter(function(x){return seen[nk(x)].id===x.id}).sort(function(a,b){var x=a.data().scoreL,y=b.data().scoreL;return (y>LZ?y:-1e9)-(x>LZ?x:-1e9)}).slice(0,100);
 renderLB(docs)}).catch(function(e){if(e==='skip')return;var msg=typeof e==='string'?e:'Could not reach the leaderboard server.',el=$('lb');
 if(el.querySelector('.row')){var w=el.querySelector('.lberr');if(!w){w=document.createElement('div');w.className='note lberr';el.insertBefore(w,el.firstChild)}w.textContent='⚠️ '+msg+' Showing the last list.'}else note(msg)})}
 /* ===== The "you" box at the top of the leaderboard: your rank and rank score, and whether your score is being sent
@@ -2418,8 +2445,8 @@ if(pushErr)return '⚠️ Your last score didn\u2019t send ('+pushErr+'). The ga
 if(!lastOk)return '⏳ Sending your score…';var s=Math.round((Date.now()-lastOk)/1000);return '✅ Your score is sent every 15 seconds. Last sent '+(s<3?'just now':s+'s ago')+'.'}
 function lbMe(){var el=$('lbme');if(!el)return;if(!FB){el.hidden=true;return}if($('lv').hidden)return;el.hidden=false;el.textContent='';
 var best=bestScore(),rb=runeBonus(S);
-var a=document.createElement('b');a.textContent=(NAME||'You')+' (you)'+(lbRank?' · #'+lbRank:'')+' · rank score '+fmt(best*(1+rb/100));
-var b=document.createElement('div');b.className='lbm2';b.textContent=(lbLoaded&&!lbRank?'Not in the top 100 yet. ':'')+'Best per second ever (no boosts or clicking) '+fmt(best)+(rb?' × rune bonus +'+rb+'% (your 3 rarest runes)':' · no rune bonus yet (your 3 rarest runes give one)')+'. Right now: '+fmt(totalOf(S))+' per second without boosts. All Games Blocked you\u2019ve ever earned: '+fmt(S.st.earned)+'.';
+var a=document.createElement('b');a.textContent=(NAME||'You')+' (you)'+(lbRank?' · #'+lbRank:'')+' · rank score '+fmtL(best>LZ?lCap(best+Math.log10(1+rb/100)):LZ);
+var b=document.createElement('div');b.className='lbm2';b.textContent=(lbLoaded&&!lbRank?'Not in the top 100 yet. ':'')+'Best per second ever (no boosts or clicking) '+fmtL(best)+(rb?' × rune bonus +'+rb+'% (your 3 rarest runes)':' · no rune bonus yet (your 3 rarest runes give one)')+'. Right now: '+fmtL(totalL(S))+' per second without boosts. All Games Blocked you\u2019ve ever earned: '+fmtL(S.st.earnedL)+'.';
 var c=document.createElement('div');c.className='lbm3';c.textContent=lbStatus();el.appendChild(a);el.appendChild(b);el.appendChild(c)}
 /* the leaderboard refreshes every 15 seconds while it's open, with a countdown at the top */
 var LB_EVERY=15,lbNext=0;
