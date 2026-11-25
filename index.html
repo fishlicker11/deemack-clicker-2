@@ -468,7 +468,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=119;
+var BUILD=120;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -782,12 +782,14 @@ function update(noAnim){var anim=ready&&!noAnim;thUI();var su=!!(S.stu&&S.stu.u)
 $("gb").textContent=fmtL(S.gbL);$("rbn").textContent=S.runes.length+"/100";var nt=Date.now(),bs=$("bst");var bp=[];if(nt>=LAUNCH.from&&nt<LAUNCH.until)bp.push("🎉 Release party: +"+LAUNCH.pct+"% income · "+hms(LAUNCH.until-nt)+" left");if(nt<RL.until)bp.push("🎰 +"+RL.pct+"% income · "+Math.ceil((RL.until-nt)/1000)+"s left");if(S.gold&&nt<S.gold.until)bp.push("✨ ×"+S.gold.m+" money · "+Math.ceil((S.gold.until-nt)/1000)+"s left");var bb=bestBossBuff();if(bb)bp.push("⚔️ +"+bb.pct+"% income ("+T[bb.i].name+") · "+mmss(bb.until-nt)+" left");var qa=(S.qb||[]).filter(function(q){return q.un>nt}),qn=qa.filter(function(q){return q.st<=nt})[0];if(qn)bp.push("📋 +"+qn.p+"% money · "+mmss(qn.un-nt)+" left"+(qa.length>1?" (+"+(qa.length-1)+" queued)":""));bs.hidden=!bp.length;bs.textContent=bp.join(" · ");$("dn").textContent=S.rolls;$("devb").hidden=!showDev();var pn=ppPending(),pw=prsWait();$("prn").textContent=pn>0?(pw>0?"⏳ "+mmss(pw):"+"+(pn>=1e4?fmt(pn):pn)+" pts"):"Prestige";$("prb").classList.toggle("hot",pn>0&&pw===0);$("cn2").textContent=Object.keys(S.cards).length+"/"+T.length;
 
 var rb=rbOf(S),am=allMulL(),allT=allTeachers();
+/* each teacher's share of your income: its income / everyone's (plus the 1 per second everyone gets) */
+var shareTot=lSum([am].concat(T.map(function(t,i){return S.own[t.id]>0?eachL(t,i,rb,am)+Math.log10(S.own[t.id]):LZ})));
 T.forEach(function(t,i){var r=refs[t.id],vis=i===0||allT||S.own[T[i-1].id]>0||S.own[t.id]>0||((S.evo&&S.evo[t.id])>0);
 if(!vis){r.card.hidden=true;return}
 var hid=!!(S.th&&S.th[t.id]);if(r.hid!==hid){r.hid=hid;r.card.classList.toggle('thid',hid);r.h.textContent=hid?'👁 Show':'🙈 Hide'}if(hid&&!thEdit){r.card.hidden=true;return}
 if(r.card.hidden){r.card.hidden=false;if(anim)r.card.classList.add("pop")}
 var eL=eachL(t,i,rb,am),en=evoNeed(t),lv=S.lvl[t.id];r.in.textContent=fmtL(eL)+"/s each · Owned "+S.own[t.id]+" · Lv "+lv+(starsOf(t.id)<EVO_MAX&&lv<en&&lv>=en-5?" · "+starIc(starsOf(t.id)+1)+" at Lv "+en:"");
-r.mk.textContent="Making "+(S.own[t.id]>0?fmtL(eL+Math.log10(S.own[t.id])):"0")+"/s";
+var shp=S.own[t.id]>0?100*Math.pow(10,eL+Math.log10(S.own[t.id])-shareTot):0;r.mk.textContent="Making "+(S.own[t.id]>0?fmtL(eL+Math.log10(S.own[t.id])):"0")+"/s"+(S.own[t.id]>0?" · "+(shp>=99.95?"100":shp>=10?shp.toFixed(0):shp>=0.1?shp.toFixed(1):"<0.1")+"% of income":"");
 label(r.b,"Buy",plan("b",t));label(r.u,"Upgrade",plan("u",t));evoUI(t,r)})}
 
 $("bar").onclick=function(e){var m=e.target.getAttribute&&e.target.getAttribute("data-m");if(!m)return;
