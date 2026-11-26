@@ -468,7 +468,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=120;
+var BUILD=121;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1262,7 +1262,7 @@ $('bfx').onclick=closeFight;
 var DODGE_DMG=80,DODGE_PEN=10; /* dodge: damage dealt when it ends, minus this much per red block that hit you */
 function fCounter(m){var n=Math.max(2,Math.round(BF.base*0.10*(m||1)));fStatus('Perfect! Counterattack for '+n+'!');hurtBoss(n);return fAlive(BF&&BF.id)}
 function mashNeed(){return Math.round((17+BF.d*66)*1.25)} /* taps needed in 10 seconds (25% more than before) */
-ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+((1+1.0*(1+n*(0.6-BF.d*0.38)))*mgTime()).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
+ATK.circles=function(){var id=BF.id,A=arena(),n=1+Math.round(BF.d*9),secs=+((2+1.0*(1+n*(0.6-BF.d*0.38)))*mgTime()).toFixed(1),left=n,hit=Math.max(2,Math.round(BF.dmg*1.2/n)),end=Date.now()+secs*1000,over=false,sz=Math.round(54-BF.d*20),spd=12+BF.d*85;
 fStatus(n>1?'Tap all '+n+' red circles!':'Tap the red circle!');
 var tm=document.createElement('div');tm.className='ctime';A.appendChild(tm);var W=A.clientWidth,H=A.clientHeight,pts=[],cs=[];
 function draw(){tm.textContent=left+' left · '+Math.max(0,(end-Date.now())/1000).toFixed(1)+'s'}
@@ -1351,7 +1351,7 @@ var img=new Image();img.src=PHOTOS[BF.t.ph||BF.t.id]||'';
 var notes=[],lastIn=[-9,-9,-9,-9];
 function add(t,ln){if(t-lastIn[ln]<0.13){for(var k=1;k<4;k++){var l2=(ln+k)%4;if(t-lastIn[l2]>=0.13){ln=l2;break}}if(t-lastIn[ln]<0.13)return}lastIn[ln]=t;notes.push({t:t,l:ln,st:0})}
 for(var b=0;b<beats;b++){var tb=lead+b*bt;
-if(b===0||Math.random()<0.85){var l=Math.floor(Math.random()*4);add(tb,l);if(b>0&&Math.random()<Math.max(0,d-0.35)*0.45)add(tb,(l+1+Math.floor(Math.random()*3))%4)}
+if(b===0||Math.random()<0.85){var l=Math.floor(Math.random()*4);add(tb,l);if(b>0&&Math.random()<Math.max(0,d-0.5)*0.25)add(tb,(l+1+Math.floor(Math.random()*3))%4)}
 if(b<beats-1&&Math.random()<0.15+d*0.5){add(tb+bt/2,Math.floor(Math.random()*4));if(d>0.55&&Math.random()<(d-0.55)*0.5)add(tb+bt*0.75,Math.floor(Math.random()*4))}}
 notes.sort(function(x,y){return x.t-y.t});
 /* missing hurts you: mhit per missed circle (half that for a tap with no circle), at most cap per rhythm attack */
@@ -2244,7 +2244,7 @@ ATK.shield=function(){var id=BF.id,A=arena(),d=BF.d;fStatus('Tap or swipe toward
 var cv=grab(document.createElement('canvas'));cv.className='dg';A.appendChild(cv);
 var W=A.clientWidth,H=A.clientHeight,dpr=window.devicePixelRatio||1;cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);var g=cv.getContext('2d');g.scale(dpr,dpr);
 var cx=W/2,cy=H/2+10,PR=18,SR=34,DIRS=d>=0.3?[0,1,2,3]:[0,2],n=7+Math.round(d*9),every=(1.1-0.65*d)*1000*mgTime(),travel=(1.45-0.75*d)*1000*mgTime(),
-dir=0,shots=[],made=0,blocked=0,hits=0,gt=0,last=performance.now(),nextS=600,hit=Math.max(2,Math.round(BF.dmg/2.5)),fx=[],down=false,done=false,DX=[1,0,-1,0],DY=[0,1,0,-1],FR=20,
+dir=0,shots=[],made=0,blocked=0,hits=0,gt=0,last=performance.now(),nextS=600,hit=Math.max(1,Math.round(BF.dmg/4)),fx=[],down=false,done=false,DX=[1,0,-1,0],DY=[0,1,0,-1],FR=20,
 faces=T.filter(function(t){return PHOTOS[t.ph||t.id]}).map(function(t){return faceImg(t)});
 var mut=(getComputedStyle(document.documentElement).getPropertyValue('--muted')||'').trim()||'#888';
 function aim(e){var r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*(r.width?W/r.width:1)-cx,y=(e.clientY-r.top)*(r.height?H/r.height:1)-cy;if(x*x+y*y<100)return;
