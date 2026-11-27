@@ -358,10 +358,11 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 .gall{width:100%;margin:2px 0 8px}.gup.own button{background:#22a35a;color:#fff;opacity:1}
 .gnote{color:var(--muted);font-size:13px;padding:6px 0}.gsum{border-top:1px solid var(--line);margin-top:4px;padding-top:8px}
 .gwin{text-align:center;padding:6px 0}.gwin b{font-size:18px}.gwin button{margin-top:6px;padding:10px 14px}
-.onl{position:fixed;top:calc(6px + env(safe-area-inset-top,0px));right:8px;z-index:19;border:0;border-radius:999px;padding:5px 11px;background:rgba(0,0,0,.8);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.onl{position:fixed;top:calc(30px + env(safe-area-inset-top,0px));right:8px;z-index:19;border:0;border-radius:999px;padding:5px 11px;background:rgba(0,0,0,.8);color:#fff;font:inherit;font-size:13px;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .onl i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:6px;box-shadow:0 0 6px #22c55e;vertical-align:1px}.onl.err i{background:#9ca3af;box-shadow:none}
 .onl[hidden],.onlp[hidden]{display:none}
-.onlp{position:fixed;top:calc(40px + env(safe-area-inset-top,0px));right:8px;z-index:19;width:min(260px,88vw);max-height:60vh;overflow:auto;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);box-sizing:border-box}
+.onlt{display:block;width:100%;margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:13px;font-weight:700;cursor:pointer}.onlt.on{border-color:#22c55e}
+.onlp{position:fixed;top:calc(64px + env(safe-area-inset-top,0px));right:8px;z-index:19;width:min(260px,88vw);max-height:60vh;overflow:auto;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.3);box-sizing:border-box}
 .onlp>b{display:block;margin-bottom:4px}.onlp div{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-top:1px solid var(--line)}.onlp div b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.onlp span{color:var(--muted);flex:none}
 #gend{position:fixed;inset:0;z-index:60;background:#000;color:#fff;overflow:hidden}#gend[hidden]{display:none}
 .gscroll{position:absolute;left:0;right:0;top:100%;text-align:center;padding:0 20px;max-width:560px;margin:0 auto}
@@ -427,7 +428,7 @@ canvas.dg{width:100%;height:100%;touch-action:none;display:block;-webkit-touch-c
 <div class="ov" id="dcv" hidden><div class="box"><h1>🛠️ Dev tools</h1><p>Enter the owner code.</p><input id="dcin" type="password" inputmode="numeric" maxlength="12" placeholder="Owner code" autocomplete="off"><button id="dcok">Unlock</button><button id="dcx" class="sec">Cancel</button><p id="dcerr"></p></div></div>
 <div class="ov" id="pv" hidden><div class="box"><h1 id="pvn"></h1><p id="pvr"></p><div id="pvs"></div><button id="pvx">Close</button></div></div>
 <div class="ov" id="rv" hidden><div class="box rbox"><h1>Runes</h1><p id="rvs"></p><div id="rvl"></div><button id="rvx">Close</button></div></div>
-<div class="ov" id="lv" hidden><div class="box rbox lb"><div class="phd"><h1>Leaderboard</h1><button class="xbtn" id="lvx" aria-label="Close">✕</button></div><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><p>Top 100 players, ranked by <b>rank score</b> (the big number): the highest income per second you’ve ever reached from your teachers (boosts and clicking <b>don’t</b> count) × your rune bonus. It never goes down when you prestige. The small number under it is <b>all the Games Blocked</b> that player has ever earned.</p><div class="lbme" id="lbme" hidden></div><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button></div></div>
+<div class="ov" id="lv" hidden><div class="box rbox lb"><div class="phd"><h1>Leaderboard</h1><button class="xbtn" id="lvx" aria-label="Close">✕</button></div><div class="lbref" id="lbref">🔄 Refreshes every 15 seconds</div><button id="onlt" class="onlt"></button><p>Top 100 players, ranked by <b>rank score</b> (the big number): the highest income per second you’ve ever reached from your teachers (boosts and clicking <b>don’t</b> count) × your rune bonus. It never goes down when you prestige. The small number under it is <b>all the Games Blocked</b> that player has ever earned.</p><div class="lbme" id="lbme" hidden></div><div id="lb"><div class="note">Loading...</div></div><button id="lvn" class="sec">Change name</button></div></div>
 <div class="ov" id="rl" hidden><div class="box"><h1>Daily Roller</h1><p>Roll once every 22 hours for an income boost.</p><div id="rls"></div><p id="rlt"></p><button id="rlr">Roll</button><button id="rlx">Close</button></div></div>
 <div class="ov" id="dv" hidden><div class="box rbox"><h1>Dice</h1><p id="dvs"></p><div id="dres"></div><button id="dvr">Roll</button><button id="dvra" class="sec">🎲 Roll all</button><button id="dvx">Close</button></div></div>
 <div class="ov" id="cv" hidden><div class="box rbox"><h1>Cards</h1><p id="cvs"></p><div class="binder" id="cvb"></div><button id="cvx">Close</button></div></div>
@@ -468,7 +469,7 @@ var FB_KEY='AIzaSyCLmETqpZTe4xqfhHzVkXLXjcNtPIG3Rpw';
    Each post: {id:<number, one higher than the last>, date:'Nov 20, 2026', title:'Short title', text:'The message.'} ===== */
 /* ===== VERSION: bump BUILD here AND "build" in version.json (same number) every time the game is updated.
    Open copies of the game check version.json and move players onto the newest version. ===== */
-var BUILD=123;
+var BUILD=124;
 /* ===== CREDITS: shown in the 🎬 Credits button, top to bottom. Each: {role:'ROLE', names:['Name', 'Name']} ===== */
 var CREDITS=[
 {role:'OWNER AND CREATOR',names:['Trenton D']},
@@ -1869,8 +1870,6 @@ function allTeachers(){return isOwnerName(NAME)&&devOk()&&devFlag('allteach')}
 var DEVCMDS=[
 {id:'themes',type:'toggle',name:'Unlock all themes',desc:'Every theme can be used, no achievements needed.',
  run:function(on){if(on)toast('All themes unlocked','#a855f7');else{var n=achCount(S);if(S.theme>=0&&n<5*(S.theme+1)){S.theme=-1;applyTheme(-1);save()}toast('Themes back to normal','#a855f7')}if(!$('tv').hidden)renderThemes()}},
-{id:'online',type:'toggle',name:'Who\u2019s online',desc:'Shows how many players are online right now at the top right of the main screen (their game sent its score in the last 75 seconds). Tap it to see their names.',
- run:function(on){onlUI();if(on)onlFetch();toast(on?'Showing who\u2019s online':'Online counter hidden','#a855f7')}},
 {id:'allteach',type:'toggle',name:'Show all teachers',desc:'Shows every teacher in the shop, even ones you haven\u2019t unlocked yet. Doesn\u2019t buy anything.',
  run:function(on){update(true);toast(on?'All teachers shown':'Teachers back to normal','#a855f7')}},
 {id:'setpp',type:'input',name:'Set prestige points',desc:'Sets how many prestige points you have to spend.',ph:'Points',
@@ -2455,13 +2454,18 @@ var c=document.createElement('div');c.className='lbm3';c.textContent=lbStatus();
 var LB_EVERY=15,lbNext=0;
 function lbTick(){if($('lv').hidden||document.hidden)return;lbMe();var n=Date.now();if(n>=lbNext){lbNext=n+LB_EVERY*1000;loadLB()}$('lbref').textContent='🔄 Refreshes every '+LB_EVERY+' seconds · next in '+Math.max(1,Math.ceil((lbNext-n)/1000))+'s'}
 setInterval(lbTick,1000);
-/* ===== Owner only (dev toggle "Who's online"): a pill at the top right of the screen with how many players are online now,
-   meaning their game sent its score to the server in the last ONL_MS (a running game sends it every 15 s, a game in a
-   background tab about once a minute). Tap it for their names. It checks the server every 20 seconds while it's on. ===== */
-var ONL_MS=75000,onlList=null,onlErr=false,onlBusy=false;
-function onlOn(){return isOwnerName(NAME)&&devOk()&&devFlag('online')&&!!FB}
-function onlFetch(){if(!onlOn()||onlBusy||document.hidden)return;onlBusy=true;
-tfetch(FB+'/players.json',{cache:'no-store'}).then(function(r){return r.ok?r.json():Promise.reject(r.status)}).then(function(o){onlBusy=false;onlErr=false;var n=Date.now(),by={};o=o&&typeof o==='object'?o:{};
+/* ===== Who's online (anyone can switch it on in the Leaderboard; saved on this device): a pill at the top right of the screen
+   with how many players are online now, meaning their game sent its score to the server in the last ONL_MS (a running game
+   sends it every 15 s, a game in a background tab about once a minute). Tap it for their names.
+   It asks the server only for players seen lately (needs ".indexOn": ["score","t"] in the database rules) every 20 seconds;
+   if the server can't do that yet, it downloads the whole player list instead, but only once a minute. ===== */
+var ONL_MS=75000,onlList=null,onlErr=false,onlBusy=false,onlAll=false,onlLast=0,ONL_KEY='deemackClicker2.online';
+try{if(devFlag('online')&&LS.getItem(ONL_KEY)==null)LS.setItem(ONL_KEY,'1')}catch(e){} /* the old owner-only switch */
+function onlWant(){try{return LS.getItem(ONL_KEY)==='1'}catch(e){return false}}
+function onlOn(){return !!FB&&onlWant()}
+function onlFetch(force){if(!onlOn()||onlBusy||document.hidden)return;var n0=Date.now();if(!force&&onlAll&&n0-onlLast<55000)return;onlBusy=true;onlLast=n0;
+(onlAll?tfetch(FB+'/players.json',{cache:'no-store'}):tfetch(FB+'/players.json?orderBy=%22t%22&startAt='+(n0-ONL_MS-60000),{cache:'no-store'}).then(function(r){if(r.ok)return r;
+return r.json().catch(function(){return null}).then(function(o){if(/index/i.test(String(o&&o.error||''))){onlAll=true;return tfetch(FB+'/players.json',{cache:'no-store'})}return r})})).then(function(r){return r.ok?r.json():Promise.reject(r.status)}).then(function(o){onlBusy=false;onlErr=false;var n=Date.now(),by={};o=o&&typeof o==='object'?o:{};
 for(var k in o){var d=o[k];if(!d||typeof d!=='object')continue;var t=+d.t||0;if(!(n-t<=ONL_MS&&t<=n+120000))continue;var nm=String(d.name||'Player').slice(0,16),key=nm.toLowerCase();
 if(!by[key]||t>by[key].t)by[key]={name:nm,t:t,me:k===uid||key===String(NAME||'').toLowerCase()}}
 onlList=Object.keys(by).map(function(x){return by[x]}).sort(function(a,b){return b.t-a.t});onlUI()},function(){onlBusy=false;onlErr=true;onlUI()})}
@@ -2475,7 +2479,9 @@ $('onl').onclick=function(e){e.stopPropagation();var P=$('onlp');P.hidden=!P.hid
 document.addEventListener('click',function(e){var P=$('onlp');if(!P.hidden&&!P.contains(e.target))P.hidden=true});
 setInterval(function(){if(onlOn())onlFetch();else if(!$('onl').hidden)onlUI()},20000);
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&onlOn())onlFetch()});
-onlUI();if(onlOn())onlFetch();
+function onltUI(){var on=onlWant();$('onlt').textContent=on?'🟢 Who\u2019s online is shown at the top right · tap to hide':'⚪ Show who\u2019s online at the top right';$('onlt').classList.toggle('on',on)}
+$('onlt').onclick=function(){var on=!onlWant();try{LS.setItem(ONL_KEY,on?'1':'0')}catch(e){}onltUI();onlList=on?onlList:null;onlUI();if(on)onlFetch(true)};
+onltUI();onlUI();if(onlOn())onlFetch(true);
 if(NAME)pushStats(true);
 if(!LS_OK)$('nosave').hidden=false;
 applyTheme(S.theme);checkAch();update(true);ready=true;renderWebs();renderSlots();

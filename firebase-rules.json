@@ -2,7 +2,10 @@
   "rules": {
     "players": {
       ".read": true,
-      ".indexOn": ["score"],
+      ".indexOn": [
+        "score",
+        "t"
+      ],
       "$uid": {
         ".write": "auth != null && (auth.uid === $uid || (!newData.exists() && $uid.matches(/^p[a-z0-9]+$/)))",
         ".validate": "newData.hasChildren(['name', 'score']) && newData.child('name').isString() && newData.child('name').val().length <= 16 && newData.child('score').isNumber()"
